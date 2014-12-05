@@ -1,0 +1,5 @@
+//present a map
+            for (Entry<GameObject, Node> entry : m_collectNodes.entrySet())
+            {
+                System.out.println(entry.getKey() + " > " + entry.getValue());
+            }

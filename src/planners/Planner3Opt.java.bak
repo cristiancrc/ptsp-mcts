@@ -1,0 +1,146 @@
+package planners;
+
+import java.util.LinkedList;
+import framework.core.Game;
+import framework.core.Waypoint;
+import framework.graph.Graph;
+
+/**
+ *  3 opt planner
+ *  searches by removing edges
+ *  TODO:
+ *  - does this work well on nodes?
+ *  - is an edge approach better / faster / more complete?
+ *  - for 2 opt, run backwards through list, resulting in -1 4 3 0 1 2 for breaks -1~0 and 2~3
+ *  @author Cristian
+ *  @version 141204
+ */
+
+public class Planner3Opt extends Planner {
+
+    @SuppressWarnings("unchecked")
+	public Planner3Opt(Game a_gameCopy)
+    {
+    	System.out.println("***play opt planner***");
+        long timeStart = System.currentTimeMillis();
+    	m_graph = new Graph(a_gameCopy);
+    	
+    	verbose = true;
+    	
+    	//get a greedy plan
+		Planner planner = new PlannerGreedy(a_gameCopy);
+    	LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
+		waypointList = planner.getOrderedWaypoints();//get the planned route
+		long timeAfterGreedy = System.currentTimeMillis();
+		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeStart) + " ms.");		
+
+    	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);//add ship position as waypoint        
+        waypointList.addFirst(wpShip);
+    	m_orderedWaypoints.add(wpShip);
+    	distanceMatrix = createDistanceMatrix(waypointList);            	
+		long timeAfterMatrix = System.currentTimeMillis();
+		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");		
+		
+
+		//build paths, based on the greedy result
+    	double pathMinCost = getPathDistance(waypointList);//result from greedy	
+		double pathCost = 0;//local search result
+		LinkedList<Waypoint> aPath = new LinkedList<>();//stores built paths	
+		
+		int tempLimit = waypointList.size();
+		tempLimit = 5;
+        int s = -1;
+        LinkedList<Integer> intPath = new LinkedList<>();
+		LinkedList<Integer> intPathRev = new LinkedList<>();
+        
+		//full search through all edges
+//		for (int i = 0; i < waypointList.size()-2; i++)
+		for (int i = 0; i < tempLimit; i++)//no need to check the last, 1 because counting starts at 0, another 1 because this is a graph not a circuit
+		{
+			for (int j = i+2; j < tempLimit; j++)//+2 to avoid removing adjacent edges, as that creates a closed loop
+    		{
+				
+    			aPath.clear();
+    			aPath.add(wpShip);
+    			
+                intPath.clear();
+                intPathRev.clear();
+
+				//	remove edges    				
+    			if (verbose) 
+    			{
+    				System.out.print("removed " + (i-1) + " ~ " + (i));
+    				System.out.println(" removed " + (j-1) + " ~ " + (j));
+    			}
+				
+    			// add the nodes of the first part, up to the first break
+    			if (verbose) System.out.print("\tadding nodes before break");	
+				for (int n = 0; n < i; n++)
+    			{
+					if (verbose) System.out.print(" " + n);
+    				aPath.add(waypointList.get(n));
+    				intPath.add(n);
+    			}
+				
+				if (verbose) System.out.println("\n\t reconnecting p1");
+				//  add the nodes of the second part
+				for(int m = j-1; m > i; m--)
+				{
+					if (verbose) System.out.println("\t added " + m);
+					aPath.add(waypointList.get(m));
+					intPath.add(m);
+				}
+				
+				// reconnect with second part
+				if (verbose) System.out.println("\t added " + (i) + " ~ " + (j));
+				aPath.add(waypointList.get(i));
+				aPath.add(waypointList.get(j));
+				intPath.add(i);
+				intPath.add(j);
+				
+				// add the nodes of the second part
+				if (verbose) System.out.print("\tadding rest ");
+				for(int l = j+1; l < tempLimit; l++)
+				{
+					if (verbose) System.out.print(" " + (l));	
+					aPath.add(waypointList.get(l));
+					intPath.add(l);
+				}
+				//resulting base list
+				System.out.println("\n" + intPath);
+				//create reversed list
+				for (int c = aPath.size()-1; c >= 0; c--)
+				{
+					intPathRev.add(intPath.get(c));
+				}
+
+				// check if one of the resulting paths is shorter than minimum
+				intPath.addFirst(-1);
+				System.out.print("\n\t" + intPath);				
+            	pathCost = getPathDistance(aPath);
+            	if (verbose) System.out.println(" generated " + pathCost + "(" + pathMinCost + ")");
+            	if(pathCost < pathMinCost)
+            	{
+            		pathMinCost = pathCost;
+            		m_orderedWaypoints = (LinkedList<Waypoint>) aPath.clone();
+            	}  					
+            	
+				intPathRev.addFirst(-1);
+				System.out.print("\n\t" + intPathRev);				
+            	pathCost = getPathDistance(aPath);
+            	if (verbose) System.out.println(" generated " + pathCost + "(" + pathMinCost + ")");
+            	if(pathCost < pathMinCost)
+            	{
+            		pathMinCost = pathCost;
+            		m_orderedWaypoints = (LinkedList<Waypoint>) aPath.clone();
+            	}  					
+    		}
+			if (verbose) System.out.println("");   		
+    	}    	
+    	long timeAfter = System.currentTimeMillis();
+    	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
+		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			
+		System.out.println("3Opt Planner time: " + (timeAfter - timeStart) + " ms.");	
+		System.exit(0);
+    }
+}
