@@ -33,7 +33,6 @@ public class PlannerPlay extends Planner {
 
 		//add ship position as waypoint
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
-        waypointList.addFirst(wpShip);
     	m_orderedWaypoints.add(wpShip);
     	distanceMatrix = createDistanceMatrix(waypointList);            	
 		long timeAfterMatrix = System.currentTimeMillis();
@@ -64,35 +63,10 @@ public class PlannerPlay extends Planner {
 		
 		
 		
-		
-		
-		
-		
 		long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
 		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			
 		System.out.println("3Opt Planner time: " + (timeAfter - timeStart) + " ms.");	
 		System.exit(0);
     }
-
-    private void walkPath(int from, int to, boolean forward, LinkedList<Integer> currentPath)
-    {
-    	if(forward) 
-    	{
-    		for (int i = from; i <= to; i ++)
-	    	{
-	    		currentPath.add(i);
-	    	}    		
-    	}
-	    
-    	else 
-    	{
-    		for (int i = from; i >= to; i --)
-	    	{
-	    		currentPath.add(i);
-	    	}
-    	}
-    		
-    }
-    
 }

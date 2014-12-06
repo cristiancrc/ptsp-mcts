@@ -322,7 +322,7 @@ public class ExecSync extends Exec
 //        m_controllerName = "controllers.keycontroller.KeyControllerShowPaths"; //key controller
         
         //parameters
-        m_visibility = false; //Set here if the graphics must be displayed or not (for those modes where graphics are allowed).
+        m_visibility = true; //Set here if the graphics must be displayed or not (for those modes where graphics are allowed).
         m_writeOutput = false; //Indicate if the actions must be saved to a file after the end of the game (the file name will be the current date and time)..
         m_verbose = true;
 //        m_warmUpTime = 150; //Change this to modify the wait time (in milliseconds) before starting the game in a visual mode
@@ -334,7 +334,7 @@ public class ExecSync extends Exec
 
         /////// 2. Executes one game.
         //int delay = 1;  //1: quickest; PTSPConstants.DELAY: human play speed, PTSPConstants.ACTION_TIME_MS: max. controller delay
-        runGame(m_visibility, delay);
+//        runGame(m_visibility, delay);
 
         ////// 3. Executes N games (numMaps x numTrials), graphics disabled.
         //int numTrials=10;

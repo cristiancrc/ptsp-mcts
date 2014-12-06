@@ -12,13 +12,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import planners.Planner;
+import planners.Planner2Opt;
 import planners.Planner3OptManual;
-import planners.PlannerPlay;
-import planners.Planner2OptNodes;
 import planners.PlannerBruteForce;
 import planners.PlannerGreedy;
-import planners.PlannerGreedyEvolved;
 import planners.PlannerMC;
+import planners.PlannerPlay;
 
 /**
  * greedy controller
@@ -60,13 +59,14 @@ public class DriveGreedy extends Controller
         
 
 
+//        Planner planner = new PlannerPlay(a_gameCopy);//current working planner
 //      Planner planner = new PlannerGreedyEvolved(a_gameCopy);//plan a cost based route through the waypoints   
-//        Planner planner = new Planner3OptManual(a_gameCopy);//remove three edges and reconnect the graph
-        Planner planner = new PlannerPlay(a_gameCopy);//remove two edges and reconnect the graph
+        Planner planner = new Planner3OptManual(a_gameCopy);//remove three edges and reconnect the graph
+        
 
         
         //done
-//        Planner planner = new Planner2OptNodes(a_gameCopy);//remove two edges and reconnect the graph    
+//        Planner planner = new Planner2Opt(a_gameCopy);//remove two edges and reconnect the graph    
 //        Planner planner = new PlannerMC(a_gameCopy);//search through random paths to find a small one // 1512 ... 1680
 //        Planner planner = new PlannerBruteForce(a_gameCopy);//brute force search planner  //1512
 //        Planner planner = new PlannerGreedy(a_gameCopy);//plan a distance based route through the waypoints //1614

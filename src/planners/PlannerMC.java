@@ -31,7 +31,7 @@ public class PlannerMC extends Planner {
 		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeStart) + " ms.");		
     	
     	// find the shortest path among the randomly generated paths
-    	int allotedTime = 850;//from the beginning of the planner, when to stop searching (100 - 150 needed for controller init)
+    	int allotedTime = 800;//from the beginning of the planner, when to stop searching (100 - 150 needed for controller init)
     	Random rand = new Random();
     	LinkedList<Waypoint> aPath = new LinkedList<>();//the random path    	
     	double pathMinCost = Double.MAX_VALUE;    	

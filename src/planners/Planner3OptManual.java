@@ -8,6 +8,7 @@ import framework.graph.Graph;
 /**
  *  TODO:
  *  - this is the worst approach
+ *  - if it works ,fuck it, use it
  *  @author Cristian
  *  @version 141204
  */
@@ -31,7 +32,7 @@ public class Planner3OptManual extends Planner {
 		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeStart) + " ms.");		
 
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);//add ship position as waypoint        
-        waypointList.addFirst(wpShip);
+//        waypointList.addFirst(wpShip);
     	m_orderedWaypoints.add(wpShip);
     	distanceMatrix = createDistanceMatrix(waypointList);            	
 		long timeAfterMatrix = System.currentTimeMillis();
@@ -134,12 +135,87 @@ public class Planner3OptManual extends Planner {
 	    			if (verbose) 
 	    			{
 	    				System.out.print("removed " + (0) + "~" + (i-1));
+	    				rem1_s = 0;
+	    				rem1_e = i-1;
 	    				System.out.print(" removed " + (j-1) + "~" + (j));
+	    				rem2_s = j-1;
+	    				rem2_e = j;
 	    				System.out.println(" removed " + (k-1) + "~" + (k));
+	    				rem3_s = k-1;
+	    				rem3_e = k;
 	    			}	    			
 	    		}
     		}
     	} 		
+		
+		
+		//rebuild
+        intPath.clear();		
+		walkPath(1, rem1_s, true, intPath);
+			walkPath(rem2_s, rem1_e, false, intPath);	
+				walkPath(rem2_e, rem3_s, true, intPath);
+		walkPath(rem3_e, tempLimit-1, true, intPath);
+		System.out.println(intPath);
+		
+        intPath.clear();
+		walkPath(tempLimit-1, rem1_s, false, intPath);
+			walkPath(rem2_s, rem1_e, false, intPath);	
+				walkPath(rem3_s, rem2_e, false, intPath);
+		walkPath(rem3_e, 1, false, intPath);
+		System.out.println(intPath);				
+
+		
+        intPath.clear();			
+		walkPath(1, rem1_s, true, intPath);
+			walkPath(rem2_e, rem3_s, true, intPath);	
+				walkPath(rem1_e, rem2_s, true, intPath);
+		walkPath(rem3_e, tempLimit-1, true, intPath);
+		System.out.println(intPath);				
+
+        intPath.clear();
+		walkPath(1, rem1_s, true, intPath);
+			walkPath(rem2_e, rem3_s, true, intPath);	
+				walkPath(rem2_s, rem1_e, false, intPath);
+		walkPath(rem3_e, tempLimit-1, true, intPath);
+		System.out.println(intPath);				
+	
+
+        intPath.clear();
+		walkPath(1, rem1_s, true, intPath);
+			walkPath(rem3_s, rem2_e, false, intPath);	
+				walkPath(rem1_e, rem2_s, true, intPath);
+		walkPath(rem3_e, tempLimit-1, true, intPath);
+		System.out.println(intPath);				
+		
+        intPath.clear();
+		walkPath(1, rem1_s, true, intPath);
+			walkPath(rem3_s, rem2_e, false, intPath);	
+				walkPath(rem2_s, rem1_e, false, intPath);
+		walkPath(rem3_e, tempLimit-1, true, intPath);
+		System.out.println(intPath);	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
     	long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
 		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			

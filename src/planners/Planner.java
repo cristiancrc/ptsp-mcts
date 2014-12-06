@@ -114,6 +114,7 @@ public abstract class Planner {
 	 */
     public void showList(LinkedList<Waypoint> waypointList)
     {
+    	System.out.println("");
     	for (Waypoint way : waypointList)
     	{
     		System.out.print(way.getName() + " ");
@@ -130,7 +131,7 @@ public abstract class Planner {
 		double pathCost = 0;		
 		for(int i = 1; i < aPath.size(); i++)
    		{
-//			System.out.println("apath i-1 " + aPath.get(i-1).getName());
+//			System.out.println("\napath i-1 " + aPath.get(i-1).getName());
 //			System.out.println("apath i " + aPath.get(i).getName());
 //			System.out.println("distmatrix " + distanceMatrix.get(aPath.get(i-1)).get(aPath.get(i)));
 			pathCost += distanceMatrix.get(aPath.get(i-1)).get(aPath.get(i));
