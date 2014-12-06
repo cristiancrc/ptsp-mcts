@@ -45,18 +45,34 @@ public class PlannerPlay extends Planner {
 		LinkedList<Waypoint> aPathRev = new LinkedList<>();//stores built paths
 		
 		int tempLimit = waypointList.size();
-		tempLimit = 6;
+		tempLimit = 7;
         LinkedList<Integer> intPath = new LinkedList<>();
 		LinkedList<Integer> intPathRev = new LinkedList<>();
 
 		
 		
 		showList(waypointList);
-		for (int i = 0; i < tempLimit; i++)
+		for (int i = 0; i < tempLimit; i++) //i denotes first break
 		{
-			System.out.print(" " + i);
+			for (int j = i+2; j < tempLimit; j++) //j denotes second break
+			{
+				for (int k = j+2; k < tempLimit; k++) //k denotes third break
+				{
+					int showK = k;
+					if(k+1 == tempLimit)
+						{
+							showK = 0;
+						}
+					System.out.print("removed " + i + "~" + (i+1) + " " + waypointList.get(i).getName() + "~" + waypointList.get(i+1).getName());
+					System.out.print("... removed " + j + "~" + (j+1) + " " + waypointList.get(j).getName() + "~" + waypointList.get(j+1).getName());
+					System.out.println("... removed " + k + "~" + (k+1) + " " + waypointList.get(k).getName() + "~" + waypointList.get(showK).getName());
+				}
+			}
 		}
+		// the break marking are now correct
 		System.out.println("");
+		
+		// rebuild cycle
 		
 		
 		
