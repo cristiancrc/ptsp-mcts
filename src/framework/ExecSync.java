@@ -322,7 +322,7 @@ public class ExecSync extends Exec
 //        m_controllerName = "controllers.keycontroller.KeyControllerShowPaths"; //key controller
         
         //parameters
-        m_visibility = true; //Set here if the graphics must be displayed or not (for those modes where graphics are allowed).
+        m_visibility = false; //Set here if the graphics must be displayed or not (for those modes where graphics are allowed).
         m_writeOutput = false; //Indicate if the actions must be saved to a file after the end of the game (the file name will be the current date and time)..
         m_verbose = true;
 //        m_warmUpTime = 150; //Change this to modify the wait time (in milliseconds) before starting the game in a visual mode
