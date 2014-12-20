@@ -299,7 +299,7 @@ public class ExecSync extends Exec
         //35 - tight
         //40 - tight walled inside
         //45 - tight walled inside 2
-        //56 - labyrinth
+        //56 - labyrinth //going off path getting stuck in corners
         //61 - wide open
         
         
@@ -308,21 +308,23 @@ public class ExecSync extends Exec
         //exec sync 61 time between checkpoints 
         
         
-        //can select a planner inside the file
-        m_controllerName = "controllers.greedy.DriveGreedy"; //greedy driver
-//        m_controllerName = "controllers.mc.DriveDfs"; //dfs driver
+        m_controllerName = "controllers.mc.DriveDfs"; //dfs driver
 //        m_controllerName = "controllers.mc.DriveMC"; //mc driver
+//        m_controllerName = "controllers.mctsnavi.DriveMCTS"; //mcts driver, not implemented
+        
+        //completed controller
+//      m_controllerName = "controllers.greedy.DriveGreedy"; //greedy controller with planner selection
 
         //defaults
 //        m_controllerName = "controllers.greedy.GreedyController"; // default greedy
-//        m_controllerName = "controllers.MacroRandomSearch.MacroRSController"; //default macro actions (TODO: check if time is wasted)
+//        m_controllerName = "controllers.MacroRandomSearch.MacroRSController"; //default macro actions (TODO: check if time is wasted when macroing)
 //        m_controllerName = "controllers.lineofsight.LineOfSight";//default line of sight greedy
 //        m_controllerName = "controllers.random.RandomController";//default random walker
 //        m_controllerName = "controllers.WoxController.WoxController"; //default
 //        m_controllerName = "controllers.keycontroller.KeyControllerShowPaths"; //key controller
         
         //parameters
-        m_visibility = false; //Set here if the graphics must be displayed or not (for those modes where graphics are allowed).
+        m_visibility = true; //Set here if the graphics must be displayed or not (for those modes where graphics are allowed).
         m_writeOutput = false; //Indicate if the actions must be saved to a file after the end of the game (the file name will be the current date and time)..
         m_verbose = true;
 //        m_warmUpTime = 150; //Change this to modify the wait time (in milliseconds) before starting the game in a visual mode

@@ -12,11 +12,17 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
+import planners.Planner;
+import planners.Planner3Opt;
+import planners.PlannerBruteForce;
+import planners.PlannerGreedy;
 import planners.PlannerGreedyEvolved;
+import planners.PlannerMC;
 
 /**
  * deep first search driver with macro actions
  * TODO:
+ *  - use planner
  *  - actually use the time gained from macro actions
  *  - clean up unused code
  *  - paint possible ship positions is not showing anything
@@ -77,25 +83,35 @@ public class DriveDfs extends Controller
      */
     public DriveDfs(Game a_gameCopy, long a_timeDue)
     {
-    	System.out.println("*** dfs controller***");
+    	System.out.println("**** dfs controller ****");
         m_graph = new Graph(a_gameCopy);//Init the graph.
 
-        PlannerGreedyEvolved planner = new PlannerGreedyEvolved(a_gameCopy);
-        m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
-        planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another  
-        m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
-        
-        //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
-        m_collectNodes = new HashMap<GameObject, Node>();
-        for(Waypoint way: a_gameCopy.getWaypoints())
-        {
-            m_collectNodes.put(way, m_graph.getClosestNodeTo(way.s.x, way.s.y,true));
-        }
+        m_graph = new Graph(a_gameCopy);//Init the graph.
 
-        for(FuelTank ft: a_gameCopy.getFuelTanks())
-        {
-            m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
-        }
+        //completed planners
+//          Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph        
+//          Planner planner = new Planner2Opt(a_gameCopy);//remove two edges and reconnect the graph    
+//          Planner planner = new PlannerMC(a_gameCopy);//search through random paths to find a small one // 1512 ... 1680
+//          Planner planner = new PlannerBruteForce(a_gameCopy);//brute force search planner  //1512
+          Planner planner = new PlannerGreedy(a_gameCopy);//plan a distance based route through the waypoints //1614
+
+          m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
+          m_nextWaypoint = m_orderedWaypoints.get(0);//set immediate goal        
+          planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
+          m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
+          
+          
+          //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
+          m_collectNodes = new HashMap<GameObject, Node>();
+          for(Waypoint way: m_orderedWaypoints)
+          {
+              m_collectNodes.put(way, m_graph.getClosestNodeTo(way.s.x, way.s.y,true));
+          }
+
+          for(FuelTank ft: a_gameCopy.getFuelTanks())
+          {
+              m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
+          }
     }
     
     /**
@@ -120,7 +136,7 @@ public class DriveDfs extends Controller
     		m_nextWaypoint.setCollected(true);
     	}
     
-    	possiblePosition.clear();//just one level of search
+//    	possiblePosition.clear();//just one level of search
         Game simulatedGame = a_gameCopy.getCopy();
     	int returnedAction = getSimulatedAction(simulatedGame, a_timeDue, 0);
     	return returnedAction;
@@ -294,30 +310,6 @@ public class DriveDfs extends Controller
     	}
     }
 
-    /**
-     * calculate paths from ship to each remaining object
-     * @param a_gameCopy
-     */
-    @SuppressWarnings("unused")
-	private void calculateObjectPaths(Game a_gameCopy)
-    {            
-    	//put all (remaining) waypoints paths here
-        m_pathToWaypoints.clear();            
-        for(Waypoint way: a_gameCopy.getWaypoints())
-        {
-            if(!way.isCollected())     //Only consider those not collected yet.
-            {
-            	m_pathToWaypoints.add(m_graph.getPath(m_shipNode.id(), m_collectNodes.get(way).id()));
-            }
-        }
-        
-        m_pathToFuelTanks.clear();
-        for(FuelTank tank: a_gameCopy.getFuelTanks())
-        {
-        	if(!tank.isCollected())
-        		m_pathToFuelTanks.add(m_graph.getPath(m_shipNode.id(), m_collectNodes.get(tank).id()));
-        }
-    }
         
     /**
      * This is a debug function that can be used to paint on the screen.
@@ -439,17 +431,11 @@ public class DriveDfs extends Controller
      */
     private void paintPossibleShipPositions(Graphics2D a_gr)
     {
-//    	int drawEvery = 1;
-//    	int drawn = 1;
-    	a_gr.setColor(Color.blue);
+    	a_gr.setColor(Color.red);
     	ArrayList<Vector2d> positionsToDraw = (ArrayList<Vector2d>) possiblePosition.clone();
     	for(Vector2d position : positionsToDraw) 
     	{
-//    		if(drawn % drawEvery == 0)
-//    		{
-    			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
-//    		}
-//    		drawn++;
+			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
     	}
     	
     }
