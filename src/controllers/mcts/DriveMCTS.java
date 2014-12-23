@@ -149,7 +149,7 @@ public class DriveMCTS extends Controller
     	return bestAction;
     }
     
-    private double evaluateShipPosition(Game a_gameCopy) {
+    public double evaluateShipPosition(Game a_gameCopy) {
 		
     	Vector2d nextPosition = a_gameCopy.getShip().s;
 		Vector2d potentialDirection = a_gameCopy.getShip().d;
@@ -332,4 +332,9 @@ public class DriveMCTS extends Controller
         }
     	
     }
+
+	public static boolean isGameOver(Game rollerState) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

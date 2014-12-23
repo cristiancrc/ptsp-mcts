@@ -4,7 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import ontology.Types;
+
+import controllers.sampleMCTS.Agent;
+import core.game.StateObservation;
+
 import framework.core.Controller;
+import framework.core.Game;
 
 public class SearchTreeNode {
 	//state
@@ -53,6 +59,56 @@ public class SearchTreeNode {
         }
         //System.out.println("-- " + numIters + " -- ( " + avgTimeTaken + ")");
     }	
+	
+	 public double rollOut(Game aGameCopy)
+	    {
+		 	Game rollerState = (Game) aGameCopy.getCopy();
+	        int thisDepth = this.depth;
+
+	        while (!finishRollout(rollerState,thisDepth)) {
+
+	            int action = rnd.nextInt(DriveMCTS.NUM_ACTIONS);
+//	            rollerState.advance(action);
+	            thisDepth++;
+	        }
+
+	        double delta = value(rollerState);
+
+	        if(delta < alpha)
+	            alpha = delta;
+
+	        if(delta > beta)
+	            beta = delta;
+
+	        return delta;
+	    }
+	 
+	 public boolean finishRollout(Game rollerState, int depth)
+	    {
+	        if(depth >= DriveMCTS.searchDepth)      //rollout end condition.
+	            return true;
+
+	        if(DriveMCTS.isGameOver(rollerState))               //end of game
+	            return true;
+
+	        return false;
+	    }
+	 
+	 public double value(Game a_gameState) {
+
+	        boolean gameOver = (DriveMCTS.isGameOver(a_gameState));
+	        //TODO eval ship	        
+	        double rawScore = DriveMCTS.evaluateShipPosition(a_gameState);
+
+
+//	        if(gameOver && win == Types.WINNER.PLAYER_LOSES)
+//	            rawScore += HUGE_NEGATIVE;
+//
+//	        if(gameOver && win == Types.WINNER.PLAYER_WINS)
+//	            rawScore += HUGE_POSITIVE;
+
+	        return rawScore;
+	    }
 	
 	
 	public SearchTreeNode selectNextNode() {
