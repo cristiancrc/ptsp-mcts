@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import framework.core.Game;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
@@ -19,14 +20,9 @@ public abstract class Planner {
 	boolean verbose = false;
 	HashMap<Waypoint, HashMap<Waypoint, Double>> distanceMatrix = new HashMap<>();//distance matrix from each waypoint to each other
 	LinkedList<Waypoint> m_orderedWaypoints = new LinkedList<>();//the route resulted from the planner
-	ArrayList<Path> m_plannedPath = new ArrayList<>();//path between waypoints ready to be displayed onscreen
+	ArrayList<Path> m_plannedPath = new ArrayList<>();//path between waypoints ready to be displayed on-screen
 	Graph m_graph;
 	
-	public Planner()
-	{
-//    	System.out.println("***abstract planner constructor***");	
-    }
-
     /**
      * store paths from one point to another, in the order resulted by a planner
      * @param a_gameCopy
@@ -49,7 +45,6 @@ public abstract class Planner {
 	 * @param a list of waypoints
 	 * @return a distance matrix
 	 */
-	@SuppressWarnings("unchecked")
 	public HashMap<Waypoint, HashMap<Waypoint, Double>> createDistanceMatrix(LinkedList<Waypoint> waypointList) {
     	
 		//compute distance matrix for waypoints
