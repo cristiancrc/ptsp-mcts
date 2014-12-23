@@ -307,6 +307,9 @@ public class ExecSync extends Exec
         //exec 153 controller init time = 1000ms (10 waypoints * 10)
         //exec sync 61 time between checkpoints 
         
+        //main target
+//        m_controllerName = "controllers.mctsnavi.DriveMCTS"; //mcts driver, not implemented
+        
         
         m_controllerName = "controllers.mc.DriveDfs"; //dfs driver
 //        m_controllerName = "controllers.mc.DriveMC"; //mc driver
