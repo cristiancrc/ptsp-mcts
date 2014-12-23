@@ -31,7 +31,7 @@ public class Planner3Opt extends Planner {
 
 		//add ship position as waypoint
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
-    	m_orderedWaypoints.add(wpShip);
+    	m_orderedWaypoints = waypointList;
     	distanceMatrix = createDistanceMatrix(waypointList);            	
 		long timeAfterMatrix = System.currentTimeMillis();
 		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");

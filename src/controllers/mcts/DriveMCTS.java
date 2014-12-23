@@ -1,4 +1,4 @@
-package controllers.mc;
+package controllers.mcts;
 
 import framework.core.*;
 import framework.graph.Graph;
@@ -26,30 +26,29 @@ import java.util.Vector;
 
 import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg;
+
 import planners.Planner;
 import planners.Planner3Opt;
 import planners.PlannerGreedyEvolved;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import controllers.mctsnavi.SearchTreeNode;
 
 /**
- * monte carlo simulation driver
+ * monte carlo tree search driver
  * TODO:
- *  - why doesn't search fan out? it should be a triangle
- *  - move paint functions to controller or a brand new painter class
+ * !!!this is a mess
  *  - clean up code
- *  - check implementation, this should be a naive mcts
- *  - takes pauses after a  while, something is not cleaned up
- * @version 141128
+ * @version 141223
  * @author Cristian
  *
  */
 
-public class DriveMC extends Controller
+public class DriveMCTS extends Controller
 {
     private Graph m_graph; //     * Graph for this controller.
     private Node m_shipNode; //     * Node in the graph, closest to the ship position.
-    private Path m_pathToClosest; //     * Path to the closest waypoint in the map
     private ArrayList<Path> m_plannedPath = new ArrayList<>();//      * Paths to the waypoints based on the planner
 	private LinkedList<Waypoint> m_orderedWaypoints = new LinkedList<>(); //waypoints in the order they should be visited as computed by the planner
     // Path from ship to all waypoints in the map
@@ -57,18 +56,24 @@ public class DriveMC extends Controller
 	private ArrayList<Path> m_pathToFuelTanks = new ArrayList<>();
 
     private HashMap<GameObject, Node> m_collectNodes;//     * Hash map that matches waypoints in the map with their closest node in the graph.
-
-	private Waypoint m_nextWaypoint; //	 * Next waypoint in the list resulted by planner
-    private Integer nextWaypoint = null; // index of next waypoint in m_orderedWaypoints 
+	private Waypoint m_nextWaypoint;
+	private Integer nextWaypoint = null; // index of next waypoint in m_orderedWaypoints
+	public static int searchDepth = 10;
+    private int ticks = 0;
+    private Node aimedNode = null;
+    private Path pathToFollow;
+    private ArrayList<Vector2d> possiblePosition = new ArrayList<>();
+    public Random m_rnd = new Random();
 
     /**
      * Constructor, that receives a copy of the game state
      * @param a_gameCopy a copy of the game state
      * @param a_timeDue The time the initialization is due. Finishing this method after a_timeDue will disqualify this controller.
      */
-    public DriveMC(Game a_gameCopy, long a_timeDue)
+    public DriveMCTS(Game a_gameCopy, long a_timeDue)
     {
-    	System.out.println("**** monte carlo search controller ****");
+//    	if (true) throw new NotImplementedException();
+    	System.out.print("**** mcts driver ****");
         m_graph = new Graph(a_gameCopy);//Init the graph.
 
         Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph        
@@ -76,7 +81,6 @@ public class DriveMC extends Controller
         m_nextWaypoint = m_orderedWaypoints.get(0);//set immediate goal        
         planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
         m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
-        
         
         //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
         m_collectNodes = new HashMap<GameObject, Node>();
@@ -89,7 +93,6 @@ public class DriveMC extends Controller
         {
             m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
         }
-        
     }
     
     /**
@@ -99,9 +102,10 @@ public class DriveMC extends Controller
      * @return the integer identifier of the action to execute (see interface framework.core.Controller for definitions)
      */
     public int getAction(Game a_gameCopy, long a_timeDue)
-    {   	
-    	boolean verbose = true;
-//    	verbose = ((ticks % 100 == 0) ? true : false);
+    {
+    	ticks++;
+    	boolean verbose = false;
+    	//verbose = ((ticks % 10 == 0) ? true : false);
     	
         long timeIn = System.currentTimeMillis();
         if(verbose) System.out.println("\n>>>in\t\t" + timeIn);
@@ -109,10 +113,10 @@ public class DriveMC extends Controller
               
         long remainingTime;
         remainingTime = a_timeDue - System.currentTimeMillis();
-                       
+                        
         possiblePosition.clear();//display just one level of search
-        
-    	//target reached?
+    	
+      //target reached?
         if(m_nextWaypoint.checkCollected(a_gameCopy.getShip().ps, m_nextWaypoint.radius/4*3))
     	{
     		System.out.println("!!!!!marked as completed " + m_nextWaypoint);
@@ -130,47 +134,21 @@ public class DriveMC extends Controller
         //Get the next node to go to, from the path to the closest waypoint/ fueltank
     	aimedNode = getLastNodeVisible(pathToFollow, a_gameCopy);  
 
-    	//search for the next action
-        int bestAction = 0;
-        double bestScore = Double.MAX_VALUE;
+    	int bestAction = -1;
         int playouts = 0;
         while(remainingTime > 5)
         {
         	playouts++;
-        	if (verbose) System.out.print("\n" +ticks + ":" + playouts + ">");
-
-    		// select a random action
-        	int action = m_rnd.nextInt(Controller.NUM_ACTIONS-1)+1;//avoid action 0
-        	
-        	// apply the action            	
-        	Game forThisAction = a_gameCopy.getCopy();
-        	forThisAction.getShip().update(action);
-        	
-        	if(m_nextWaypoint.checkCollected(forThisAction.getShip().ps, m_nextWaypoint.radius/4*3)) break;
-          	
-          	// get new ship position
-            Vector2d nextPosition = forThisAction.getShip().s;
-            Vector2d potentialDirection = forThisAction.getShip().d;                                
-            
-            // draw dots on screen
-            if(!possiblePosition.contains(nextPosition))
-            {
-//                	System.out.println(" +");
-            	possiblePosition.add(nextPosition);	
-            } else
-            {
-//                	System.out.println(" -");
-            }
-        	        	
+        	System.out.print("\n" +ticks + ":" + playouts + ">");
         	remainingTime = a_timeDue - System.currentTimeMillis();
 //        	System.out.println("\n" + playouts + " --- remaining:" + remainingTime );
         }
         if(verbose) System.out.println("\n" + ticks + " tick ran: " + playouts + " playouts");
+        
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
-        ticks++;
     	return bestAction;
     }
-       
+    
     private double evaluateShipPosition(Game a_gameCopy) {
 		
     	Vector2d nextPosition = a_gameCopy.getShip().s;
@@ -213,30 +191,6 @@ public class DriveMC extends Controller
     }
 
     	
-	private void waitRandom(int a_near)
-    {
-        Random m_rnd = new Random();
-        int waitTime = (a_near-30) + m_rnd.nextInt(50);
-        long startingTime = System.currentTimeMillis();
-        long finalDateMs = startingTime + waitTime;
-
-        while(startingTime < finalDateMs)
-            startingTime = System.currentTimeMillis();
-
-        System.out.println("Waited " + waitTime + " ms");
-    }
-	
-	private void wait(int waitTime)
-    {
-        long startingTime = System.currentTimeMillis();
-        long finalDateMs = startingTime + waitTime;
-
-        while(startingTime < finalDateMs)
-            startingTime = System.currentTimeMillis();
-
-        System.out.println("Waited " + waitTime + " ms");
-    }
-     
     /**
      * set next waypoint to visit from the planned path
      * @param a_gameCopy
@@ -258,73 +212,64 @@ public class DriveMC extends Controller
     	}
     }
 
-        
     /**
-     * This is a debug function that can be used to paint on the screen.
-     * @param a_gr Graphics device to paint.
+     * calculate paths from ship to each remaining object
+     * @param a_gameCopy
      */
-    public void paintPathsToAllObjects(Graphics2D a_gr)
-    {
-    	//paint all nodes
-    	//m_graph.draw(a_gr);
-    
-    	//paint all fuel tanks
-        a_gr.setColor(Color.green);
-        ArrayList<Path> pathToFuelTanks = getPathToFuelTanks();
-        if ( pathToFuelTanks.size() > 0) 
+    private void calculateObjectPaths(Game a_gameCopy)
+    {            
+    	//put all (remaining) waypoints paths here
+        m_pathToWaypoints.clear();            
+        for(Waypoint way: a_gameCopy.getWaypoints())
         {
-	        for(int i = 0; i< pathToFuelTanks.size(); i++)
-	        {
-	        	Path a_path = pathToFuelTanks.get(i);
-	        	if (null != a_path)
-	        	{
-		        	for(int j = 0; j < a_path.m_points.size()-1; ++j)
-		            {
-		                Node thisNode = m_graph.getNode(a_path.m_points.get(j));
-		                Node nextNode = m_graph.getNode(a_path.m_points.get(j+1));
-		                a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
-		            }
-	        	}
-	        }
+            if(!way.isCollected())     //Only consider those not collected yet.
+            {
+            	m_pathToWaypoints.add(m_graph.getPath(m_shipNode.id(), m_collectNodes.get(way).id()));
+            }
         }
         
-        //paint all active waypoints
-        a_gr.setColor(Color.blue);
-        ArrayList<Path> pathToWaypoints = getPathToWaypoints();
-        if ( pathToWaypoints.size() > 0) 
+        m_pathToFuelTanks.clear();
+        for(FuelTank tank: a_gameCopy.getFuelTanks())
         {
-	        for(int i = 0; i< pathToWaypoints.size(); i++)
-	        {	        	
-	        	Path a_path = pathToWaypoints.get(i);
-	        	if (null != a_path)
-	        	{
-		        	for(int j = 0; j < a_path.m_points.size()-1; ++j)
-		            {
-		                Node thisNode = m_graph.getNode(a_path.m_points.get(j));
-		                Node nextNode = m_graph.getNode(a_path.m_points.get(j+1));
-		                a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
-		            }
-	        	}
-	        }
+        	if(!tank.isCollected())
+        		m_pathToFuelTanks.add(m_graph.getPath(m_shipNode.id(), m_collectNodes.get(tank).id()));
         }
-        
-        //paint closest waypoint
-        a_gr.setColor(Color.red);
-        Path pathToClosest = getPathToClosest();
-        if(pathToClosest != null) 
-        {
-        	for(int i = 0; i < pathToClosest.m_points.size()-1; ++i)
-        	
-	        {
-	            Node thisNode = m_graph.getNode(pathToClosest.m_points.get(i));
-	            Node nextNode = m_graph.getNode(pathToClosest.m_points.get(i+1));
-	            a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
-	        }
-        }
-    }  
+    }
     
     /**
-     * paint additional info, called automatically every frame
+     * store paths from one point to another, in the order resulted by a planner
+     * @param a_gameCopy
+     */
+    private void calculateOrderedWaypointsPaths(Game a_gameCopy) 
+    {
+    	Node m_fromNode = null;
+    	Node m_toNode = null;
+    	Path pathToNext = null;
+
+        //calculate paths from one waypoint to the next
+        for (int i = 0; i < m_orderedWaypoints.size()-1; i++)
+        {
+        	if(!m_orderedWaypoints.get(i).isCollected())//TODO: newly added
+        	{
+		        	//get node for the current waypoint
+		        	m_fromNode = m_graph.getClosestNodeTo(m_orderedWaypoints.get(i).s.x, m_orderedWaypoints.get(i).s.y, false);
+		        	
+		        	//get node for the next waypoint
+		        	m_toNode = m_graph.getClosestNodeTo(m_orderedWaypoints.get(i+1).s.x, m_orderedWaypoints.get(i+1).s.y, false);
+		        	
+		        	//And get the path from one to the other
+		        	pathToNext = m_graph.getPath(m_fromNode.id(), m_toNode.id());
+		        	
+		        	//store the path
+		        	m_plannedPath.add(pathToNext);
+        	}
+        }
+        
+    }
+    
+    
+    /**
+     * paint additional info
      */
     public void paint(Graphics2D a_gr)
     {  
@@ -334,6 +279,32 @@ public class DriveMC extends Controller
 
     	//paintPathsToAllObjects(a_gr);
     }  
+    
+    /**
+     * draw the node where the ship is going for
+     * @param a_gr
+     */
+    private void paintAimedNode(Graphics2D a_gr)
+    {
+        a_gr.setColor(Color.RED);
+//    	a_gr.drawOval(aimedNode.x(), aimedNode.y(), 5, 5);
+    	
+    	a_gr.fillOval(aimedNode.x(), aimedNode.y(), 5, 5);	
+    }
+    
+    /**
+     * plot possible ship positions
+     */
+    private void paintPossibleShipPositions(Graphics2D a_gr)
+    {
+    	a_gr.setColor(Color.red);
+    	ArrayList<Vector2d> positionsToDraw = (ArrayList<Vector2d>) possiblePosition.clone();
+    	for(Vector2d position : positionsToDraw) 
+    	{
+			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
+    	}
+    	
+    }
     
     /**
      * draws the path resulted from a planner
@@ -361,74 +332,4 @@ public class DriveMC extends Controller
         }
     	
     }
-    
-    /**
-     * draw the node where the ship is going for
-     * @param a_gr
-     */
-    private void paintAimedNode(Graphics2D a_gr)
-    {
-        a_gr.setColor(Color.RED);
-//    	a_gr.drawOval(aimedNode.x(), aimedNode.y(), 5, 5);
-    	
-    	a_gr.fillOval(aimedNode.x(), aimedNode.y(), 5, 5);	
-    }
-    
-    /**
-     * plot possible ship positions
-     */
-    private void paintPossibleShipPositions(Graphics2D a_gr)
-    {
-//    	int drawEvery = 1;
-//    	int drawn = 1;
-    	a_gr.setColor(Color.red);
-    	@SuppressWarnings("unchecked")
-		ArrayList<Vector2d> positionsToDraw = (ArrayList<Vector2d>) possiblePosition.clone();
-    	for(Vector2d position : positionsToDraw) 
-    	{
-			a_gr.fillRect((int)position.x, (int)position.y, 1, 1);
-    	}
-    	
-    }
-    
-	/**
-     * Returns the paths to all waypoints. (for debugging purposes)
-     * @return the paths to all waypoints
-     */
-    private ArrayList<Path> getPathToWaypoints() {return m_pathToWaypoints;}
-
-	/**
-     * Returns the path to the closest waypoint. (for debugging purposes)
-     * @return the path to the closest waypoint
-     */
-    public Path getPathToClosest() {return m_pathToClosest;}
-    
-	/**
-     * Returns the paths to all fuel tanks. (for debugging purposes)
-     * @return the paths to all fuel tanks
-     */
-    //private ArrayList<Path> getPathToWaypoints() {return m_pathToWaypoints;}
-    private ArrayList<Path> getPathToFuelTanks() {return m_pathToFuelTanks;}
-
-    /**
-     * Returns the graph. (for debugging purposes)
-     * @return the graph.
-     */
-    public Graph getGraph() {return m_graph;}
-    
-    //how many ticks passed
-    private int ticks = 0;
-    
-    private Node aimedNode = null;
-    
-    private Path pathToFollow;
-    
-    //how many times to repeat each action
-	//repeat a turn 30 times = 90 degrees
-	private int macroCount = 3;
-	private int maxDepth = 1;
-    
-    private ArrayList<Vector2d> possiblePosition = new ArrayList<>();
-    
-    public Random m_rnd = new Random();
 }

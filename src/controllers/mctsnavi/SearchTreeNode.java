@@ -10,6 +10,8 @@ public class SearchTreeNode {
 	private double value = Double.POSITIVE_INFINITY;
 	private SearchTreeNode parent = null;
 	private ArrayList<SearchTreeNode> children = new ArrayList<>();
+	private double alpha = Double.NEGATIVE_INFINITY;
+	private double beta = Double.POSITIVE_INFINITY;
 	
 	public ArrayList<SearchTreeNode> getChildren() {
 		return children;
