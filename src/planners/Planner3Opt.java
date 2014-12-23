@@ -15,7 +15,6 @@ import framework.graph.Graph;
 
 public class Planner3Opt extends Planner {
 
-	@SuppressWarnings("unchecked")
 	public Planner3Opt(Game a_gameCopy)
     {
     	System.out.println("***3Opt planner***");
@@ -24,7 +23,7 @@ public class Planner3Opt extends Planner {
     	
     	//get a greedy plan
 		Planner planner = new PlannerGreedy(a_gameCopy);
-    	LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
+		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
 		waypointList = planner.getOrderedWaypoints();//get the planned route
 		long timeAfterGreedy = System.currentTimeMillis();
 		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeStart) + " ms.");		
@@ -32,6 +31,9 @@ public class Planner3Opt extends Planner {
 		//add ship position as waypoint
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
     	m_orderedWaypoints = waypointList;
+=======
+    	m_orderedWaypoints = (LinkedList<Waypoint>) waypointList.clone();//an initial list is needed
+>>>>>>> Stashed changes
     	distanceMatrix = createDistanceMatrix(waypointList);            	
 		long timeAfterMatrix = System.currentTimeMillis();
 		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");
@@ -55,7 +57,7 @@ public class Planner3Opt extends Planner {
 			}
 			waypointList = shortList;			
 		}
-				
+
 		//3OPT break points
 		int b1_s = 0, b1_e = 0, b2_s = 0, b2_e = 0 , b3_s = 0, b3_e = 0;			
 		for (int i = 0; i < searchLimit; i++) //i denotes first break
@@ -119,7 +121,7 @@ public class Planner3Opt extends Planner {
 							walkIntPath(start1, end1, edge1Fwd, intPath);
 							walkIntPath(start2, end2, edge2Fwd, intPath);
 							walkIntPath(b3_e, searchLimit-1, true, intPath);
-//							System.out.println(intPath);
+//							System.out.println(intPath);//all resulting paths
 
 							//rebuild path based on indexes
 							aPath.clear();
@@ -135,13 +137,13 @@ public class Planner3Opt extends Planner {
 			            	{
 			            		pathMinCost = pathCost;
 			            		m_orderedWaypoints = (LinkedList<Waypoint>) aPath.clone();
-			            	}  								
+			            	}
+			            	// else better have an initial list
 						}
 					}
 				}
 			}
 		}	
-		
 		long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
 		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			

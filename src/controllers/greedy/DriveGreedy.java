@@ -4,12 +4,15 @@ import framework.core.*;
 import framework.graph.Graph;
 import framework.graph.Node;
 import framework.graph.Path;
+import framework.utils.Navigator;
+import framework.utils.Painter;
 import framework.utils.Vector2d;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+
 
 import planners.Planner;
 import planners.Planner3Opt;
@@ -20,6 +23,7 @@ import planners.PlannerMC;
 
 /**
  * greedy controller
+ * added planner to Diego Perez' GreedyController
  * 
  * @version 141128
  * @author Cristian
@@ -34,9 +38,6 @@ public class DriveGreedy extends Controller
     private Node oldShipId;
     private Path m_pathToClosest;//path to closest waypoint
     private ArrayList<Path> m_plannedPath = new ArrayList<>();
-    
-	private ArrayList<Path> m_pathToWaypoints = new ArrayList<>();//Path to all waypoints in the map
-	private ArrayList<Path> m_pathToFuelTanks = new ArrayList<>();//Path to all waypoints in the map
 	
 	private LinkedList<Waypoint> m_orderedWaypoints = new LinkedList<>();//waypoints in the order they should be visited as computed by the planner
     private GameObject m_closestPickUp;//Closest object (waypoint or fuel tank) to the ship.
@@ -55,11 +56,8 @@ public class DriveGreedy extends Controller
         
         m_graph = new Graph(a_gameCopy);//Init the graph.
 
-        
-
 //      Planner planner = new PlannerKOpt(a_gameCopy);//general solution, not yet complete
 //      Planner planner = new PlannerGreedyEvolved(a_gameCopy);//plan a cost based route through the waypoints   
-        
         
         //completed planners
         Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph        
@@ -116,12 +114,11 @@ public class DriveGreedy extends Controller
 
             m_pathToClosest = m_graph.getPath(m_shipNode.id(), m_collectNodes.get(m_closestPickUp).id());//get path to closest waypoint
         }
-//        calculateObjectPaths(a_gameCopy);
         
         //can we can see the waypoint:
-        boolean isThereLineOfSight = a_gameCopy.getMap().LineOfSight(a_gameCopy.getShip().s, m_closestPickUp.s);
+        boolean isThereLineOfSight = a_gameCopy.getMap().LineOfSight(a_gameCopy.getShip().s, m_closestPickUp.s);        
         if(isThereLineOfSight)
-        {
+        {   
             return manageStraightTravel(a_gameCopy);
         }
 
@@ -268,157 +265,12 @@ public class DriveGreedy extends Controller
     }
     
     
-    /**
-     * calculate paths from ship to each remaining object
-     * these can be drawn with paintPathsToAllObjects()
-     * @param a_gameCopy
-     */
-    @SuppressWarnings("unused")
-	private void calculateObjectPaths(Game a_gameCopy)
-    {            
-    	//put all (remaining) waypoints paths here
-        m_pathToWaypoints.clear();            
-        for(Waypoint way: a_gameCopy.getWaypoints())
-        {
-            if(!way.isCollected())     //Only consider those not collected yet.
-            {
-            	m_pathToWaypoints.add(m_graph.getPath(m_shipNode.id(), m_collectNodes.get(way).id()));
-            }
-        }
-        
-        m_pathToFuelTanks.clear();
-        for(FuelTank tank: a_gameCopy.getFuelTanks())
-        {
-        	if(!tank.isCollected())
-        		m_pathToFuelTanks.add(m_graph.getPath(m_shipNode.id(), m_collectNodes.get(tank).id()));
-        }
-    }
-    
-
-    /**
-     * This is a debug function that can be used to paint on the screen.
-     * call calculateObjectPaths() to get the paths
-     * @param a_gr Graphics device to paint.
-     */
-    public void paintPathsToAllObjects(Graphics2D a_gr)
-    {
-    	//paint all nodes
-    	//m_graph.draw(a_gr);
-    
-    	//paint all fuel tanks
-        a_gr.setColor(Color.green);
-        ArrayList<Path> pathToFuelTanks = getPathToFuelTanks();
-        if ( pathToFuelTanks.size() > 0) 
-        {
-	        for(int i = 0; i< pathToFuelTanks.size(); i++)
-	        {
-	        	Path a_path = pathToFuelTanks.get(i);
-	        	if (null != a_path)
-	        	{
-		        	for(int j = 0; j < a_path.m_points.size()-1; ++j)
-		            {
-		                Node thisNode = m_graph.getNode(a_path.m_points.get(j));
-		                Node nextNode = m_graph.getNode(a_path.m_points.get(j+1));
-		                a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
-		            }
-	        	}
-	        }
-        }
-        
-        //paint all active waypoints
-        a_gr.setColor(Color.blue);
-        ArrayList<Path> pathToWaypoints = getPathToWaypoints();
-        if ( pathToWaypoints.size() > 0) 
-        {
-	        for(int i = 0; i< pathToWaypoints.size(); i++)
-	        {	        	
-	        	Path a_path = pathToWaypoints.get(i);
-	        	if (null != a_path)
-	        	{
-		        	for(int j = 0; j < a_path.m_points.size()-1; ++j)
-		            {
-		                Node thisNode = m_graph.getNode(a_path.m_points.get(j));
-		                Node nextNode = m_graph.getNode(a_path.m_points.get(j+1));
-		                a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
-		            }
-	        	}
-	        }
-        }
-        
-        //paint closest waypoint
-        a_gr.setColor(Color.red);
-        Path pathToClosest = getPathToClosest();
-        if(pathToClosest != null) 
-        {
-        	for(int i = 0; i < pathToClosest.m_points.size()-1; ++i)
-        	
-	        {
-	            Node thisNode = m_graph.getNode(pathToClosest.m_points.get(i));
-	            Node nextNode = m_graph.getNode(pathToClosest.m_points.get(i+1));
-	            a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
-	        }
-        }
-    }  
     
     /**
      * paint additional info
      */
     public void paint(Graphics2D a_gr)
     {  
-    	paintOrderedWaypointsPaths(a_gr);
-//    	paintPathsToAllObjects(a_gr);
+    	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
     }  
-    
-    /**
-     * draws the path resulted from a planner
-     * @param a_gr
-     */
-    private void paintOrderedWaypointsPaths(Graphics2D a_gr)
-    {
-    	//paint planned paths
-        a_gr.setColor(Color.GRAY);
-        if ( m_plannedPath.size() > 0) 
-        {
-	        for(int i = 0; i< m_plannedPath.size(); i++)
-	        {	        	
-	        	Path a_path = m_plannedPath.get(i);
-	        	if (null != a_path)
-	        	{
-		        	for(int j = 0; j < a_path.m_points.size()-1; ++j)
-		            {
-		                Node thisNode = m_graph.getNode(a_path.m_points.get(j));
-		                Node nextNode = m_graph.getNode(a_path.m_points.get(j+1));
-		                a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
-		            }
-	        	}
-	        }
-        }
-    	
-    }
-        
-	/**
-     * Returns the paths to all waypoints. (for debugging purposes)
-     * @return the paths to all waypoints
-     */
-    private ArrayList<Path> getPathToWaypoints() {return m_pathToWaypoints;}
-
-	/**
-     * Returns the path to the closest waypoint. (for debugging purposes)
-     * @return the path to the closest waypoint
-     */
-    public Path getPathToClosest() {return m_pathToClosest;}
-    
-	/**
-     * Returns the paths to all fuel tanks. (for debugging purposes)
-     * @return the paths to all fuel tanks
-     */
-    //private ArrayList<Path> getPathToWaypoints() {return m_pathToWaypoints;}
-    private ArrayList<Path> getPathToFuelTanks() {return m_pathToFuelTanks;}
-
-    /**
-     * Returns the graph. (for debugging purposes)
-     * @return the graph.
-     */
-    public Graph getGraph() {return m_graph;}
-
 }
