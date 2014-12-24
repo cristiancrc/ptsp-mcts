@@ -35,7 +35,7 @@ import planners.Planner;
 import planners.Planner3Opt;
 import planners.PlannerGreedyEvolved;
 
-import controllers.mctsnavi.SearchTreeNode;
+import controllers.mctsnavi.SearchTreeNodeOld;
 
 /**
  * monte carlo simulation driver
@@ -129,7 +129,7 @@ public class DriveMC extends Controller
         pathToFollow = m_plannedPath.get(nextWaypoint-1);      
     	
         //Get the next node to go to, from the path to the closest waypoint/ fueltank
-    	aimedNode = Navigator.getLastNodeVisible(pathToFollow, a_gameCopy);  
+    	aimedNode = Navigator.getLastNodeVisible(pathToFollow, a_gameCopy, m_graph);  
 
     	// for each basic action
     	int playouts = 1;

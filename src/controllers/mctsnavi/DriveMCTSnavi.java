@@ -33,7 +33,7 @@ import planners.Planner3Opt;
 import planners.PlannerGreedyEvolved;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import controllers.mctsnavi.SearchTreeNode;
+import controllers.mctsnavi.SearchTreeNodeOld;
 
 /**
  * monte carlo simulation driver
@@ -47,7 +47,7 @@ import controllers.mctsnavi.SearchTreeNode;
  *
  */
 
-public class DriveMCTS extends Controller
+public class DriveMCTSnavi extends Controller
 {
     private Graph m_graph; //     * Graph for this controller.
     private Node m_shipNode; //     * Node in the graph, closest to the ship position.
@@ -82,7 +82,7 @@ public class DriveMCTS extends Controller
      * @param a_gameCopy a copy of the game state
      * @param a_timeDue The time the initialization is due. Finishing this method after a_timeDue will disqualify this controller.
      */
-    public DriveMCTS(Game a_gameCopy, long a_timeDue)
+    public DriveMCTSnavi(Game a_gameCopy, long a_timeDue)
     {
 //    	if (true) throw new NotImplementedException();
     	System.out.print("**** older mc driver ****");
@@ -139,7 +139,7 @@ public class DriveMCTS extends Controller
         long remainingTime;
         remainingTime = a_timeDue - System.currentTimeMillis();
                 
-        SearchTreeNode rootNode = new SearchTreeNode();
+        SearchTreeNodeOld rootNode = new SearchTreeNodeOld();
 		rootNode.setAction(-1);
 		rootNode.setScore(0);
 		rootNode.setVisited(0);
@@ -204,7 +204,7 @@ public class DriveMCTS extends Controller
 	 * @param min boolean denoting if looking to minimize score
 	 * @return
 	 */
-	private int getUrgentNodeAction(SearchTreeNode rootNode, boolean min) {
+	private int getUrgentNodeAction(SearchTreeNodeOld rootNode, boolean min) {
 		double bestValue;
 		int bestAction = -1;
 		
@@ -212,7 +212,7 @@ public class DriveMCTS extends Controller
 		if(min)
 		{
 			bestValue = Double.POSITIVE_INFINITY;
-			for(SearchTreeNode node : rootNode.getChildren())
+			for(SearchTreeNodeOld node : rootNode.getChildren())
 			{
 				node.present(10);
 				if(node.getValue() < bestValue)
@@ -226,7 +226,7 @@ public class DriveMCTS extends Controller
 		else
 		{
 			bestValue = Double.NEGATIVE_INFINITY;
-			for(SearchTreeNode node : rootNode.getChildren())
+			for(SearchTreeNodeOld node : rootNode.getChildren())
 			{
 				node.present(10);
 				if(node.getValue() > bestValue)
@@ -240,7 +240,7 @@ public class DriveMCTS extends Controller
 		return bestAction;
 	}
 
-	public void getActionPlayouts(Game a_gameCopy, long a_timeDue, SearchTreeNode parentNode, int actionTaken, int depth)
+	public void getActionPlayouts(Game a_gameCopy, long a_timeDue, SearchTreeNodeOld parentNode, int actionTaken, int depth)
     {
 //    	System.out.println("entering with depth : " + depth); 
         depth++;
@@ -264,7 +264,7 @@ public class DriveMCTS extends Controller
 			actionScore += evaluateShipPosition(a_gameCopy);
 			
 //			System.out.print("in v:" + parentNode.getVisited() + " s:" + parentNode.getScore());
-			SearchTreeNode leafNode = new SearchTreeNode();
+			SearchTreeNodeOld leafNode = new SearchTreeNodeOld();
 			leafNode.setParent(parentNode);
 			leafNode.setScore(actionScore);
 			leafNode.setAction(actionTaken);

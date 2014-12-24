@@ -2,31 +2,31 @@ package controllers.mctsnavi;
 
 import java.util.ArrayList;
 
-public class SearchTreeNode {
+public class SearchTreeNodeOld {
 	private int action = -1;//action performed that got us here
 	private int visited = 0;
 	private double score = Double.NEGATIVE_INFINITY;
 //	private double value = Double.NEGATIVE_INFINITY;
 	private double value = Double.POSITIVE_INFINITY;
-	private SearchTreeNode parent = null;
-	private ArrayList<SearchTreeNode> children = new ArrayList<>();
+	private SearchTreeNodeOld parent = null;
+	private ArrayList<SearchTreeNodeOld> children = new ArrayList<>();
 	private double alpha = Double.NEGATIVE_INFINITY;
 	private double beta = Double.POSITIVE_INFINITY;
 	
-	public ArrayList<SearchTreeNode> getChildren() {
+	public ArrayList<SearchTreeNodeOld> getChildren() {
 		return children;
 	}
-	public void setChildren(ArrayList<SearchTreeNode> children) {
+	public void setChildren(ArrayList<SearchTreeNodeOld> children) {
 		this.children = children;
 	}
-	public void addChild(SearchTreeNode a_child)
+	public void addChild(SearchTreeNodeOld a_child)
 	{
 		children.add(a_child);
 	}
-	public SearchTreeNode getParent() {
+	public SearchTreeNodeOld getParent() {
 		return parent;
 	}
-	public void setParent(SearchTreeNode parent) {
+	public void setParent(SearchTreeNodeOld parent) {
 		this.parent = parent;
 	}
 	public int getAction() {
@@ -68,23 +68,23 @@ public class SearchTreeNode {
 		this.incrementVisited();
 		setValue((double)this.score / (double)this.visited);
 	}
-	public boolean hasChildObject(SearchTreeNode possibleChild)
+	public boolean hasChildObject(SearchTreeNodeOld possibleChild)
 	{
 		if(children.contains(possibleChild)) return true;
 		return false;
 	}
 	
-	public boolean hasChild(SearchTreeNode possibleChild)
+	public boolean hasChild(SearchTreeNodeOld possibleChild)
 	{
-		for(SearchTreeNode a_node : children)
+		for(SearchTreeNodeOld a_node : children)
 		{
 			if(a_node.action == possibleChild.action)
 				return true;
 		}
 		return false;
 	}
-	public SearchTreeNode getChild(int action) {
-		for(SearchTreeNode a_node : children)
+	public SearchTreeNodeOld getChild(int action) {
+		for(SearchTreeNodeOld a_node : children)
 		{
 			if(a_node.action == action)
 				return a_node;
@@ -98,7 +98,7 @@ public class SearchTreeNode {
 		if(this.getChildren().size() > 0)
 		{
 			depth++;
-			for(SearchTreeNode aNode : this.getChildren())
+			for(SearchTreeNodeOld aNode : this.getChildren())
 			{
 				System.out.print("\n");
 				for(int i = 0; i < depth; i++) System.out.print("\t");

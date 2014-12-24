@@ -1,4 +1,4 @@
-package controllers.mc;
+package controllers.greedy;
 
 import framework.core.*;
 import framework.graph.Graph;
@@ -99,7 +99,7 @@ public class DriveDfs extends Controller
         pathToFollow = m_plannedPath.get(nextWaypoint-1);      
     	
         //Get the next node to go to, from the path to the closest waypoint/ fuel tank
-    	aimedNode = Navigator.getLastNodeVisible(pathToFollow, a_gameCopy); 
+    	aimedNode = Navigator.getLastNodeVisible(pathToFollow, a_gameCopy, m_graph); 
     	
     	possiblePosition.clear();//just one level of search
         Game simulatedGame = a_gameCopy.getCopy();

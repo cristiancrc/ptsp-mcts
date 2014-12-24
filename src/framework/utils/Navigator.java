@@ -19,9 +19,8 @@ public class Navigator {
      * TODO:
      *  - due to inertia ship can not see the path at all: find a solution
      */
-    public static Node getLastNodeVisible(Path a_Path, Game a_gameCopy)
+	public static Node getLastNodeVisible(Path a_Path, Game a_gameCopy, Graph m_graph)
     {
-        Graph m_graph = new Graph(a_gameCopy);//Init the graph.
     	Node furthestNodeVisible =  m_graph.getNode(a_Path.m_points.get(0));
     	for(int i = 0; i < a_Path.m_points.size(); i++)
     	{

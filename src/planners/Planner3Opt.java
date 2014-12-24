@@ -21,8 +21,9 @@ public class Planner3Opt extends Planner {
         long timeStart = System.currentTimeMillis();
     	m_graph = new Graph(a_gameCopy);
     	
-    	//get a greedy plan
+    	//get a base plan
 		Planner planner = new PlannerGreedy(a_gameCopy);
+//    	Planner planner = new PlannerMC(a_gameCopy);//limit by time
 		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
 		waypointList = planner.getOrderedWaypoints();//get the planned route
 		long timeAfterGreedy = System.currentTimeMillis();
@@ -30,10 +31,7 @@ public class Planner3Opt extends Planner {
 
 		//add ship position as waypoint
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
-    	m_orderedWaypoints = waypointList;
-=======
     	m_orderedWaypoints = (LinkedList<Waypoint>) waypointList.clone();//an initial list is needed
->>>>>>> Stashed changes
     	distanceMatrix = createDistanceMatrix(waypointList);            	
 		long timeAfterMatrix = System.currentTimeMillis();
 		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");
