@@ -35,9 +35,10 @@ public class Painter {
     public static void paintPossibleShipPositions(Graphics2D a_gr, ArrayList<Vector2d> possiblePosition)
     {
     	a_gr.setColor(Color.red);
-    	if (null != possiblePosition)
+    	ArrayList<Vector2d> possiblePositionCopy = (ArrayList<Vector2d>) possiblePosition.clone();
+    	if (null != possiblePositionCopy)
     	{
-    		for(Vector2d position : possiblePosition) 
+    		for(Vector2d position : possiblePositionCopy) 
         	{
     			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
         	}	

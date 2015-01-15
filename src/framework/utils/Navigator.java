@@ -57,6 +57,7 @@ public class Navigator {
 		Value value = new Value();
 		value.distance = dist;
 		value.direction = dot;
+		value.value = dist + dot;//TODO: this is a very bad heuristic
 		return value;
 	}
 

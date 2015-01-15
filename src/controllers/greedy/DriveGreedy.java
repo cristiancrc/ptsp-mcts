@@ -45,6 +45,8 @@ public class DriveGreedy extends Controller
 
     private HashMap<GameObject, Node> m_collectNodes;//Hash map that matches waypoints in the map with their closest node in the graph.
 	
+    private ArrayList<Vector2d> possiblePosition = new ArrayList<>();	
+    
     /**
      * Constructor
      * @param a_gameCopy a copy of the game state
@@ -235,6 +237,11 @@ public class DriveGreedy extends Controller
                     bestDot = newDot;
                     bestAction = i;
                 }
+            	Vector2d nextPosition = forThisAction.getShip().s;
+           	 	if(!possiblePosition.contains(nextPosition))
+                {
+           	 		possiblePosition.add(nextPosition);	
+                } 
             }
         } else //We can thrust
             return Controller.ACTION_THR_FRONT;
@@ -272,5 +279,6 @@ public class DriveGreedy extends Controller
     public void paint(Graphics2D a_gr)
     {  
     	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
+    	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
     }  
 }

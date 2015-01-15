@@ -1,6 +1,19 @@
 package controllers.mcts;
 
-import framework.core.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Random;
+
+import planners.Planner;
+import planners.Planner3Opt;
+import framework.core.Controller;
+import framework.core.FuelTank;
+import framework.core.Game;
+import framework.core.GameObject;
+import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
 import framework.graph.Path;
@@ -8,42 +21,9 @@ import framework.utils.Navigator;
 import framework.utils.Painter;
 import framework.utils.Vector2d;
 
-import java.awt.*;
-import java.awt.RenderingHints.Key;
-import java.awt.font.FontRenderContext;
-import java.awt.font.GlyphVector;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ImageObserver;
-import java.awt.image.RenderedImage;
-import java.awt.image.renderable.RenderableImage;
-import java.text.AttributedCharacterIterator;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Random;
-import java.util.Vector;
-
-import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
-
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg;
-
-import planners.Planner;
-import planners.Planner3Opt;
-import planners.PlannerGreedy;
-import planners.PlannerGreedyEvolved;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import controllers.mcts.SearchTreeNode;
-
 /**
  * monte carlo tree search driver
- * TODO:
- * !!!this is a mess
- *  - clean up code
- * @version 141223
+ * @version 150113
  * @author Cristian
  *
  */
@@ -58,11 +38,11 @@ public class DriveMCTS extends Controller
 	private Waypoint m_nextWaypoint;
 	private Integer nextWaypoint = null; // index of next waypoint in m_orderedWaypoints
     private int ticks = 0;
-    private Node aimedNode = null;
+    static Node aimedNode = null;//visible to search tree node
     private Path pathToFollow;
-    private ArrayList<Vector2d> possiblePosition = new ArrayList<>();
+    static ArrayList<Vector2d> possiblePosition = new ArrayList<>();
 
-    public static int searchDepth = 10;
+    public static int searchDepth = 100;
     public Random m_rnd = new Random();
 
     /**
@@ -145,35 +125,33 @@ public class DriveMCTS extends Controller
         while(remainingTime > 5)
         {
         	playouts++;
-        	System.out.print("\n" +ticks + ":" + playouts + ">");        	
+        	System.out.print("\n" +ticks + " : " + playouts + " >");        	
 
-        	//////////perform mcts search            
-        	System.out.println(".");
-        	
         	// apply tree policy to select the urgent node
         	SearchTreeNode urgentNode = treePolicy(rootNode);
         	
-        	// expand
-        	urgentNode.expand();
-        	
         	// simulate
-        	simulate(urgentNode);
+        	double matchValue = urgentNode.simulate(aimedNode);
+        	System.out.print("simulated value: " + matchValue);
         	
         	// back propagate
-        	backPropagate(urgentNode);
+        	urgentNode.backPropagate(urgentNode, matchValue);
         	
         	remainingTime = timeDue - System.currentTimeMillis();
-        	System.out.println("\n" + playouts + " --- remaining:" + remainingTime );
+        	System.out.println("\n" + ticks + " : "  + playouts + " --- remaining:" + remainingTime );
         }
         //TODO: time this and set search alloted time accordingly
         //select child node
-        bestAction = rootNode.getActionMostVisited();
-		bestAction = rootNode.getActionBest();
+//        bestAction = rootNode.mostVisitedAction();
+		bestAction = rootNode.bestAction();
+        
+        System.out.println("selected "+ bestAction); 
         
     	return bestAction;
-    }   
-    
-    private SearchTreeNode treePolicy(SearchTreeNode rootNode) {
+    }      
+
+  //TODO: add uct , otherwise this is just random
+	private SearchTreeNode treePolicy(SearchTreeNode rootNode) {
     	SearchTreeNode currentNode = rootNode;
 
         while (!isWaypointReached(currentNode.worldSate) && currentNode.depth < searchDepth)
@@ -182,9 +160,9 @@ public class DriveMCTS extends Controller
                 return currentNode.expand();
 
             } else {
-//            	SearchTreeNode nextNode = currentNode.uct();
+            	SearchTreeNode nextNode = currentNode.uct();
 //                SearchTreeNode nextNode = currentNode.egreedy();
-                SearchTreeNode nextNode = currentNode.random();
+//                SearchTreeNode nextNode = currentNode.random();
                 currentNode = nextNode;
             }
         }
