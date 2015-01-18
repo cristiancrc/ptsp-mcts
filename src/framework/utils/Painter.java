@@ -21,10 +21,14 @@ public class Painter {
 	 * @param a_gr
 	 * @param aimedNode
 	 */
+	public static void paintAimedNode(Graphics2D a_gr, Node aimedNode, Color color)
+	{
+		a_gr.setColor(color);
+    	a_gr.fillOval(aimedNode.x(), aimedNode.y(), 5, 5);
+	}
 	public static void paintAimedNode(Graphics2D a_gr, Node aimedNode)
     {
-        a_gr.setColor(Color.RED);
-    	a_gr.fillOval(aimedNode.x(), aimedNode.y(), 5, 5);	
+        paintAimedNode(a_gr, aimedNode, Color.RED);	
     }
     
     /**

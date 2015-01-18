@@ -1,6 +1,19 @@
 package controllers.mc;
 
-import framework.core.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Random;
+
+import planners.Planner;
+import planners.Planner3Opt;
+import framework.core.Controller;
+import framework.core.FuelTank;
+import framework.core.Game;
+import framework.core.GameObject;
+import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
 import framework.graph.Path;
@@ -8,34 +21,6 @@ import framework.utils.Navigator;
 import framework.utils.Painter;
 import framework.utils.Value;
 import framework.utils.Vector2d;
-
-import java.awt.*;
-import java.awt.RenderingHints.Key;
-import java.awt.font.FontRenderContext;
-import java.awt.font.GlyphVector;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ImageObserver;
-import java.awt.image.RenderedImage;
-import java.awt.image.renderable.RenderableImage;
-import java.text.AttributedCharacterIterator;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Random;
-import java.util.Vector;
-
-import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
-import planners.Planner;
-import planners.Planner3Opt;
-import planners.PlannerGreedyEvolved;
-
-import controllers.mctsnavi.SearchTreeNodeOld;
 
 /**
  * monte carlo simulation driver

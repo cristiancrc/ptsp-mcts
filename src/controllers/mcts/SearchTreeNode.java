@@ -156,24 +156,27 @@ public class SearchTreeNode {
 
     }
 	
+	/**
+	 * upper confidence tree
+	 * @return
+	 */
 	public SearchTreeNode uct() {
 		SearchTreeNode selectedNode = null;
-        double bestValue = -Double.MAX_VALUE;
+        double bestValue = Double.MAX_VALUE;
         for (SearchTreeNode child : this.children)
         {
             double hvVal = child.value;
             double childValue =  hvVal / (child.visited + epsilon);
 
-            //TODO:why normalize?
+            //TODO:why normalize? bounds change
             childValue = normalise(childValue, bounds[0], bounds[1]);
 
-            double uctValue = childValue + sqrt2 * Math.sqrt(Math.log(this.visited + 1) / (child.visited + epsilon));
+            double uctValue = childValue - sqrt2 * Math.sqrt(Math.log(this.visited + 1) / (child.visited + epsilon));
 
             // small sampleRandom numbers: break ties in unexpanded nodes
             uctValue = noise(uctValue, epsilon, this.rnd.nextDouble());     //break ties randomly
 
-            // small sampleRandom numbers: break ties in unexpanded nodes
-            if (uctValue > bestValue) {
+            if (uctValue < bestValue) {
                 selectedNode = child;
                 bestValue = uctValue;
             }
@@ -264,6 +267,7 @@ public class SearchTreeNode {
     }
 
 
+    //TODO: consider using just the state without the aimed node (update evaluation fn)
 	public double simulate(Node aimedNode) 
 	{
 		Game nextState = worldSate.getCopy();        
@@ -285,10 +289,14 @@ public class SearchTreeNode {
         Value newStateValue = Navigator.evaluateShipPosition(nextState, DriveMCTS.aimedNode);
         double localNewValue = newStateValue.value;
         if(localNewValue < bounds[0])
+        {
             bounds[0] = localNewValue;
+        }
 
         if(localNewValue > bounds[1])
+        {
             bounds[1] = localNewValue;
+        }
 
         return localNewValue;		
 	}
@@ -305,7 +313,7 @@ public class SearchTreeNode {
         }    	      
         
         //TODO: target reached? aimedNode.RADIUS?
-        if(5 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
+        if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
     	{    		
         	System.out.println("target checkpoint reached");
     		return true;
@@ -337,7 +345,11 @@ public class SearchTreeNode {
         }
     }
 
-	public int mostVisitedAction() {
+	/**
+	 * return most visited node
+	 * @return
+	 */
+	public int getActionRobustChild() {
         int selectedAction = -1;
         double highestVisited = Double.MIN_VALUE;
         boolean allEqual = true;
@@ -388,20 +400,24 @@ public class SearchTreeNode {
         return selectedAction;
     }
 
-    public int bestAction()
+	/**
+	 * return node with smallest value
+	 * @return
+	 */
+    public int getActionMinValue()
     {
         int selectedAction = -1;
         double bestValue = Double.MAX_VALUE;
-
+//        System.out.println("bounds : " + SearchTreeNode.bounds[0] + " <> " + SearchTreeNode.bounds[1]);
         for (int i = 0; i < children.length; i++) 
         {
             if(null != children[i])
             {
-            	System.out.println("\nat child " + i + " with data");            	            
-            	System.out.println("visited : " + children[i].visited);
-            	System.out.println("score : " + children[i].score);
-            	System.out.println("best child : " + children[i].bestPossible);            	
-            	System.out.println("value : " + children[i].value);
+//            	System.out.println("\nat child " + i + " with data");            	            
+//            	System.out.println("visited : " + children[i].visited);
+//            	System.out.println("score : " + children[i].score);
+//            	System.out.println("best child : " + children[i].bestPossible);            	
+//            	System.out.println("value : " + children[i].value);
             	
                 if (children[i].value < bestValue) {
                     bestValue = children[i].value;
@@ -418,4 +434,39 @@ public class SearchTreeNode {
 
         return selectedAction;
     }	
+    
+    /**
+	 * path where a child had the lowest score (local min bound)
+	 * @return
+	 */
+    public int getActionSecureChild()
+    {
+        int selectedAction = -1;
+        double bestValue = Double.MAX_VALUE;
+        System.out.println("bounds : " + SearchTreeNode.bounds[0] + " <> " + SearchTreeNode.bounds[1]);
+        for (int i = 0; i < children.length; i++) 
+        {
+            if(null != children[i])
+            {
+            	System.out.println("\nat child " + i + " with data");            	            
+            	System.out.println("visited : " + children[i].visited);
+            	System.out.println("score : " + children[i].score);
+            	System.out.println("best child : " + children[i].bestPossible);            	
+            	System.out.println("value : " + children[i].value);
+            	
+                if (children[i].bestPossible < bestValue) {
+                    bestValue = children[i].bestPossible;
+                    selectedAction = i;
+                }
+            }
+        }
+
+        if (selectedAction == -1)
+        {
+        	System.err.println("invalid action");
+            selectedAction = 0;
+        }
+
+        return selectedAction;
+    }	    
 }

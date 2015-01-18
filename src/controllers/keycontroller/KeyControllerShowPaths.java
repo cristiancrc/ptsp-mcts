@@ -67,6 +67,9 @@ public class KeyControllerShowPaths extends KeyController
     /**
      * Constructor of the KeyController.
      */
+    
+    Path pathToClosest;
+    
     public KeyControllerShowPaths(Game a_gameCopy, long a_timeDue)
     {
         m_input = new KeyInput();
@@ -188,9 +191,11 @@ public class KeyControllerShowPaths extends KeyController
      */
     public void paint(Graphics2D a_gr)
     {
+    	pathToClosest = getPathToClosest();
     	a_gr.setColor(Color.GRAY);
     	a_gr.drawString("x:" + Double.toString(shipHeading_x), 30,30);
     	a_gr.drawString("y:" + Double.toString(shipHeading_y), 30,60);
+    	a_gr.drawString("cost:" + Double.toString(pathToClosest.m_cost), 30,90);
     	paintPaths(a_gr);
     }  
     
@@ -219,7 +224,7 @@ public class KeyControllerShowPaths extends KeyController
         //paint closest waypoint
         //m_graph.draw(a_gr);
         a_gr.setColor(Color.red);
-        Path pathToClosest = getPathToClosest();
+        
         if(pathToClosest != null) 
         {
         	for(int i = 0; i < pathToClosest.m_points.size()-1; ++i)

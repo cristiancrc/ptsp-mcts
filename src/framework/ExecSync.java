@@ -287,7 +287,7 @@ public class ExecSync extends Exec
      */
     public static void main(String[] args)
     {
-        m_mapNames = new String[]{"maps/ptsp_map40.map"}; //Set here the name of the map to play in.
+        m_mapNames = new String[]{"maps/ptsp_map45.map"}; //Set here the name of the map to play in.
         //m_mapNames = new String[]{"maps/ptsp_map01.map","maps/ptsp_map02.map","maps/ptsp_map08.map",
         //        "maps/ptsp_map19.map","maps/ptsp_map24.map","maps/ptsp_map35.map","maps/ptsp_map40.map",
         //        "maps/ptsp_map45.map","maps/ptsp_map56.map","maps/ptsp_map61.map"}; //In an array, to play in multiple maps with runGames().
@@ -307,10 +307,8 @@ public class ExecSync extends Exec
         //exec 153 controller init time = 1000ms (10 waypoints * 10)
         //exec sync 61 time between checkpoints 
         
-        //main target
-        m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver
-        
         //completed controller
+        m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver        
 //        m_controllerName = "controllers.greedy.DriveDfs"; //dfs controller        
 //      m_controllerName = "controllers.greedy.DriveGreedy"; //greedy controller with planner selection
 
