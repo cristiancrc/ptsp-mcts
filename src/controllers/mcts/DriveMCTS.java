@@ -52,8 +52,20 @@ public class DriveMCTS extends Controller
     int panicModeNextCheck = panicModeCheckInterval;    
     int panicModeAction = 1;//action to take while in panic mode
     Vector2d previousShipPosition;
+    
+    static int macroActionsCount = 1;
+    int macroActionsRemaining = macroActionsCount;
+    int macroAction;
 
     public static int searchDepth = 100;
+    /*
+     * searchDepth * macroActionsCount should be around 100
+     * 
+     * deeper than that and the paths are too chaotic
+     * count = 1, searchDepth = 100  : no macro actions 
+     * count = 5, searchDepth = 20
+     * 
+     */
     public Random m_rnd = new Random();
 
     /**
@@ -96,11 +108,17 @@ public class DriveMCTS extends Controller
     public int getAction(Game a_gameCopy, long a_timeDue)
     {
     	ticks++;
-    	//verbose = ((ticks % 10 == 0) ? true : false);
+    	//verbose = ((ticks % 10 == 0) ? true : false);    	
     	
         long timeIn = System.currentTimeMillis();
         if(verbose) System.out.println("\n>>>in\t\t" + timeIn);
         if(verbose) System.out.println("---due on\t" + a_timeDue);
+        
+		//TODO: do something useful with this time
+		if(macroActionsRemaining-- > 0)
+		{
+			return macroAction;			
+		}        
               
         possiblePosition.clear();//display just one level of search
     	
@@ -150,6 +168,8 @@ public class DriveMCTS extends Controller
     		aimedNodeNext = Navigator.getLastNodeVisible(pathToFollowFarther, a_gameCopyForAimedNode, m_graph);    		
     	}
     	bestAction = mctsSearch(a_gameCopy, a_timeDue);
+        macroAction = bestAction;
+        macroActionsRemaining = macroActionsCount;    	
     	
     	//check if ship is stuck in the same position
     	if(ticks >= panicModeNextCheck)
@@ -170,7 +190,7 @@ public class DriveMCTS extends Controller
     }
     
 	public int mctsSearch(Game a_gameCopy, long timeDue)
-    {
+    {	
     	long remainingTime;
     	long now = System.currentTimeMillis();
         remainingTime = timeDue - now;
@@ -204,9 +224,8 @@ public class DriveMCTS extends Controller
 //		bestAction = rootNode.getActionRobustChild();//most visited child		
 //		bestAction = rootNode.getActionSecureChild();//lowest average score child
         bestAction = rootNode.getActionMinValue();//lowest average score child        
-        
-//        System.out.println("selected "+ bestAction); 
-        
+         
+//      System.out.println("selected "+ bestAction);        
     	return bestAction;
     }      
 

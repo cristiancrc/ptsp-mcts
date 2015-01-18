@@ -273,10 +273,13 @@ public class SearchTreeNode {
 		Game nextState = worldSate.getCopy();        
         int thisDepth = this.depth;
 
-        while (!finishRollout(nextState, thisDepth, aimedNode)) {
-
+        while (!finishRollout(nextState, thisDepth, aimedNode)) 
+        {
             int action = rnd.nextInt(Controller.NUM_ACTIONS);
-            nextState.getShip().update(action);
+            for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
+            {
+            	nextState.getShip().update(action);	
+            }            
             thisDepth++;
             
             Vector2d nextPosition = nextState.getShip().s;
