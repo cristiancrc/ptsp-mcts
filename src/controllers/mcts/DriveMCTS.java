@@ -53,11 +53,11 @@ public class DriveMCTS extends Controller
     int panicModeAction = 1;//action to take while in panic mode
     Vector2d previousShipPosition;
     
-    static int macroActionsCount = 1;
-    int macroActionsRemaining = macroActionsCount;
+    static int macroActionsCount = 5;
+    int macroActionsRemaining = 0;
     int macroAction;
 
-    public static int searchDepth = 100;
+    public static int searchDepth = 10;
     /*
      * searchDepth * macroActionsCount should be around 100
      * 
@@ -117,6 +117,7 @@ public class DriveMCTS extends Controller
 		//TODO: do something useful with this time
 		if(macroActionsRemaining-- > 0)
 		{
+			System.out.print("^");
 			return macroAction;			
 		}        
               
@@ -125,6 +126,7 @@ public class DriveMCTS extends Controller
     	int bestAction = -1;
         if(inPanicMode)
     	{
+        	//TODO: mark position on map
 //        	System.out.print(".");
         	if (System.currentTimeMillis() > panicModeStart + panicModeLength)
         	{
@@ -138,7 +140,7 @@ public class DriveMCTS extends Controller
         	}
         	else
         	{
-        		if (verbose) System.out.println("!");
+        		if (verbose) System.out.println("panic mode!!!");
         		return panicModeAction;
         	}
         		
@@ -186,7 +188,11 @@ public class DriveMCTS extends Controller
         	panicModeNextCheck = ticks + panicModeCheckInterval;
     	}    	
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
-    	return bestAction;
+
+        //TODO: this stops the execution
+        System.exit(1);////////////////////////////////////////////////////////////////////////////
+    	
+        return bestAction;    	
     }
     
 	public int mctsSearch(Game a_gameCopy, long timeDue)
@@ -205,12 +211,14 @@ public class DriveMCTS extends Controller
         while(remainingTime > 5)
         {
         	playouts++;
-        	if (verbose) System.out.print("\n" +ticks + " : " + playouts);        	
+        	if (verbose) System.out.print("\n\n" +ticks + " : " + playouts);        	
 
+        	//TODO: this should only return one of the roots' children
         	// apply tree policy to select the urgent node
         	SearchTreeNode urgentNode = treePolicy(rootNode);
         	
         	// simulate
+        	System.out.println(" simulating for an urgent node with depth " + urgentNode.depth);
         	double matchValue = urgentNode.simulate(aimedNode);
         	
         	// back propagate
@@ -223,8 +231,7 @@ public class DriveMCTS extends Controller
         //select child node
 //		bestAction = rootNode.getActionRobustChild();//most visited child		
 //		bestAction = rootNode.getActionSecureChild();//lowest average score child
-        bestAction = rootNode.getActionMinValue();//lowest average score child        
-         
+        bestAction = rootNode.getActionMinValue();//lowest average score child                 
 //      System.out.println("selected "+ bestAction);        
     	return bestAction;
     }      
@@ -244,7 +251,6 @@ public class DriveMCTS extends Controller
                 currentNode = nextNode;
             }
         }
-
         return currentNode;
     }
     

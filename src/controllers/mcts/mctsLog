@@ -1,0 +1,1995 @@
+**** mcts controller ****
+***3Opt planner***
+***greedy planner***
+Path distance:2090.8023074035523
+Greedy Planner running time: 176 ms.
+ Time spent for greedy planner: 200 ms.
+ Time spent to build distance matrix: 87 ms.
+ Time spent searching: 7 ms.
+Path distance:1903.7240969167508
+3Opt Planner time: 294 ms.
+Controller initialization time: 364 ms.
+Running controllers.mcts.DriveMCTS in map maps/ptsp_map45.map...
+
+>>>in		1432587037161
+---due on	1432587037201
+!!!!!marked as completed framework.core.Waypoint@37fd9ca
+
+
+1 : 1..........max depth reached 10, limit at 10
+1 : 1 value:57.70166501314289 remaining: 37
+
+1 : 2..........max depth reached 10, limit at 10
+1 : 2 value:47.585600054902486 remaining: 37
+
+1 : 3..........max depth reached 10, limit at 10
+1 : 3 value:55.141205938882706 remaining: 36
+
+1 : 4..........max depth reached 10, limit at 10
+1 : 4 value:55.37639122913143 remaining: 35
+
+1 : 5..........max depth reached 10, limit at 10
+1 : 5 value:51.837578358239426 remaining: 35
+
+1 : 6..........max depth reached 10, limit at 10
+1 : 6 value:45.46492903645929 remaining: 34
+
+1 : 7.........max depth reached 10, limit at 10
+1 : 7 value:49.10908751458723 remaining: 34
+
+1 : 8.........max depth reached 10, limit at 10
+1 : 8 value:54.00881570904711 remaining: 33
+
+1 : 9.........max depth reached 10, limit at 10
+1 : 9 value:57.618661096042324 remaining: 33
+
+1 : 10.........max depth reached 10, limit at 10
+1 : 10 value:55.99747502389888 remaining: 32
+
+1 : 11.........max depth reached 10, limit at 10
+1 : 11 value:53.314929242470036 remaining: 32
+
+1 : 12.........max depth reached 10, limit at 10
+1 : 12 value:50.091229807412745 remaining: 32
+
+1 : 13........max depth reached 10, limit at 10
+1 : 13 value:56.117932294384566 remaining: 31
+
+1 : 14........max depth reached 10, limit at 10
+1 : 14 value:49.66348011180299 remaining: 31
+
+1 : 15........max depth reached 10, limit at 10
+1 : 15 value:51.81624782091761 remaining: 30
+
+1 : 16........max depth reached 10, limit at 10
+1 : 16 value:52.34375706280326 remaining: 30
+
+1 : 17........max depth reached 10, limit at 10
+1 : 17 value:47.962631600575016 remaining: 27
+
+1 : 18........max depth reached 10, limit at 10
+1 : 18 value:53.01690312383018 remaining: 26
+
+1 : 19.......max depth reached 10, limit at 10
+1 : 19 value:51.88859921081452 remaining: 25
+
+1 : 20.......max depth reached 10, limit at 10
+1 : 20 value:57.982118920684066 remaining: 22
+
+1 : 21.......max depth reached 10, limit at 10
+1 : 21 value:54.692386430013904 remaining: 21
+
+1 : 22.......max depth reached 10, limit at 10
+1 : 22 value:52.16146550437751 remaining: 21
+
+1 : 23.......max depth reached 10, limit at 10
+1 : 23 value:55.72987645480092 remaining: 21
+
+1 : 24.......max depth reached 10, limit at 10
+1 : 24 value:56.1050980436769 remaining: 21
+
+1 : 25......max depth reached 10, limit at 10
+1 : 25 value:55.79118728654498 remaining: 20
+
+1 : 26......max depth reached 10, limit at 10
+1 : 26 value:53.69067199476939 remaining: 20
+
+1 : 27......max depth reached 10, limit at 10
+1 : 27 value:55.30002164210221 remaining: 20
+
+1 : 28......max depth reached 10, limit at 10
+1 : 28 value:51.527385017336606 remaining: 20
+
+1 : 29......max depth reached 10, limit at 10
+1 : 29 value:52.11334688711479 remaining: 20
+
+1 : 30......max depth reached 10, limit at 10
+1 : 30 value:55.561171683687675 remaining: 19
+
+1 : 31.....max depth reached 10, limit at 10
+1 : 31 value:55.389641218652336 remaining: 19
+
+1 : 32.....max depth reached 10, limit at 10
+1 : 32 value:54.532930467370136 remaining: 19
+
+1 : 33.....max depth reached 10, limit at 10
+1 : 33 value:56.06868680468361 remaining: 19
+
+1 : 34.....max depth reached 10, limit at 10
+1 : 34 value:55.379760263730894 remaining: 19
+
+1 : 35.....max depth reached 10, limit at 10
+1 : 35 value:56.39442648776747 remaining: 18
+
+1 : 36.....max depth reached 10, limit at 10
+1 : 36 value:56.355049347129544 remaining: 18
+
+1 : 37....max depth reached 10, limit at 10
+1 : 37 value:56.35965651895224 remaining: 18
+
+1 : 38....max depth reached 10, limit at 10
+1 : 38 value:56.33689850743072 remaining: 18
+
+1 : 39....max depth reached 10, limit at 10
+1 : 39 value:55.33668423256891 remaining: 18
+
+1 : 40....max depth reached 10, limit at 10
+1 : 40 value:56.53344742644444 remaining: 18
+
+1 : 41....max depth reached 10, limit at 10
+1 : 41 value:55.946948247500046 remaining: 17
+
+1 : 42....max depth reached 10, limit at 10
+1 : 42 value:54.970663521687406 remaining: 17
+
+1 : 43...max depth reached 10, limit at 10
+1 : 43 value:57.2328120094615 remaining: 17
+
+1 : 44...max depth reached 10, limit at 10
+1 : 44 value:57.29299672599163 remaining: 17
+
+1 : 45...max depth reached 10, limit at 10
+1 : 45 value:57.55478451154163 remaining: 17
+
+1 : 46...max depth reached 10, limit at 10
+1 : 46 value:56.33813925560482 remaining: 17
+
+1 : 47...max depth reached 10, limit at 10
+1 : 47 value:56.60249351727114 remaining: 17
+
+1 : 48...max depth reached 10, limit at 10
+1 : 48 value:57.1481879647599 remaining: 16
+
+1 : 49..max depth reached 10, limit at 10
+1 : 49 value:57.94300671156554 remaining: 16
+
+1 : 50..max depth reached 10, limit at 10
+1 : 50 value:57.828214482872134 remaining: 16
+
+1 : 51..max depth reached 10, limit at 10
+1 : 51 value:57.37647883463662 remaining: 16
+
+1 : 52..max depth reached 10, limit at 10
+1 : 52 value:57.94300671156554 remaining: 16
+
+1 : 53..max depth reached 10, limit at 10
+1 : 53 value:57.521416477182 remaining: 16
+
+1 : 54..max depth reached 10, limit at 10
+1 : 54 value:57.61535716227357 remaining: 16
+
+1 : 55.max depth reached 10, limit at 10
+1 : 55 value:58.316644446372074 remaining: 15
+
+1 : 56.max depth reached 10, limit at 10
+1 : 56 value:58.316644446372074 remaining: 15
+
+1 : 57.max depth reached 10, limit at 10
+1 : 57 value:58.316644446372074 remaining: 15
+
+1 : 58.max depth reached 10, limit at 10
+1 : 58 value:58.316644446372074 remaining: 15
+
+1 : 59.max depth reached 10, limit at 10
+1 : 59 value:58.316644446372074 remaining: 15
+
+1 : 60.max depth reached 10, limit at 10
+1 : 60 value:58.316644446372074 remaining: 15
+
+1 : 61.max depth reached 10, limit at 10
+1 : 61 value:58.316644446372074 remaining: 15
+
+1 : 62.max depth reached 10, limit at 10
+1 : 62 value:58.316644446372074 remaining: 14
+
+1 : 63.max depth reached 10, limit at 10
+1 : 63 value:58.316644446372074 remaining: 14
+
+1 : 64.max depth reached 10, limit at 10
+1 : 64 value:58.316644446372074 remaining: 14
+
+1 : 65.max depth reached 10, limit at 10
+1 : 65 value:58.316644446372074 remaining: 14
+
+1 : 66.max depth reached 10, limit at 10
+1 : 66 value:58.316644446372074 remaining: 14
+
+1 : 67.max depth reached 10, limit at 10
+1 : 67 value:58.316644446372074 remaining: 13
+
+1 : 68.max depth reached 10, limit at 10
+1 : 68 value:58.316644446372074 remaining: 13
+
+1 : 69.max depth reached 10, limit at 10
+1 : 69 value:58.316644446372074 remaining: 13
+
+1 : 70.max depth reached 10, limit at 10
+1 : 70 value:58.316644446372074 remaining: 13
+
+1 : 71.max depth reached 10, limit at 10
+1 : 71 value:58.316644446372074 remaining: 13
+
+1 : 72.max depth reached 10, limit at 10
+1 : 72 value:58.316644446372074 remaining: 13
+
+1 : 73.max depth reached 10, limit at 10
+1 : 73 value:58.316644446372074 remaining: 13
+
+1 : 74.max depth reached 10, limit at 10
+1 : 74 value:58.316644446372074 remaining: 13
+
+1 : 75.max depth reached 10, limit at 10
+1 : 75 value:58.316644446372074 remaining: 13
+
+1 : 76.max depth reached 10, limit at 10
+1 : 76 value:58.316644446372074 remaining: 12
+
+1 : 77.max depth reached 10, limit at 10
+1 : 77 value:58.316644446372074 remaining: 12
+
+1 : 78.max depth reached 10, limit at 10
+1 : 78 value:58.316644446372074 remaining: 12
+
+1 : 79.max depth reached 10, limit at 10
+1 : 79 value:58.316644446372074 remaining: 12
+
+1 : 80.max depth reached 10, limit at 10
+1 : 80 value:58.316644446372074 remaining: 12
+
+1 : 81.max depth reached 10, limit at 10
+1 : 81 value:58.316644446372074 remaining: 12
+
+1 : 82.max depth reached 10, limit at 10
+1 : 82 value:58.316644446372074 remaining: 12
+
+1 : 83.max depth reached 10, limit at 10
+1 : 83 value:58.316644446372074 remaining: 12
+
+1 : 84.max depth reached 10, limit at 10
+1 : 84 value:58.316644446372074 remaining: 12
+
+1 : 85.max depth reached 10, limit at 10
+1 : 85 value:58.316644446372074 remaining: 12
+
+1 : 86.max depth reached 10, limit at 10
+1 : 86 value:58.316644446372074 remaining: 11
+
+1 : 87.max depth reached 10, limit at 10
+1 : 87 value:58.316644446372074 remaining: 11
+
+1 : 88.max depth reached 10, limit at 10
+1 : 88 value:58.316644446372074 remaining: 11
+
+1 : 89.max depth reached 10, limit at 10
+1 : 89 value:58.316644446372074 remaining: 11
+
+1 : 90.max depth reached 10, limit at 10
+1 : 90 value:58.316644446372074 remaining: 11
+
+1 : 91.max depth reached 10, limit at 10
+1 : 91 value:58.316644446372074 remaining: 11
+
+1 : 92.max depth reached 10, limit at 10
+1 : 92 value:58.316644446372074 remaining: 11
+
+1 : 93.max depth reached 10, limit at 10
+1 : 93 value:58.316644446372074 remaining: 11
+
+1 : 94.max depth reached 10, limit at 10
+1 : 94 value:58.316644446372074 remaining: 11
+
+1 : 95.max depth reached 10, limit at 10
+1 : 95 value:58.316644446372074 remaining: 11
+
+1 : 96.max depth reached 10, limit at 10
+1 : 96 value:58.316644446372074 remaining: 10
+
+1 : 97.max depth reached 10, limit at 10
+1 : 97 value:58.316644446372074 remaining: 10
+
+1 : 98.max depth reached 10, limit at 10
+1 : 98 value:58.316644446372074 remaining: 10
+
+1 : 99.max depth reached 10, limit at 10
+1 : 99 value:58.316644446372074 remaining: 10
+
+1 : 100.max depth reached 10, limit at 10
+1 : 100 value:58.316644446372074 remaining: 10
+
+1 : 101.max depth reached 10, limit at 10
+1 : 101 value:58.316644446372074 remaining: 10
+
+1 : 102.max depth reached 10, limit at 10
+1 : 102 value:58.316644446372074 remaining: 10
+
+1 : 103.max depth reached 10, limit at 10
+1 : 103 value:58.316644446372074 remaining: 10
+
+1 : 104.max depth reached 10, limit at 10
+1 : 104 value:58.316644446372074 remaining: 10
+
+1 : 105.max depth reached 10, limit at 10
+1 : 105 value:58.316644446372074 remaining: 9
+
+1 : 106.max depth reached 10, limit at 10
+1 : 106 value:58.316644446372074 remaining: 9
+
+1 : 107.max depth reached 10, limit at 10
+1 : 107 value:58.316644446372074 remaining: 9
+
+1 : 108.max depth reached 10, limit at 10
+1 : 108 value:58.316644446372074 remaining: 9
+
+1 : 109.max depth reached 10, limit at 10
+1 : 109 value:58.316644446372074 remaining: 9
+
+1 : 110.max depth reached 10, limit at 10
+1 : 110 value:58.316644446372074 remaining: 9
+
+1 : 111.max depth reached 10, limit at 10
+1 : 111 value:58.316644446372074 remaining: 9
+
+1 : 112.max depth reached 10, limit at 10
+1 : 112 value:58.316644446372074 remaining: 9
+
+1 : 113.max depth reached 10, limit at 10
+1 : 113 value:58.316644446372074 remaining: 9
+
+1 : 114.max depth reached 10, limit at 10
+1 : 114 value:58.316644446372074 remaining: 9
+
+1 : 115.max depth reached 10, limit at 10
+1 : 115 value:58.316644446372074 remaining: 8
+
+1 : 116.max depth reached 10, limit at 10
+1 : 116 value:58.316644446372074 remaining: 8
+
+1 : 117.max depth reached 10, limit at 10
+1 : 117 value:58.316644446372074 remaining: 8
+
+1 : 118.max depth reached 10, limit at 10
+1 : 118 value:58.316644446372074 remaining: 8
+
+1 : 119.max depth reached 10, limit at 10
+1 : 119 value:58.316644446372074 remaining: 8
+
+1 : 120.max depth reached 10, limit at 10
+1 : 120 value:58.316644446372074 remaining: 8
+
+1 : 121.max depth reached 10, limit at 10
+1 : 121 value:58.316644446372074 remaining: 8
+
+1 : 122.max depth reached 10, limit at 10
+1 : 122 value:58.316644446372074 remaining: 8
+
+1 : 123.max depth reached 10, limit at 10
+1 : 123 value:58.316644446372074 remaining: 8
+
+1 : 124.max depth reached 10, limit at 10
+1 : 124 value:58.316644446372074 remaining: 8
+
+1 : 125.max depth reached 10, limit at 10
+1 : 125 value:58.316644446372074 remaining: 8
+
+1 : 126.max depth reached 10, limit at 10
+1 : 126 value:58.316644446372074 remaining: 8
+
+1 : 127.max depth reached 10, limit at 10
+1 : 127 value:58.316644446372074 remaining: 8
+
+1 : 128.max depth reached 10, limit at 10
+1 : 128 value:58.316644446372074 remaining: 7
+
+1 : 129.max depth reached 10, limit at 10
+1 : 129 value:58.316644446372074 remaining: 7
+
+1 : 130.max depth reached 10, limit at 10
+1 : 130 value:58.316644446372074 remaining: 7
+
+1 : 131.max depth reached 10, limit at 10
+1 : 131 value:58.316644446372074 remaining: 7
+
+1 : 132.max depth reached 10, limit at 10
+1 : 132 value:58.316644446372074 remaining: 7
+
+1 : 133.max depth reached 10, limit at 10
+1 : 133 value:58.316644446372074 remaining: 7
+
+1 : 134.max depth reached 10, limit at 10
+1 : 134 value:58.316644446372074 remaining: 7
+
+1 : 135.max depth reached 10, limit at 10
+1 : 135 value:58.316644446372074 remaining: 7
+
+1 : 136.max depth reached 10, limit at 10
+1 : 136 value:58.316644446372074 remaining: 7
+
+1 : 137.max depth reached 10, limit at 10
+1 : 137 value:58.316644446372074 remaining: 7
+
+1 : 138.max depth reached 10, limit at 10
+1 : 138 value:58.316644446372074 remaining: 7
+
+1 : 139.max depth reached 10, limit at 10
+1 : 139 value:58.316644446372074 remaining: 7
+
+1 : 140.max depth reached 10, limit at 10
+1 : 140 value:58.316644446372074 remaining: 6
+
+1 : 141.max depth reached 10, limit at 10
+1 : 141 value:58.316644446372074 remaining: 6
+
+1 : 142.max depth reached 10, limit at 10
+1 : 142 value:58.316644446372074 remaining: 6
+
+1 : 143.max depth reached 10, limit at 10
+1 : 143 value:58.316644446372074 remaining: 6
+
+1 : 144.max depth reached 10, limit at 10
+1 : 144 value:58.316644446372074 remaining: 6
+
+1 : 145.max depth reached 10, limit at 10
+1 : 145 value:58.316644446372074 remaining: 6
+
+1 : 146.max depth reached 10, limit at 10
+1 : 146 value:58.316644446372074 remaining: 6
+
+1 : 147.max depth reached 10, limit at 10
+1 : 147 value:58.316644446372074 remaining: 6
+
+1 : 148.max depth reached 10, limit at 10
+1 : 148 value:58.316644446372074 remaining: 6
+
+1 : 149.max depth reached 10, limit at 10
+1 : 149 value:58.316644446372074 remaining: 6
+
+1 : 150.max depth reached 10, limit at 10
+1 : 150 value:58.316644446372074 remaining: 6
+
+1 : 151.max depth reached 10, limit at 10
+1 : 151 value:58.316644446372074 remaining: 6
+
+1 : 152.max depth reached 10, limit at 10
+1 : 152 value:58.316644446372074 remaining: 6
+
+1 : 153.max depth reached 10, limit at 10
+1 : 153 value:58.316644446372074 remaining: 6
+
+1 : 154.max depth reached 10, limit at 10
+1 : 154 value:58.316644446372074 remaining: 6
+
+1 : 155.max depth reached 10, limit at 10
+1 : 155 value:58.316644446372074 remaining: 5
+>>>out		1432587037196
+
+>>>in		1432587037198
+---due on	1432587037238
+^
+>>>in		1432587037214
+---due on	1432587037254
+^
+>>>in		1432587037230
+---due on	1432587037270
+^
+>>>in		1432587037247
+---due on	1432587037287
+^
+>>>in		1432587037263
+---due on	1432587037303
+^
+>>>in		1432587037279
+---due on	1432587037319
+
+
+7 : 1..........max depth reached 10, limit at 10
+7 : 1 value:45.5024443122391 remaining: 40
+
+7 : 2..........max depth reached 10, limit at 10
+7 : 2 value:53.67291411210509 remaining: 40
+
+7 : 3..........max depth reached 10, limit at 10
+7 : 3 value:54.74308989800738 remaining: 40
+
+7 : 4..........max depth reached 10, limit at 10
+7 : 4 value:54.2532519894136 remaining: 39
+
+7 : 5..........max depth reached 10, limit at 10
+7 : 5 value:55.19560179604294 remaining: 36
+
+7 : 6..........max depth reached 10, limit at 10
+7 : 6 value:55.47428948595591 remaining: 35
+
+7 : 7.........max depth reached 10, limit at 10
+7 : 7 value:53.08864655504689 remaining: 35
+
+7 : 8.........max depth reached 10, limit at 10
+7 : 8 value:47.238116856085966 remaining: 34
+
+7 : 9.........max depth reached 10, limit at 10
+7 : 9 value:53.97628792117348 remaining: 33
+
+7 : 10.........max depth reached 10, limit at 10
+7 : 10 value:48.37786975745704 remaining: 31
+
+7 : 11.........max depth reached 10, limit at 10
+7 : 11 value:50.57441612602214 remaining: 31
+
+7 : 12.........max depth reached 10, limit at 10
+7 : 12 value:55.02779335479314 remaining: 31
+
+7 : 13........max depth reached 10, limit at 10
+7 : 13 value:53.39093352732304 remaining: 31
+
+7 : 14........max depth reached 10, limit at 10
+7 : 14 value:53.32919905280116 remaining: 31
+
+7 : 15........max depth reached 10, limit at 10
+7 : 15 value:54.36516280407323 remaining: 29
+
+7 : 16........max depth reached 10, limit at 10
+7 : 16 value:52.67864914134499 remaining: 29
+
+7 : 17........max depth reached 10, limit at 10
+7 : 17 value:53.91566161988144 remaining: 29
+
+7 : 18........max depth reached 10, limit at 10
+7 : 18 value:56.06567967425164 remaining: 29
+
+7 : 19.......max depth reached 10, limit at 10
+7 : 19 value:55.49515926119658 remaining: 29
+
+7 : 20.......max depth reached 10, limit at 10
+7 : 20 value:54.61763904486686 remaining: 29
+
+7 : 21.......max depth reached 10, limit at 10
+7 : 21 value:51.428124145776216 remaining: 28
+
+7 : 22.......max depth reached 10, limit at 10
+7 : 22 value:51.928021197422034 remaining: 28
+
+7 : 23.......max depth reached 10, limit at 10
+7 : 23 value:53.33790806721752 remaining: 28
+
+7 : 24.......max depth reached 10, limit at 10
+7 : 24 value:51.08693916529118 remaining: 28
+
+7 : 25......max depth reached 10, limit at 10
+7 : 25 value:53.49412545015927 remaining: 28
+
+7 : 26......max depth reached 10, limit at 10
+7 : 26 value:54.060419494006815 remaining: 28
+
+7 : 27......max depth reached 10, limit at 10
+7 : 27 value:52.683038075876304 remaining: 28
+
+7 : 28......max depth reached 10, limit at 10
+7 : 28 value:55.96639022452161 remaining: 28
+
+7 : 29......max depth reached 10, limit at 10
+7 : 29 value:55.53934568108139 remaining: 28
+
+7 : 30......max depth reached 10, limit at 10
+7 : 30 value:55.982884428001476 remaining: 27
+
+7 : 31.....max depth reached 10, limit at 10
+7 : 31 value:55.47074304111906 remaining: 27
+
+7 : 32.....max depth reached 10, limit at 10
+7 : 32 value:55.27542995142034 remaining: 27
+
+7 : 33.....max depth reached 10, limit at 10
+7 : 33 value:57.251192606312685 remaining: 27
+
+7 : 34.....max depth reached 10, limit at 10
+7 : 34 value:57.75694359576628 remaining: 27
+
+7 : 35.....max depth reached 10, limit at 10
+7 : 35 value:54.511382484747536 remaining: 27
+
+7 : 36.....max depth reached 10, limit at 10
+7 : 36 value:56.18086465288873 remaining: 27
+
+7 : 37....max depth reached 10, limit at 10
+7 : 37 value:57.08475111737708 remaining: 27
+
+7 : 38....max depth reached 10, limit at 10
+7 : 38 value:55.63138326365727 remaining: 27
+
+7 : 39....max depth reached 10, limit at 10
+7 : 39 value:57.377616754016344 remaining: 27
+
+7 : 40....max depth reached 10, limit at 10
+7 : 40 value:56.46693900000455 remaining: 26
+
+7 : 41....max depth reached 10, limit at 10
+7 : 41 value:56.40271469129373 remaining: 26
+
+7 : 42....max depth reached 10, limit at 10
+7 : 42 value:57.57448254252446 remaining: 26
+
+7 : 43...max depth reached 10, limit at 10
+7 : 43 value:58.15194854697979 remaining: 26
+
+7 : 44...max depth reached 10, limit at 10
+7 : 44 value:57.606386667669774 remaining: 26
+
+7 : 45...max depth reached 10, limit at 10
+7 : 45 value:57.41437554334514 remaining: 26
+
+7 : 46...max depth reached 10, limit at 10
+7 : 46 value:57.76420075886806 remaining: 26
+
+7 : 47...max depth reached 10, limit at 10
+7 : 47 value:57.195978300982475 remaining: 26
+
+7 : 48...max depth reached 10, limit at 10
+7 : 48 value:57.59177556267147 remaining: 26
+
+7 : 49..max depth reached 10, limit at 10
+7 : 49 value:58.253324017562655 remaining: 26
+
+7 : 50..max depth reached 10, limit at 10
+7 : 50 value:57.93408746768339 remaining: 25
+
+7 : 51..max depth reached 10, limit at 10
+7 : 51 value:58.12693095205102 remaining: 24
+
+7 : 52..max depth reached 10, limit at 10
+7 : 52 value:57.93408746768339 remaining: 24
+
+7 : 53..max depth reached 10, limit at 10
+7 : 53 value:58.253324017562655 remaining: 24
+
+7 : 54..max depth reached 10, limit at 10
+7 : 54 value:57.83042989285125 remaining: 24
+
+7 : 55.max depth reached 10, limit at 10
+7 : 55 value:58.42068790993089 remaining: 24
+
+7 : 56.max depth reached 10, limit at 10
+7 : 56 value:58.42068790993089 remaining: 24
+
+7 : 57.max depth reached 10, limit at 10
+7 : 57 value:58.42068790993089 remaining: 24
+
+7 : 58.max depth reached 10, limit at 10
+7 : 58 value:58.42068790993089 remaining: 24
+
+7 : 59.max depth reached 10, limit at 10
+7 : 59 value:58.42068790993089 remaining: 23
+
+7 : 60.max depth reached 10, limit at 10
+7 : 60 value:58.42068790993089 remaining: 23
+
+7 : 61.max depth reached 10, limit at 10
+7 : 61 value:58.42068790993089 remaining: 23
+
+7 : 62.max depth reached 10, limit at 10
+7 : 62 value:58.42068790993089 remaining: 23
+
+7 : 63.max depth reached 10, limit at 10
+7 : 63 value:58.42068790993089 remaining: 23
+
+7 : 64.max depth reached 10, limit at 10
+7 : 64 value:58.42068790993089 remaining: 23
+
+7 : 65.max depth reached 10, limit at 10
+7 : 65 value:58.42068790993089 remaining: 23
+
+7 : 66.max depth reached 10, limit at 10
+7 : 66 value:58.42068790993089 remaining: 23
+
+7 : 67.max depth reached 10, limit at 10
+7 : 67 value:58.42068790993089 remaining: 23
+
+7 : 68.max depth reached 10, limit at 10
+7 : 68 value:58.42068790993089 remaining: 23
+
+7 : 69.max depth reached 10, limit at 10
+7 : 69 value:58.42068790993089 remaining: 23
+
+7 : 70.max depth reached 10, limit at 10
+7 : 70 value:58.42068790993089 remaining: 23
+
+7 : 71.max depth reached 10, limit at 10
+7 : 71 value:58.42068790993089 remaining: 23
+
+7 : 72.max depth reached 10, limit at 10
+7 : 72 value:58.42068790993089 remaining: 23
+
+7 : 73.max depth reached 10, limit at 10
+7 : 73 value:58.42068790993089 remaining: 23
+
+7 : 74.max depth reached 10, limit at 10
+7 : 74 value:58.42068790993089 remaining: 23
+
+7 : 75.max depth reached 10, limit at 10
+7 : 75 value:58.42068790993089 remaining: 23
+
+7 : 76.max depth reached 10, limit at 10
+7 : 76 value:58.42068790993089 remaining: 23
+
+7 : 77.max depth reached 10, limit at 10
+7 : 77 value:58.42068790993089 remaining: 23
+
+7 : 78.max depth reached 10, limit at 10
+7 : 78 value:58.42068790993089 remaining: 23
+
+7 : 79.max depth reached 10, limit at 10
+7 : 79 value:58.42068790993089 remaining: 22
+
+7 : 80.max depth reached 10, limit at 10
+7 : 80 value:58.42068790993089 remaining: 22
+
+7 : 81.max depth reached 10, limit at 10
+7 : 81 value:58.42068790993089 remaining: 22
+
+7 : 82.max depth reached 10, limit at 10
+7 : 82 value:58.42068790993089 remaining: 22
+
+7 : 83.max depth reached 10, limit at 10
+7 : 83 value:58.42068790993089 remaining: 22
+
+7 : 84.max depth reached 10, limit at 10
+7 : 84 value:58.42068790993089 remaining: 22
+
+7 : 85.max depth reached 10, limit at 10
+7 : 85 value:58.42068790993089 remaining: 22
+
+7 : 86.max depth reached 10, limit at 10
+7 : 86 value:58.42068790993089 remaining: 22
+
+7 : 87.max depth reached 10, limit at 10
+7 : 87 value:58.42068790993089 remaining: 22
+
+7 : 88.max depth reached 10, limit at 10
+7 : 88 value:58.42068790993089 remaining: 22
+
+7 : 89.max depth reached 10, limit at 10
+7 : 89 value:58.42068790993089 remaining: 22
+
+7 : 90.max depth reached 10, limit at 10
+7 : 90 value:58.42068790993089 remaining: 22
+
+7 : 91.max depth reached 10, limit at 10
+7 : 91 value:58.42068790993089 remaining: 22
+
+7 : 92.max depth reached 10, limit at 10
+7 : 92 value:58.42068790993089 remaining: 22
+
+7 : 93.max depth reached 10, limit at 10
+7 : 93 value:58.42068790993089 remaining: 22
+
+7 : 94.max depth reached 10, limit at 10
+7 : 94 value:58.42068790993089 remaining: 22
+
+7 : 95.max depth reached 10, limit at 10
+7 : 95 value:58.42068790993089 remaining: 22
+
+7 : 96.max depth reached 10, limit at 10
+7 : 96 value:58.42068790993089 remaining: 21
+
+7 : 97.max depth reached 10, limit at 10
+7 : 97 value:58.42068790993089 remaining: 21
+
+7 : 98.max depth reached 10, limit at 10
+7 : 98 value:58.42068790993089 remaining: 21
+
+7 : 99.max depth reached 10, limit at 10
+7 : 99 value:58.42068790993089 remaining: 21
+
+7 : 100.max depth reached 10, limit at 10
+7 : 100 value:58.42068790993089 remaining: 21
+
+7 : 101.max depth reached 10, limit at 10
+7 : 101 value:58.42068790993089 remaining: 21
+
+7 : 102.max depth reached 10, limit at 10
+7 : 102 value:58.42068790993089 remaining: 21
+
+7 : 103.max depth reached 10, limit at 10
+7 : 103 value:58.42068790993089 remaining: 21
+
+7 : 104.max depth reached 10, limit at 10
+7 : 104 value:58.42068790993089 remaining: 21
+
+7 : 105.max depth reached 10, limit at 10
+7 : 105 value:58.42068790993089 remaining: 21
+
+7 : 106.max depth reached 10, limit at 10
+7 : 106 value:58.42068790993089 remaining: 21
+
+7 : 107.max depth reached 10, limit at 10
+7 : 107 value:58.42068790993089 remaining: 21
+
+7 : 108.max depth reached 10, limit at 10
+7 : 108 value:58.42068790993089 remaining: 21
+
+7 : 109.max depth reached 10, limit at 10
+7 : 109 value:58.42068790993089 remaining: 21
+
+7 : 110.max depth reached 10, limit at 10
+7 : 110 value:58.42068790993089 remaining: 21
+
+7 : 111.max depth reached 10, limit at 10
+7 : 111 value:58.42068790993089 remaining: 21
+
+7 : 112.max depth reached 10, limit at 10
+7 : 112 value:58.42068790993089 remaining: 21
+
+7 : 113.max depth reached 10, limit at 10
+7 : 113 value:58.42068790993089 remaining: 20
+
+7 : 114.max depth reached 10, limit at 10
+7 : 114 value:58.42068790993089 remaining: 20
+
+7 : 115.max depth reached 10, limit at 10
+7 : 115 value:58.42068790993089 remaining: 20
+
+7 : 116.max depth reached 10, limit at 10
+7 : 116 value:58.42068790993089 remaining: 20
+
+7 : 117.max depth reached 10, limit at 10
+7 : 117 value:58.42068790993089 remaining: 20
+
+7 : 118.max depth reached 10, limit at 10
+7 : 118 value:58.42068790993089 remaining: 20
+
+7 : 119.max depth reached 10, limit at 10
+7 : 119 value:58.42068790993089 remaining: 20
+
+7 : 120.max depth reached 10, limit at 10
+7 : 120 value:58.42068790993089 remaining: 20
+
+7 : 121.max depth reached 10, limit at 10
+7 : 121 value:58.42068790993089 remaining: 20
+
+7 : 122.max depth reached 10, limit at 10
+7 : 122 value:58.42068790993089 remaining: 20
+
+7 : 123.max depth reached 10, limit at 10
+7 : 123 value:58.42068790993089 remaining: 20
+
+7 : 124.max depth reached 10, limit at 10
+7 : 124 value:58.42068790993089 remaining: 20
+
+7 : 125.max depth reached 10, limit at 10
+7 : 125 value:58.42068790993089 remaining: 20
+
+7 : 126.max depth reached 10, limit at 10
+7 : 126 value:58.42068790993089 remaining: 20
+
+7 : 127.max depth reached 10, limit at 10
+7 : 127 value:58.42068790993089 remaining: 20
+
+7 : 128.max depth reached 10, limit at 10
+7 : 128 value:58.42068790993089 remaining: 20
+
+7 : 129.max depth reached 10, limit at 10
+7 : 129 value:58.42068790993089 remaining: 20
+
+7 : 130.max depth reached 10, limit at 10
+7 : 130 value:58.42068790993089 remaining: 20
+
+7 : 131.max depth reached 10, limit at 10
+7 : 131 value:58.42068790993089 remaining: 20
+
+7 : 132.max depth reached 10, limit at 10
+7 : 132 value:58.42068790993089 remaining: 20
+
+7 : 133.max depth reached 10, limit at 10
+7 : 133 value:58.42068790993089 remaining: 20
+
+7 : 134.max depth reached 10, limit at 10
+7 : 134 value:58.42068790993089 remaining: 20
+
+7 : 135.max depth reached 10, limit at 10
+7 : 135 value:58.42068790993089 remaining: 20
+
+7 : 136.max depth reached 10, limit at 10
+7 : 136 value:58.42068790993089 remaining: 20
+
+7 : 137.max depth reached 10, limit at 10
+7 : 137 value:58.42068790993089 remaining: 20
+
+7 : 138.max depth reached 10, limit at 10
+7 : 138 value:58.42068790993089 remaining: 19
+
+7 : 139.max depth reached 10, limit at 10
+7 : 139 value:58.42068790993089 remaining: 19
+
+7 : 140.max depth reached 10, limit at 10
+7 : 140 value:58.42068790993089 remaining: 19
+
+7 : 141.max depth reached 10, limit at 10
+7 : 141 value:58.42068790993089 remaining: 19
+
+7 : 142.max depth reached 10, limit at 10
+7 : 142 value:58.42068790993089 remaining: 19
+
+7 : 143.max depth reached 10, limit at 10
+7 : 143 value:58.42068790993089 remaining: 19
+
+7 : 144.max depth reached 10, limit at 10
+7 : 144 value:58.42068790993089 remaining: 19
+
+7 : 145.max depth reached 10, limit at 10
+7 : 145 value:58.42068790993089 remaining: 19
+
+7 : 146.max depth reached 10, limit at 10
+7 : 146 value:58.42068790993089 remaining: 19
+
+7 : 147.max depth reached 10, limit at 10
+7 : 147 value:58.42068790993089 remaining: 19
+
+7 : 148.max depth reached 10, limit at 10
+7 : 148 value:58.42068790993089 remaining: 19
+
+7 : 149.max depth reached 10, limit at 10
+7 : 149 value:58.42068790993089 remaining: 19
+
+7 : 150.max depth reached 10, limit at 10
+7 : 150 value:58.42068790993089 remaining: 19
+
+7 : 151.max depth reached 10, limit at 10
+7 : 151 value:58.42068790993089 remaining: 19
+
+7 : 152.max depth reached 10, limit at 10
+7 : 152 value:58.42068790993089 remaining: 19
+
+7 : 153.max depth reached 10, limit at 10
+7 : 153 value:58.42068790993089 remaining: 19
+
+7 : 154.max depth reached 10, limit at 10
+7 : 154 value:58.42068790993089 remaining: 19
+
+7 : 155.max depth reached 10, limit at 10
+7 : 155 value:58.42068790993089 remaining: 19
+
+7 : 156.max depth reached 10, limit at 10
+7 : 156 value:58.42068790993089 remaining: 19
+
+7 : 157.max depth reached 10, limit at 10
+7 : 157 value:58.42068790993089 remaining: 19
+
+7 : 158.max depth reached 10, limit at 10
+7 : 158 value:58.42068790993089 remaining: 19
+
+7 : 159.max depth reached 10, limit at 10
+7 : 159 value:58.42068790993089 remaining: 18
+
+7 : 160.max depth reached 10, limit at 10
+7 : 160 value:58.42068790993089 remaining: 18
+
+7 : 161.max depth reached 10, limit at 10
+7 : 161 value:58.42068790993089 remaining: 18
+
+7 : 162.max depth reached 10, limit at 10
+7 : 162 value:58.42068790993089 remaining: 18
+
+7 : 163.max depth reached 10, limit at 10
+7 : 163 value:58.42068790993089 remaining: 18
+
+7 : 164.max depth reached 10, limit at 10
+7 : 164 value:58.42068790993089 remaining: 18
+
+7 : 165.max depth reached 10, limit at 10
+7 : 165 value:58.42068790993089 remaining: 18
+
+7 : 166.max depth reached 10, limit at 10
+7 : 166 value:58.42068790993089 remaining: 18
+
+7 : 167.max depth reached 10, limit at 10
+7 : 167 value:58.42068790993089 remaining: 18
+
+7 : 168.max depth reached 10, limit at 10
+7 : 168 value:58.42068790993089 remaining: 18
+
+7 : 169.max depth reached 10, limit at 10
+7 : 169 value:58.42068790993089 remaining: 18
+
+7 : 170.max depth reached 10, limit at 10
+7 : 170 value:58.42068790993089 remaining: 18
+
+7 : 171.max depth reached 10, limit at 10
+7 : 171 value:58.42068790993089 remaining: 18
+
+7 : 172.max depth reached 10, limit at 10
+7 : 172 value:58.42068790993089 remaining: 18
+
+7 : 173.max depth reached 10, limit at 10
+7 : 173 value:58.42068790993089 remaining: 18
+
+7 : 174.max depth reached 10, limit at 10
+7 : 174 value:58.42068790993089 remaining: 18
+
+7 : 175.max depth reached 10, limit at 10
+7 : 175 value:58.42068790993089 remaining: 18
+
+7 : 176.max depth reached 10, limit at 10
+7 : 176 value:58.42068790993089 remaining: 18
+
+7 : 177.max depth reached 10, limit at 10
+7 : 177 value:58.42068790993089 remaining: 18
+
+7 : 178.max depth reached 10, limit at 10
+7 : 178 value:58.42068790993089 remaining: 18
+
+7 : 179.max depth reached 10, limit at 10
+7 : 179 value:58.42068790993089 remaining: 18
+
+7 : 180.max depth reached 10, limit at 10
+7 : 180 value:58.42068790993089 remaining: 18
+
+7 : 181.max depth reached 10, limit at 10
+7 : 181 value:58.42068790993089 remaining: 18
+
+7 : 182.max depth reached 10, limit at 10
+7 : 182 value:58.42068790993089 remaining: 18
+
+7 : 183.max depth reached 10, limit at 10
+7 : 183 value:58.42068790993089 remaining: 18
+
+7 : 184.max depth reached 10, limit at 10
+7 : 184 value:58.42068790993089 remaining: 17
+
+7 : 185.max depth reached 10, limit at 10
+7 : 185 value:58.42068790993089 remaining: 17
+
+7 : 186.max depth reached 10, limit at 10
+7 : 186 value:58.42068790993089 remaining: 17
+
+7 : 187.max depth reached 10, limit at 10
+7 : 187 value:58.42068790993089 remaining: 17
+
+7 : 188.max depth reached 10, limit at 10
+7 : 188 value:58.42068790993089 remaining: 17
+
+7 : 189.max depth reached 10, limit at 10
+7 : 189 value:58.42068790993089 remaining: 17
+
+7 : 190.max depth reached 10, limit at 10
+7 : 190 value:58.42068790993089 remaining: 17
+
+7 : 191.max depth reached 10, limit at 10
+7 : 191 value:58.42068790993089 remaining: 17
+
+7 : 192.max depth reached 10, limit at 10
+7 : 192 value:58.42068790993089 remaining: 17
+
+7 : 193.max depth reached 10, limit at 10
+7 : 193 value:58.42068790993089 remaining: 17
+
+7 : 194.max depth reached 10, limit at 10
+7 : 194 value:58.42068790993089 remaining: 17
+
+7 : 195.max depth reached 10, limit at 10
+7 : 195 value:58.42068790993089 remaining: 17
+
+7 : 196.max depth reached 10, limit at 10
+7 : 196 value:58.42068790993089 remaining: 17
+
+7 : 197.max depth reached 10, limit at 10
+7 : 197 value:58.42068790993089 remaining: 17
+
+7 : 198.max depth reached 10, limit at 10
+7 : 198 value:58.42068790993089 remaining: 17
+
+7 : 199.max depth reached 10, limit at 10
+7 : 199 value:58.42068790993089 remaining: 17
+
+7 : 200.max depth reached 10, limit at 10
+7 : 200 value:58.42068790993089 remaining: 17
+
+7 : 201.max depth reached 10, limit at 10
+7 : 201 value:58.42068790993089 remaining: 17
+
+7 : 202.max depth reached 10, limit at 10
+7 : 202 value:58.42068790993089 remaining: 17
+
+7 : 203.max depth reached 10, limit at 10
+7 : 203 value:58.42068790993089 remaining: 17
+
+7 : 204.max depth reached 10, limit at 10
+7 : 204 value:58.42068790993089 remaining: 17
+
+7 : 205.max depth reached 10, limit at 10
+7 : 205 value:58.42068790993089 remaining: 17
+
+7 : 206.max depth reached 10, limit at 10
+7 : 206 value:58.42068790993089 remaining: 17
+
+7 : 207.max depth reached 10, limit at 10
+7 : 207 value:58.42068790993089 remaining: 17
+
+7 : 208.max depth reached 10, limit at 10
+7 : 208 value:58.42068790993089 remaining: 17
+
+7 : 209.max depth reached 10, limit at 10
+7 : 209 value:58.42068790993089 remaining: 17
+
+7 : 210.max depth reached 10, limit at 10
+7 : 210 value:58.42068790993089 remaining: 16
+
+7 : 211.max depth reached 10, limit at 10
+7 : 211 value:58.42068790993089 remaining: 16
+
+7 : 212.max depth reached 10, limit at 10
+7 : 212 value:58.42068790993089 remaining: 16
+
+7 : 213.max depth reached 10, limit at 10
+7 : 213 value:58.42068790993089 remaining: 16
+
+7 : 214.max depth reached 10, limit at 10
+7 : 214 value:58.42068790993089 remaining: 16
+
+7 : 215.max depth reached 10, limit at 10
+7 : 215 value:58.42068790993089 remaining: 16
+
+7 : 216.max depth reached 10, limit at 10
+7 : 216 value:58.42068790993089 remaining: 16
+
+7 : 217.max depth reached 10, limit at 10
+7 : 217 value:58.42068790993089 remaining: 16
+
+7 : 218.max depth reached 10, limit at 10
+7 : 218 value:58.42068790993089 remaining: 16
+
+7 : 219.max depth reached 10, limit at 10
+7 : 219 value:58.42068790993089 remaining: 16
+
+7 : 220.max depth reached 10, limit at 10
+7 : 220 value:58.42068790993089 remaining: 16
+
+7 : 221.max depth reached 10, limit at 10
+7 : 221 value:58.42068790993089 remaining: 16
+
+7 : 222.max depth reached 10, limit at 10
+7 : 222 value:58.42068790993089 remaining: 16
+
+7 : 223.max depth reached 10, limit at 10
+7 : 223 value:58.42068790993089 remaining: 16
+
+7 : 224.max depth reached 10, limit at 10
+7 : 224 value:58.42068790993089 remaining: 16
+
+7 : 225.max depth reached 10, limit at 10
+7 : 225 value:58.42068790993089 remaining: 16
+
+7 : 226.max depth reached 10, limit at 10
+7 : 226 value:58.42068790993089 remaining: 16
+
+7 : 227.max depth reached 10, limit at 10
+7 : 227 value:58.42068790993089 remaining: 16
+
+7 : 228.max depth reached 10, limit at 10
+7 : 228 value:58.42068790993089 remaining: 16
+
+7 : 229.max depth reached 10, limit at 10
+7 : 229 value:58.42068790993089 remaining: 16
+
+7 : 230.max depth reached 10, limit at 10
+7 : 230 value:58.42068790993089 remaining: 16
+
+7 : 231.max depth reached 10, limit at 10
+7 : 231 value:58.42068790993089 remaining: 16
+
+7 : 232.max depth reached 10, limit at 10
+7 : 232 value:58.42068790993089 remaining: 16
+
+7 : 233.max depth reached 10, limit at 10
+7 : 233 value:58.42068790993089 remaining: 16
+
+7 : 234.max depth reached 10, limit at 10
+7 : 234 value:58.42068790993089 remaining: 16
+
+7 : 235.max depth reached 10, limit at 10
+7 : 235 value:58.42068790993089 remaining: 15
+
+7 : 236.max depth reached 10, limit at 10
+7 : 236 value:58.42068790993089 remaining: 15
+
+7 : 237.max depth reached 10, limit at 10
+7 : 237 value:58.42068790993089 remaining: 15
+
+7 : 238.max depth reached 10, limit at 10
+7 : 238 value:58.42068790993089 remaining: 15
+
+7 : 239.max depth reached 10, limit at 10
+7 : 239 value:58.42068790993089 remaining: 15
+
+7 : 240.max depth reached 10, limit at 10
+7 : 240 value:58.42068790993089 remaining: 15
+
+7 : 241.max depth reached 10, limit at 10
+7 : 241 value:58.42068790993089 remaining: 15
+
+7 : 242.max depth reached 10, limit at 10
+7 : 242 value:58.42068790993089 remaining: 15
+
+7 : 243.max depth reached 10, limit at 10
+7 : 243 value:58.42068790993089 remaining: 15
+
+7 : 244.max depth reached 10, limit at 10
+7 : 244 value:58.42068790993089 remaining: 15
+
+7 : 245.max depth reached 10, limit at 10
+7 : 245 value:58.42068790993089 remaining: 15
+
+7 : 246.max depth reached 10, limit at 10
+7 : 246 value:58.42068790993089 remaining: 15
+
+7 : 247.max depth reached 10, limit at 10
+7 : 247 value:58.42068790993089 remaining: 15
+
+7 : 248.max depth reached 10, limit at 10
+7 : 248 value:58.42068790993089 remaining: 15
+
+7 : 249.max depth reached 10, limit at 10
+7 : 249 value:58.42068790993089 remaining: 15
+
+7 : 250.max depth reached 10, limit at 10
+7 : 250 value:58.42068790993089 remaining: 15
+
+7 : 251.max depth reached 10, limit at 10
+7 : 251 value:58.42068790993089 remaining: 15
+
+7 : 252.max depth reached 10, limit at 10
+7 : 252 value:58.42068790993089 remaining: 15
+
+7 : 253.max depth reached 10, limit at 10
+7 : 253 value:58.42068790993089 remaining: 15
+
+7 : 254.max depth reached 10, limit at 10
+7 : 254 value:58.42068790993089 remaining: 15
+
+7 : 255.max depth reached 10, limit at 10
+7 : 255 value:58.42068790993089 remaining: 15
+
+7 : 256.max depth reached 10, limit at 10
+7 : 256 value:58.42068790993089 remaining: 15
+
+7 : 257.max depth reached 10, limit at 10
+7 : 257 value:58.42068790993089 remaining: 14
+
+7 : 258.max depth reached 10, limit at 10
+7 : 258 value:58.42068790993089 remaining: 14
+
+7 : 259.max depth reached 10, limit at 10
+7 : 259 value:58.42068790993089 remaining: 14
+
+7 : 260.max depth reached 10, limit at 10
+7 : 260 value:58.42068790993089 remaining: 14
+
+7 : 261.max depth reached 10, limit at 10
+7 : 261 value:58.42068790993089 remaining: 14
+
+7 : 262.max depth reached 10, limit at 10
+7 : 262 value:58.42068790993089 remaining: 14
+
+7 : 263.max depth reached 10, limit at 10
+7 : 263 value:58.42068790993089 remaining: 14
+
+7 : 264.max depth reached 10, limit at 10
+7 : 264 value:58.42068790993089 remaining: 14
+
+7 : 265.max depth reached 10, limit at 10
+7 : 265 value:58.42068790993089 remaining: 14
+
+7 : 266.max depth reached 10, limit at 10
+7 : 266 value:58.42068790993089 remaining: 14
+
+7 : 267.max depth reached 10, limit at 10
+7 : 267 value:58.42068790993089 remaining: 14
+
+7 : 268.max depth reached 10, limit at 10
+7 : 268 value:58.42068790993089 remaining: 14
+
+7 : 269.max depth reached 10, limit at 10
+7 : 269 value:58.42068790993089 remaining: 14
+
+7 : 270.max depth reached 10, limit at 10
+7 : 270 value:58.42068790993089 remaining: 14
+
+7 : 271.max depth reached 10, limit at 10
+7 : 271 value:58.42068790993089 remaining: 14
+
+7 : 272.max depth reached 10, limit at 10
+7 : 272 value:58.42068790993089 remaining: 14
+
+7 : 273.max depth reached 10, limit at 10
+7 : 273 value:58.42068790993089 remaining: 14
+
+7 : 274.max depth reached 10, limit at 10
+7 : 274 value:58.42068790993089 remaining: 14
+
+7 : 275.max depth reached 10, limit at 10
+7 : 275 value:58.42068790993089 remaining: 14
+
+7 : 276.max depth reached 10, limit at 10
+7 : 276 value:58.42068790993089 remaining: 14
+
+7 : 277.max depth reached 10, limit at 10
+7 : 277 value:58.42068790993089 remaining: 14
+
+7 : 278.max depth reached 10, limit at 10
+7 : 278 value:58.42068790993089 remaining: 14
+
+7 : 279.max depth reached 10, limit at 10
+7 : 279 value:58.42068790993089 remaining: 14
+
+7 : 280.max depth reached 10, limit at 10
+7 : 280 value:58.42068790993089 remaining: 14
+
+7 : 281.max depth reached 10, limit at 10
+7 : 281 value:58.42068790993089 remaining: 14
+
+7 : 282.max depth reached 10, limit at 10
+7 : 282 value:58.42068790993089 remaining: 14
+
+7 : 283.max depth reached 10, limit at 10
+7 : 283 value:58.42068790993089 remaining: 14
+
+7 : 284.max depth reached 10, limit at 10
+7 : 284 value:58.42068790993089 remaining: 14
+
+7 : 285.max depth reached 10, limit at 10
+7 : 285 value:58.42068790993089 remaining: 14
+
+7 : 286.max depth reached 10, limit at 10
+7 : 286 value:58.42068790993089 remaining: 14
+
+7 : 287.max depth reached 10, limit at 10
+7 : 287 value:58.42068790993089 remaining: 13
+
+7 : 288.max depth reached 10, limit at 10
+7 : 288 value:58.42068790993089 remaining: 13
+
+7 : 289.max depth reached 10, limit at 10
+7 : 289 value:58.42068790993089 remaining: 13
+
+7 : 290.max depth reached 10, limit at 10
+7 : 290 value:58.42068790993089 remaining: 13
+
+7 : 291.max depth reached 10, limit at 10
+7 : 291 value:58.42068790993089 remaining: 13
+
+7 : 292.max depth reached 10, limit at 10
+7 : 292 value:58.42068790993089 remaining: 13
+
+7 : 293.max depth reached 10, limit at 10
+7 : 293 value:58.42068790993089 remaining: 13
+
+7 : 294.max depth reached 10, limit at 10
+7 : 294 value:58.42068790993089 remaining: 13
+
+7 : 295.max depth reached 10, limit at 10
+7 : 295 value:58.42068790993089 remaining: 13
+
+7 : 296.max depth reached 10, limit at 10
+7 : 296 value:58.42068790993089 remaining: 13
+
+7 : 297.max depth reached 10, limit at 10
+7 : 297 value:58.42068790993089 remaining: 13
+
+7 : 298.max depth reached 10, limit at 10
+7 : 298 value:58.42068790993089 remaining: 13
+
+7 : 299.max depth reached 10, limit at 10
+7 : 299 value:58.42068790993089 remaining: 13
+
+7 : 300.max depth reached 10, limit at 10
+7 : 300 value:58.42068790993089 remaining: 13
+
+7 : 301.max depth reached 10, limit at 10
+7 : 301 value:58.42068790993089 remaining: 13
+
+7 : 302.max depth reached 10, limit at 10
+7 : 302 value:58.42068790993089 remaining: 13
+
+7 : 303.max depth reached 10, limit at 10
+7 : 303 value:58.42068790993089 remaining: 13
+
+7 : 304.max depth reached 10, limit at 10
+7 : 304 value:58.42068790993089 remaining: 13
+
+7 : 305.max depth reached 10, limit at 10
+7 : 305 value:58.42068790993089 remaining: 13
+
+7 : 306.max depth reached 10, limit at 10
+7 : 306 value:58.42068790993089 remaining: 13
+
+7 : 307.max depth reached 10, limit at 10
+7 : 307 value:58.42068790993089 remaining: 13
+
+7 : 308.max depth reached 10, limit at 10
+7 : 308 value:58.42068790993089 remaining: 13
+
+7 : 309.max depth reached 10, limit at 10
+7 : 309 value:58.42068790993089 remaining: 13
+
+7 : 310.max depth reached 10, limit at 10
+7 : 310 value:58.42068790993089 remaining: 13
+
+7 : 311.max depth reached 10, limit at 10
+7 : 311 value:58.42068790993089 remaining: 13
+
+7 : 312.max depth reached 10, limit at 10
+7 : 312 value:58.42068790993089 remaining: 13
+
+7 : 313.max depth reached 10, limit at 10
+7 : 313 value:58.42068790993089 remaining: 13
+
+7 : 314.max depth reached 10, limit at 10
+7 : 314 value:58.42068790993089 remaining: 13
+
+7 : 315.max depth reached 10, limit at 10
+7 : 315 value:58.42068790993089 remaining: 13
+
+7 : 316.max depth reached 10, limit at 10
+7 : 316 value:58.42068790993089 remaining: 12
+
+7 : 317.max depth reached 10, limit at 10
+7 : 317 value:58.42068790993089 remaining: 12
+
+7 : 318.max depth reached 10, limit at 10
+7 : 318 value:58.42068790993089 remaining: 12
+
+7 : 319.max depth reached 10, limit at 10
+7 : 319 value:58.42068790993089 remaining: 12
+
+7 : 320.max depth reached 10, limit at 10
+7 : 320 value:58.42068790993089 remaining: 12
+
+7 : 321.max depth reached 10, limit at 10
+7 : 321 value:58.42068790993089 remaining: 12
+
+7 : 322.max depth reached 10, limit at 10
+7 : 322 value:58.42068790993089 remaining: 12
+
+7 : 323.max depth reached 10, limit at 10
+7 : 323 value:58.42068790993089 remaining: 12
+
+7 : 324.max depth reached 10, limit at 10
+7 : 324 value:58.42068790993089 remaining: 12
+
+7 : 325.max depth reached 10, limit at 10
+7 : 325 value:58.42068790993089 remaining: 12
+
+7 : 326.max depth reached 10, limit at 10
+7 : 326 value:58.42068790993089 remaining: 12
+
+7 : 327.max depth reached 10, limit at 10
+7 : 327 value:58.42068790993089 remaining: 12
+
+7 : 328.max depth reached 10, limit at 10
+7 : 328 value:58.42068790993089 remaining: 12
+
+7 : 329.max depth reached 10, limit at 10
+7 : 329 value:58.42068790993089 remaining: 12
+
+7 : 330.max depth reached 10, limit at 10
+7 : 330 value:58.42068790993089 remaining: 12
+
+7 : 331.max depth reached 10, limit at 10
+7 : 331 value:58.42068790993089 remaining: 12
+
+7 : 332.max depth reached 10, limit at 10
+7 : 332 value:58.42068790993089 remaining: 12
+
+7 : 333.max depth reached 10, limit at 10
+7 : 333 value:58.42068790993089 remaining: 12
+
+7 : 334.max depth reached 10, limit at 10
+7 : 334 value:58.42068790993089 remaining: 12
+
+7 : 335.max depth reached 10, limit at 10
+7 : 335 value:58.42068790993089 remaining: 12
+
+7 : 336.max depth reached 10, limit at 10
+7 : 336 value:58.42068790993089 remaining: 12
+
+7 : 337.max depth reached 10, limit at 10
+7 : 337 value:58.42068790993089 remaining: 12
+
+7 : 338.max depth reached 10, limit at 10
+7 : 338 value:58.42068790993089 remaining: 12
+
+7 : 339.max depth reached 10, limit at 10
+7 : 339 value:58.42068790993089 remaining: 12
+
+7 : 340.max depth reached 10, limit at 10
+7 : 340 value:58.42068790993089 remaining: 12
+
+7 : 341.max depth reached 10, limit at 10
+7 : 341 value:58.42068790993089 remaining: 12
+
+7 : 342.max depth reached 10, limit at 10
+7 : 342 value:58.42068790993089 remaining: 12
+
+7 : 343.max depth reached 10, limit at 10
+7 : 343 value:58.42068790993089 remaining: 12
+
+7 : 344.max depth reached 10, limit at 10
+7 : 344 value:58.42068790993089 remaining: 12
+
+7 : 345.max depth reached 10, limit at 10
+7 : 345 value:58.42068790993089 remaining: 11
+
+7 : 346.max depth reached 10, limit at 10
+7 : 346 value:58.42068790993089 remaining: 11
+
+7 : 347.max depth reached 10, limit at 10
+7 : 347 value:58.42068790993089 remaining: 11
+
+7 : 348.max depth reached 10, limit at 10
+7 : 348 value:58.42068790993089 remaining: 11
+
+7 : 349.max depth reached 10, limit at 10
+7 : 349 value:58.42068790993089 remaining: 11
+
+7 : 350.max depth reached 10, limit at 10
+7 : 350 value:58.42068790993089 remaining: 11
+
+7 : 351.max depth reached 10, limit at 10
+7 : 351 value:58.42068790993089 remaining: 11
+
+7 : 352.max depth reached 10, limit at 10
+7 : 352 value:58.42068790993089 remaining: 11
+
+7 : 353.max depth reached 10, limit at 10
+7 : 353 value:58.42068790993089 remaining: 11
+
+7 : 354.max depth reached 10, limit at 10
+7 : 354 value:58.42068790993089 remaining: 11
+
+7 : 355.max depth reached 10, limit at 10
+7 : 355 value:58.42068790993089 remaining: 11
+
+7 : 356.max depth reached 10, limit at 10
+7 : 356 value:58.42068790993089 remaining: 11
+
+7 : 357.max depth reached 10, limit at 10
+7 : 357 value:58.42068790993089 remaining: 11
+
+7 : 358.max depth reached 10, limit at 10
+7 : 358 value:58.42068790993089 remaining: 11
+
+7 : 359.max depth reached 10, limit at 10
+7 : 359 value:58.42068790993089 remaining: 11
+
+7 : 360.max depth reached 10, limit at 10
+7 : 360 value:58.42068790993089 remaining: 11
+
+7 : 361.max depth reached 10, limit at 10
+7 : 361 value:58.42068790993089 remaining: 11
+
+7 : 362.max depth reached 10, limit at 10
+7 : 362 value:58.42068790993089 remaining: 11
+
+7 : 363.max depth reached 10, limit at 10
+7 : 363 value:58.42068790993089 remaining: 11
+
+7 : 364.max depth reached 10, limit at 10
+7 : 364 value:58.42068790993089 remaining: 11
+
+7 : 365.max depth reached 10, limit at 10
+7 : 365 value:58.42068790993089 remaining: 11
+
+7 : 366.max depth reached 10, limit at 10
+7 : 366 value:58.42068790993089 remaining: 11
+
+7 : 367.max depth reached 10, limit at 10
+7 : 367 value:58.42068790993089 remaining: 11
+
+7 : 368.max depth reached 10, limit at 10
+7 : 368 value:58.42068790993089 remaining: 11
+
+7 : 369.max depth reached 10, limit at 10
+7 : 369 value:58.42068790993089 remaining: 11
+
+7 : 370.max depth reached 10, limit at 10
+7 : 370 value:58.42068790993089 remaining: 11
+
+7 : 371.max depth reached 10, limit at 10
+7 : 371 value:58.42068790993089 remaining: 11
+
+7 : 372.max depth reached 10, limit at 10
+7 : 372 value:58.42068790993089 remaining: 11
+
+7 : 373.max depth reached 10, limit at 10
+7 : 373 value:58.42068790993089 remaining: 10
+
+7 : 374.max depth reached 10, limit at 10
+7 : 374 value:58.42068790993089 remaining: 10
+
+7 : 375.max depth reached 10, limit at 10
+7 : 375 value:58.42068790993089 remaining: 10
+
+7 : 376.max depth reached 10, limit at 10
+7 : 376 value:58.42068790993089 remaining: 10
+
+7 : 377.max depth reached 10, limit at 10
+7 : 377 value:58.42068790993089 remaining: 10
+
+7 : 378.max depth reached 10, limit at 10
+7 : 378 value:58.42068790993089 remaining: 10
+
+7 : 379.max depth reached 10, limit at 10
+7 : 379 value:58.42068790993089 remaining: 10
+
+7 : 380.max depth reached 10, limit at 10
+7 : 380 value:58.42068790993089 remaining: 10
+
+7 : 381.max depth reached 10, limit at 10
+7 : 381 value:58.42068790993089 remaining: 10
+
+7 : 382.max depth reached 10, limit at 10
+7 : 382 value:58.42068790993089 remaining: 10
+
+7 : 383.max depth reached 10, limit at 10
+7 : 383 value:58.42068790993089 remaining: 10
+
+7 : 384.max depth reached 10, limit at 10
+7 : 384 value:58.42068790993089 remaining: 10
+
+7 : 385.max depth reached 10, limit at 10
+7 : 385 value:58.42068790993089 remaining: 10
+
+7 : 386.max depth reached 10, limit at 10
+7 : 386 value:58.42068790993089 remaining: 10
+
+7 : 387.max depth reached 10, limit at 10
+7 : 387 value:58.42068790993089 remaining: 10
+
+7 : 388.max depth reached 10, limit at 10
+7 : 388 value:58.42068790993089 remaining: 10
+
+7 : 389.max depth reached 10, limit at 10
+7 : 389 value:58.42068790993089 remaining: 10
+
+7 : 390.max depth reached 10, limit at 10
+7 : 390 value:58.42068790993089 remaining: 10
+
+7 : 391.max depth reached 10, limit at 10
+7 : 391 value:58.42068790993089 remaining: 10
+
+7 : 392.max depth reached 10, limit at 10
+7 : 392 value:58.42068790993089 remaining: 10
+
+7 : 393.max depth reached 10, limit at 10
+7 : 393 value:58.42068790993089 remaining: 10
+
+7 : 394.max depth reached 10, limit at 10
+7 : 394 value:58.42068790993089 remaining: 10
+
+7 : 395.max depth reached 10, limit at 10
+7 : 395 value:58.42068790993089 remaining: 10
+
+7 : 396.max depth reached 10, limit at 10
+7 : 396 value:58.42068790993089 remaining: 10
+
+7 : 397.max depth reached 10, limit at 10
+7 : 397 value:58.42068790993089 remaining: 10
+
+7 : 398.max depth reached 10, limit at 10
+7 : 398 value:58.42068790993089 remaining: 10
+
+7 : 399.max depth reached 10, limit at 10
+7 : 399 value:58.42068790993089 remaining: 10
+
+7 : 400.max depth reached 10, limit at 10
+7 : 400 value:58.42068790993089 remaining: 10
+
+7 : 401.max depth reached 10, limit at 10
+7 : 401 value:58.42068790993089 remaining: 10
+
+7 : 402.max depth reached 10, limit at 10
+7 : 402 value:58.42068790993089 remaining: 10
+
+7 : 403.max depth reached 10, limit at 10
+7 : 403 value:58.42068790993089 remaining: 9
+
+7 : 404.max depth reached 10, limit at 10
+7 : 404 value:58.42068790993089 remaining: 9
+
+7 : 405.max depth reached 10, limit at 10
+7 : 405 value:58.42068790993089 remaining: 9
+
+7 : 406.max depth reached 10, limit at 10
+7 : 406 value:58.42068790993089 remaining: 9
+
+7 : 407.max depth reached 10, limit at 10
+7 : 407 value:58.42068790993089 remaining: 9
+
+7 : 408.max depth reached 10, limit at 10
+7 : 408 value:58.42068790993089 remaining: 9
+
+7 : 409.max depth reached 10, limit at 10
+7 : 409 value:58.42068790993089 remaining: 9
+
+7 : 410.max depth reached 10, limit at 10
+7 : 410 value:58.42068790993089 remaining: 9
+
+7 : 411.max depth reached 10, limit at 10
+7 : 411 value:58.42068790993089 remaining: 9
+
+7 : 412.max depth reached 10, limit at 10
+7 : 412 value:58.42068790993089 remaining: 9
+
+7 : 413.max depth reached 10, limit at 10
+7 : 413 value:58.42068790993089 remaining: 9
+
+7 : 414.max depth reached 10, limit at 10
+7 : 414 value:58.42068790993089 remaining: 9
+
+7 : 415.max depth reached 10, limit at 10
+7 : 415 value:58.42068790993089 remaining: 9
+
+7 : 416.max depth reached 10, limit at 10
+7 : 416 value:58.42068790993089 remaining: 9
+
+7 : 417.max depth reached 10, limit at 10
+7 : 417 value:58.42068790993089 remaining: 9
+
+7 : 418.max depth reached 10, limit at 10
+7 : 418 value:58.42068790993089 remaining: 9
+
+7 : 419.max depth reached 10, limit at 10
+7 : 419 value:58.42068790993089 remaining: 9
+
+7 : 420.max depth reached 10, limit at 10
+7 : 420 value:58.42068790993089 remaining: 9
+
+7 : 421.max depth reached 10, limit at 10
+7 : 421 value:58.42068790993089 remaining: 9
+
+7 : 422.max depth reached 10, limit at 10
+7 : 422 value:58.42068790993089 remaining: 9
+
+7 : 423.max depth reached 10, limit at 10
+7 : 423 value:58.42068790993089 remaining: 9
+
+7 : 424.max depth reached 10, limit at 10
+7 : 424 value:58.42068790993089 remaining: 9
+
+7 : 425.max depth reached 10, limit at 10
+7 : 425 value:58.42068790993089 remaining: 9
+
+7 : 426.max depth reached 10, limit at 10
+7 : 426 value:58.42068790993089 remaining: 9
+
+7 : 427.max depth reached 10, limit at 10
+7 : 427 value:58.42068790993089 remaining: 9
+
+7 : 428.max depth reached 10, limit at 10
+7 : 428 value:58.42068790993089 remaining: 9
+
+7 : 429.max depth reached 10, limit at 10
+7 : 429 value:58.42068790993089 remaining: 9
+
+7 : 430.max depth reached 10, limit at 10
+7 : 430 value:58.42068790993089 remaining: 9
+
+7 : 431.max depth reached 10, limit at 10
+7 : 431 value:58.42068790993089 remaining: 9
+
+7 : 432.max depth reached 10, limit at 10
+7 : 432 value:58.42068790993089 remaining: 9
+
+7 : 433.max depth reached 10, limit at 10
+7 : 433 value:58.42068790993089 remaining: 9
+
+7 : 434.max depth reached 10, limit at 10
+7 : 434 value:58.42068790993089 remaining: 9
+
+7 : 435.max depth reached 10, limit at 10
+7 : 435 value:58.42068790993089 remaining: 8
+
+7 : 436.max depth reached 10, limit at 10
+7 : 436 value:58.42068790993089 remaining: 8
+
+7 : 437.max depth reached 10, limit at 10
+7 : 437 value:58.42068790993089 remaining: 8
+
+7 : 438.max depth reached 10, limit at 10
+7 : 438 value:58.42068790993089 remaining: 8
+
+7 : 439.max depth reached 10, limit at 10
+7 : 439 value:58.42068790993089 remaining: 8
+
+7 : 440.max depth reached 10, limit at 10
+7 : 440 value:58.42068790993089 remaining: 8
+
+7 : 441.max depth reached 10, limit at 10
+7 : 441 value:58.42068790993089 remaining: 8
+
+7 : 442.max depth reached 10, limit at 10
+7 : 442 value:58.42068790993089 remaining: 8
+
+7 : 443.max depth reached 10, limit at 10
+7 : 443 value:58.42068790993089 remaining: 8
+
+7 : 444.max depth reached 10, limit at 10
+7 : 444 value:58.42068790993089 remaining: 8
+
+7 : 445.max depth reached 10, limit at 10
+7 : 445 value:58.42068790993089 remaining: 8
+
+7 : 446.max depth reached 10, limit at 10
+7 : 446 value:58.42068790993089 remaining: 8
+
+7 : 447.max depth reached 10, limit at 10
+7 : 447 value:58.42068790993089 remaining: 8
+
+7 : 448.max depth reached 10, limit at 10
+7 : 448 value:58.42068790993089 remaining: 8
+
+7 : 449.max depth reached 10, limit at 10
+7 : 449 value:58.42068790993089 remaining: 8
+
+7 : 450.max depth reached 10, limit at 10
+7 : 450 value:58.42068790993089 remaining: 8
+
+7 : 451.max depth reached 10, limit at 10
+7 : 451 value:58.42068790993089 remaining: 8
+
+7 : 452.max depth reached 10, limit at 10
+7 : 452 value:58.42068790993089 remaining: 8
+
+7 : 453.max depth reached 10, limit at 10
+7 : 453 value:58.42068790993089 remaining: 8
+
+7 : 454.max depth reached 10, limit at 10
+7 : 454 value:58.42068790993089 remaining: 8
+
+7 : 455.max depth reached 10, limit at 10
+7 : 455 value:58.42068790993089 remaining: 8
+
+7 : 456.max depth reached 10, limit at 10
+7 : 456 value:58.42068790993089 remaining: 8
+
+7 : 457.max depth reached 10, limit at 10
+7 : 457 value:58.42068790993089 remaining: 8
+
+7 : 458.max depth reached 10, limit at 10
+7 : 458 value:58.42068790993089 remaining: 8
+
+7 : 459.max depth reached 10, limit at 10
+7 : 459 value:58.42068790993089 remaining: 8
+
+7 : 460.max depth reached 10, limit at 10
+7 : 460 value:58.42068790993089 remaining: 8
+
+7 : 461.max depth reached 10, limit at 10
+7 : 461 value:58.42068790993089 remaining: 8
+
+7 : 462.max depth reached 10, limit at 10
+7 : 462 value:58.42068790993089 remaining: 8
+
+7 : 463.max depth reached 10, limit at 10
+7 : 463 value:58.42068790993089 remaining: 8
+
+7 : 464.max depth reached 10, limit at 10
+7 : 464 value:58.42068790993089 remaining: 8
+
+7 : 465.max depth reached 10, limit at 10
+7 : 465 value:58.42068790993089 remaining: 8
+
+7 : 466.max depth reached 10, limit at 10
+7 : 466 value:58.42068790993089 remaining: 8
+
+7 : 467.max depth reached 10, limit at 10
+7 : 467 value:58.42068790993089 remaining: 7
+
+7 : 468.max depth reached 10, limit at 10
+7 : 468 value:58.42068790993089 remaining: 7
+
+7 : 469.max depth reached 10, limit at 10
+7 : 469 value:58.42068790993089 remaining: 7
+
+7 : 470.max depth reached 10, limit at 10
+7 : 470 value:58.42068790993089 remaining: 7
+
+7 : 471.max depth reached 10, limit at 10
+7 : 471 value:58.42068790993089 remaining: 7
+
+7 : 472.max depth reached 10, limit at 10
+7 : 472 value:58.42068790993089 remaining: 7
+
+7 : 473.max depth reached 10, limit at 10
+7 : 473 value:58.42068790993089 remaining: 7
+
+7 : 474.max depth reached 10, limit at 10
+7 : 474 value:58.42068790993089 remaining: 7
+
+7 : 475.max depth reached 10, limit at 10
+7 : 475 value:58.42068790993089 remaining: 7
+
+7 : 476.max depth reached 10, limit at 10
+7 : 476 value:58.42068790993089 remaining: 7
+
+7 : 477.max depth reached 10, limit at 10
+7 : 477 value:58.42068790993089 remaining: 7
+
+7 : 478.max depth reached 10, limit at 10
+7 : 478 value:58.42068790993089 remaining: 7
+
+7 : 479.max depth reached 10, limit at 10
+7 : 479 value:58.42068790993089 remaining: 7
+
+7 : 480.max depth reached 10, limit at 10
+7 : 480 value:58.42068790993089 remaining: 7
+
+7 : 481.max depth reached 10, limit at 10
+7 : 481 value:58.42068790993089 remaining: 7
+
+7 : 482.max depth reached 10, limit at 10
+7 : 482 value:58.42068790993089 remaining: 7
+
+7 : 483.max depth reached 10, limit at 10
+7 : 483 value:58.42068790993089 remaining: 7
+
+7 : 484.max depth reached 10, limit at 10
+7 : 484 value:58.42068790993089 remaining: 7
+
+7 : 485.max depth reached 10, limit at 10
+7 : 485 value:58.42068790993089 remaining: 7
+
+7 : 486.max depth reached 10, limit at 10
+7 : 486 value:58.42068790993089 remaining: 7
+
+7 : 487.max depth reached 10, limit at 10
+7 : 487 value:58.42068790993089 remaining: 7
+
+7 : 488.max depth reached 10, limit at 10
+7 : 488 value:58.42068790993089 remaining: 7
+
+7 : 489.max depth reached 10, limit at 10
+7 : 489 value:58.42068790993089 remaining: 7
+
+7 : 490.max depth reached 10, limit at 10
+7 : 490 value:58.42068790993089 remaining: 7
+
+7 : 491.max depth reached 10, limit at 10
+7 : 491 value:58.42068790993089 remaining: 7
+
+7 : 492.max depth reached 10, limit at 10
+7 : 492 value:58.42068790993089 remaining: 5
+>>>out		1432587037314
+
+>>>in		1432587037314
+---due on	1432587037354
+^
+>>>in		1432587037330
+---due on	1432587037370
+^
+>>>in		1432587037354
+---due on	1432587037394
+^
+>>>in		1432587037370
+---due on	1432587037410
+^
+>>>in		1432587037386
+---due on	1432587037426
+^

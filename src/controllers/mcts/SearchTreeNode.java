@@ -269,18 +269,24 @@ public class SearchTreeNode {
 
     //TODO: consider using just the state without the aimed node (update evaluation fn)
 	public double simulate(Node aimedNode) 
-	{
-		Game nextState = worldSate.getCopy();        
-        int thisDepth = this.depth;
-
-        while (!finishRollout(nextState, thisDepth, aimedNode)) 
+	{		
+		System.out.println(" simulating at depth " + this.depth + " " + this.getName());		
+		Game nextState = worldSate.getCopy();		
+		int thisDepth = this.depth;
+		System.out.println("this.depth " + this.depth);
+		System.out.println("thisDepth " + thisDepth);
+				
+		while (!finishRollout(nextState, thisDepth, aimedNode)) 
         {
             int action = rnd.nextInt(Controller.NUM_ACTIONS);
             for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
             {
+//            	System.out.print(action);
             	nextState.getShip().update(action);	
             }            
             thisDepth++;
+            System.out.println("this.depth " + this.depth);
+    		System.out.println("thisDepth " + thisDepth);
             
             Vector2d nextPosition = nextState.getShip().s;
        	 	if(!DriveMCTS.possiblePosition.contains(nextPosition))
@@ -307,11 +313,11 @@ public class SearchTreeNode {
 	public boolean finishRollout(Game aState, int depth, Node aimedNode)
     {
 		//rollout end conditions
-		System.out.print(".");
 		
         if(depth >= DriveMCTS.searchDepth)
         {
-        	System.out.println("max depth reached");
+        	//TODO: not enough dots are shown
+        	System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
             return true;            
         }    	      
         
@@ -326,9 +332,7 @@ public class SearchTreeNode {
         {
         	System.out.println("game is ended()");
         	return true;
-        }
-            
-
+        }           
         return false;
     }
 	
@@ -471,5 +475,14 @@ public class SearchTreeNode {
         }
 
         return selectedAction;
-    }	    
+    }
+    
+    /**
+     * humanly readable name of waypoint
+     * @return string     
+     */    
+    public String getName()
+    {
+		return this.toString().substring(this.toString().indexOf("@")+1);    	
+    }
 }
