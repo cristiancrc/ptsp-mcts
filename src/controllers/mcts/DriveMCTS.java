@@ -9,6 +9,7 @@ import java.util.Random;
 
 import planners.Planner;
 import planners.Planner3Opt;
+import planners.PlannerGreedy;
 import framework.core.Controller;
 import framework.core.FuelTank;
 import framework.core.Game;
@@ -44,6 +45,9 @@ public class DriveMCTS extends Controller
     static Node aimedNodeNext = null;//the farthest node in the path that can be seen from aimedNode
     private Path pathToFollow;
     static ArrayList<Vector2d> possiblePosition = new ArrayList<>();
+    static ArrayList<Vector2d> panicPosition = new ArrayList<>();
+    
+    private SearchTreeNode searchTree;
         
     boolean inPanicMode = false;
     long panicModeStart;
@@ -65,6 +69,8 @@ public class DriveMCTS extends Controller
      * count = 1, searchDepth = 100  : no macro actions 
      * count = 5, searchDepth = 20
      * 
+     * paper: 5 x 10
+     * 
      */
     public Random m_rnd = new Random();
 
@@ -79,8 +85,9 @@ public class DriveMCTS extends Controller
     	System.out.println("**** mcts controller ****");
         m_graph = new Graph(a_gameCopy);//Init the graph.
 
-        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph
-//        Planner planner = new PlannerGreedy(a_gameCopy);//remove three edges and reconnect the graph
+//        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph
+        //use greedy for testing
+        Planner planner = new PlannerGreedy(a_gameCopy);//remove three edges and reconnect the graph
         m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
         m_nextWaypoint = m_orderedWaypoints.get(0);//set immediate goal        
         planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
@@ -113,11 +120,17 @@ public class DriveMCTS extends Controller
         long timeIn = System.currentTimeMillis();
         if(verbose) System.out.println("\n>>>in\t\t" + timeIn);
         if(verbose) System.out.println("---due on\t" + a_timeDue);
+        //TODO: if not much time left, return something to avoid being disqualified
+//        if(a_timeDue-timeIn < 40) 
+//        {
+//        	if(verbose) System.out.println("+++++++rush");
+//        	return 0;
+//        }
         
 		//TODO: do something useful with this time
 		if(macroActionsRemaining-- > 0)
 		{
-			System.out.print("^");
+			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]");
 			return macroAction;			
 		}        
               
@@ -125,9 +138,7 @@ public class DriveMCTS extends Controller
     	
     	int bestAction = -1;
         if(inPanicMode)
-    	{
-        	//TODO: mark position on map
-//        	System.out.print(".");
+    	{        
         	if (System.currentTimeMillis() > panicModeStart + panicModeLength)
         	{
         		if (verbose) System.out.println("\t<<<out of panic mode");
@@ -169,9 +180,14 @@ public class DriveMCTS extends Controller
     		pathToFollowFarther = m_plannedPath.get(nextWaypoint);
     		aimedNodeNext = Navigator.getLastNodeVisible(pathToFollowFarther, a_gameCopyForAimedNode, m_graph);    		
     	}
+    	//TODO: can the tree be copied for the next level? just the needed action tree.
     	bestAction = mctsSearch(a_gameCopy, a_timeDue);
+    	
+    	System.out.println("search tree action " + searchTree.action);
+    	System.out.println("search tree parents " + SearchTreeNode.getFullIdentifier(searchTree));
+    	
         macroAction = bestAction;
-        macroActionsRemaining = macroActionsCount;    	
+        macroActionsRemaining = macroActionsCount;    	               
     	
     	//check if ship is stuck in the same position
     	if(ticks >= panicModeNextCheck)
@@ -182,7 +198,11 @@ public class DriveMCTS extends Controller
         		if (verbose) System.out.println(">>>entering panic mode");
         		inPanicMode = true;
         		panicModeStart = System.currentTimeMillis();
-        		return panicModeAction;        		
+           	 	if(!panicPosition.contains(currentShipPosition))
+                {
+           	 		panicPosition.add(currentShipPosition);	
+                }        		
+        		return panicModeAction;         		
         	}
         	previousShipPosition = a_gameCopy.getShip().s;
         	panicModeNextCheck = ticks + panicModeCheckInterval;
@@ -190,8 +210,8 @@ public class DriveMCTS extends Controller
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
 
         //TODO: this stops the execution
-        System.exit(1);////////////////////////////////////////////////////////////////////////////
-    	
+//        System.exit(1);////////////////////////////////////////////////////////////////////////////
+        
         return bestAction;    	
     }
     
@@ -206,54 +226,62 @@ public class DriveMCTS extends Controller
         
     	//create root node for initial state
     	SearchTreeNode rootNode = new SearchTreeNode(a_gameCopy, null);
+    	System.out.println(" root data: " + rootNode.getIdentifier());
     	int bestAction = -1;    	    	
     	int playouts = 0;
         while(remainingTime > 5)
         {
         	playouts++;
-        	if (verbose) System.out.print("\n\n" +ticks + " : " + playouts);        	
+        	if (verbose) System.out.print("\n\n" +ticks + " : " + playouts);        	        
 
-        	//TODO: this should only return one of the roots' children
         	// apply tree policy to select the urgent node
         	SearchTreeNode urgentNode = treePolicy(rootNode);
         	
         	// simulate
-        	System.out.println(" simulating for an urgent node with depth " + urgentNode.depth);
+        	System.out.println(" simulating from " + SearchTreeNode.getFullIdentifier(urgentNode));
         	double matchValue = urgentNode.simulate(aimedNode);
         	
         	// back propagate
         	urgentNode.backPropagate(urgentNode, matchValue);
         	
         	remainingTime = timeDue - System.currentTimeMillis();
-        	if (verbose) System.out.print("\n" + ticks + " : "  + playouts + " value:" + matchValue + " remaining: " + remainingTime );
+        	if (verbose) System.out.print("\n" + ticks + " : "  + playouts + " value:" + matchValue + " remaining: " + remainingTime );        	
+        	System.out.println("\ntotal children nodes : " + SearchTreeNode.getTotalChildren(rootNode));
         }
         //TODO: time this and set search alloted time accordingly
         //select child node
 //		bestAction = rootNode.getActionRobustChild();//most visited child		
 //		bestAction = rootNode.getActionSecureChild();//lowest average score child
         bestAction = rootNode.getActionMinValue();//lowest average score child                 
-//      System.out.println("selected "+ bestAction);        
+//      System.out.println("selected "+ bestAction);  
+        
+        //TODO:store resulting tree to use next
+        searchTree = rootNode.getChild(bestAction);
+        
     	return bestAction;
     }      
 
-	private SearchTreeNode treePolicy(SearchTreeNode rootNode) {
-    	SearchTreeNode currentNode = rootNode;
+	private SearchTreeNode treePolicy(SearchTreeNode incomingNode) {
+    	SearchTreeNode currentNode = incomingNode;
 
-        while (!isWaypointReached(currentNode.worldSate) && currentNode.depth < searchDepth)
+    	//TODO: limit by depth here? if not here where?
+    	// isWaypointReached needed to limit search also?
+        while (currentNode.depth < searchDepth)
         {
-            if (currentNode.notFullyExpanded()) {
-                return currentNode.expand();
-
-            } else {
-            	SearchTreeNode nextNode = currentNode.uct();
-//                SearchTreeNode nextNode = currentNode.egreedy();
-//                SearchTreeNode nextNode = currentNode.random();//MC search
-                currentNode = nextNode;
-            }
+	        if (currentNode.notFullyExpanded()) {
+	        	System.out.println(currentNode.getIdentifier() + " expanding");
+	            return currentNode.expand();
+	        } else {        	
+	        	SearchTreeNode nextNode = currentNode.uct();
+	        	System.out.println(currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );
+	//                SearchTreeNode nextNode = currentNode.egreedy();
+	//                SearchTreeNode nextNode = currentNode.random();//MC search
+	            currentNode = nextNode;
+	        }
         }
         return currentNode;
     }
-    
+	    
     /**
      * checks if the ship reached the next waypoint
      * @param a_gameCopy
@@ -286,6 +314,7 @@ public class DriveMCTS extends Controller
     public void paint(Graphics2D a_gr)
     {  
     	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
+    	Painter.paintPanicPositions(a_gr, panicPosition);
     	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
     	Painter.paintAimedNode(a_gr, aimedNode);
     	Painter.paintAimedNode(a_gr, aimedNodeNext, Color.GREEN);

@@ -38,18 +38,35 @@ public class Painter {
      */
     public static void paintPossibleShipPositions(Graphics2D a_gr, ArrayList<Vector2d> possiblePosition)
     {
-    	a_gr.setColor(Color.red);
-    	ArrayList<Vector2d> possiblePositionCopy = (ArrayList<Vector2d>) possiblePosition.clone();
-    	if (null != possiblePositionCopy)
+    	a_gr.setColor(Color.lightGray);
+//    	ArrayList<Vector2d> possiblePositionCopy = (ArrayList<Vector2d>) possiblePosition.clone();
+    	if (null != possiblePosition)
     	{
-    		for(Vector2d position : possiblePositionCopy) 
+    		for(Vector2d position : possiblePosition) 
         	{
     			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
         	}	
-    	}
-    	
-    	
+    	}  	    	
     }    
+    
+    /**
+     * plot panic positions
+     * @param a_gr
+     * @param panicPosition
+     */
+	public static void paintPanicPositions(Graphics2D a_gr,
+			ArrayList<Vector2d> panicPosition) {
+    	a_gr.setColor(Color.red);
+//    	ArrayList<Vector2d> possiblePositionCopy = (ArrayList<Vector2d>) panicPosition.clone();
+    	if (null != panicPosition)
+    	{
+    		for(Vector2d position : panicPosition) 
+        	{
+    			a_gr.drawRect((int)position.x, (int)position.y, 5, 5);	
+        	}	
+    	} 
+		
+	}
     
     /**
      * draws a list of paths on the screen with the same color
@@ -118,4 +135,5 @@ public class Painter {
 
         System.out.println("Waited " + waitTime + " ms");
     }
+
 }

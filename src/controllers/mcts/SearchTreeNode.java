@@ -117,37 +117,58 @@ public class SearchTreeNode {
 
 	public boolean notFullyExpanded() 
 	{
-        for (SearchTreeNode aNode : children) 
-        {
+		System.out.println("\nfully expanded check on " + this.getIdentifier());		
+		int whichOne = 0;
+		int notfullyExp = 0;
+        for (SearchTreeNode aNode : this.children) 
+        {        
             if (aNode == null) 
-            {            	
-                return true;
+            {
+            	notfullyExp = 1;
+//            	System.out.println("-missing: " + whichOne);
+//                return true;
+            } else {
+//            	System.out.println("+present: " + whichOne);
             }
+            whichOne++;
         }
-        return false;
+        if(1 == notfullyExp) 
+        {
+        	return true;	
+        } else 
+        {
+        	return false;
+        }
+        
     }
 	
 	/**
-	 * return a random child (?)
-	 * why bother with that draw and not get just get a rand 0 to length 
+	 * return a random child from the unexpanded ones
 	 * @return
 	 */
 	public SearchTreeNode expand() 
 	{
-        int bestAction = 0;
-        double bestValue = -1;
-
-        for (int i = 0; i < children.length; i++) 
-        {
-            double x = rnd.nextDouble();
-            if (x > bestValue && children[i] == null)
+		//TODO: children nodes are expanded in order , not randomly
+		//TODO: for random children expansion, at least check if it is already present
+		//get unexpanded child
+		int childCount = 0;
+		for (SearchTreeNode aNode : this.children) 
+        {        
+            if (aNode != null) 
             {
-                bestAction = i;
-                bestValue = x;
+            	childCount++;
             }
         }
+		int bestAction = childCount;
+//		int bestAction = rnd.nextInt(Controller.NUM_ACTIONS);
+		System.out.println(" expand action : " + bestAction);
         Game nextState = worldSate.getCopy();
-        nextState.getShip().update(action);
+        for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
+        {
+//        	System.out.println("\nship at: " + nextState.getShip().ps + " , h : " + nextState.getShip().d);
+            nextState.getShip().update(bestAction);
+//            System.out.println("performed " + bestAction);	
+        }        
 
         SearchTreeNode child = new SearchTreeNode(nextState, this);
         children[bestAction] = child;
@@ -161,6 +182,7 @@ public class SearchTreeNode {
 	 * @return
 	 */
 	public SearchTreeNode uct() {
+		//TODO: shouldn't the epsilon be 1? exploration / exploitation ?
 		SearchTreeNode selectedNode = null;
         double bestValue = Double.MAX_VALUE;
         for (SearchTreeNode child : this.children)
@@ -176,7 +198,7 @@ public class SearchTreeNode {
             // small sampleRandom numbers: break ties in unexpanded nodes
             uctValue = noise(uctValue, epsilon, this.rnd.nextDouble());     //break ties randomly
 
-            if (uctValue < bestValue) {
+            if (uctValue < bestValue) {//minimizing a cost function
                 selectedNode = child;
                 bestValue = uctValue;
             }
@@ -270,11 +292,8 @@ public class SearchTreeNode {
     //TODO: consider using just the state without the aimed node (update evaluation fn)
 	public double simulate(Node aimedNode) 
 	{		
-		System.out.println(" simulating at depth " + this.depth + " " + this.getName());		
 		Game nextState = worldSate.getCopy();		
 		int thisDepth = this.depth;
-		System.out.println("this.depth " + this.depth);
-		System.out.println("thisDepth " + thisDepth);
 				
 		while (!finishRollout(nextState, thisDepth, aimedNode)) 
         {
@@ -285,10 +304,9 @@ public class SearchTreeNode {
             	nextState.getShip().update(action);	
             }            
             thisDepth++;
-            System.out.println("this.depth " + this.depth);
-    		System.out.println("thisDepth " + thisDepth);
             
             Vector2d nextPosition = nextState.getShip().s;
+            //TODO: store these along with score so when drawn colors can be used
        	 	if(!DriveMCTS.possiblePosition.contains(nextPosition))
             {
        	 		DriveMCTS.possiblePosition.add(nextPosition);	
@@ -312,25 +330,26 @@ public class SearchTreeNode {
 	
 	public boolean finishRollout(Game aState, int depth, Node aimedNode)
     {
-		//rollout end conditions
-		
+		//rollout end conditions		
+		System.out.print(".");
         if(depth >= DriveMCTS.searchDepth)
         {
-        	//TODO: not enough dots are shown
         	System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
             return true;            
-        }    	      
+        }  
         
-        //TODO: target reached? aimedNode.RADIUS?
+        //TODO: slowdown towards the end of the run. why?! check tree size. 
+        
+//        //TODO: target reached? aimedNode.RADIUS? why should this even stop?
         if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
     	{    		
-        	System.out.println("target checkpoint reached");
+        	System.out.print("target checkpoint reached");
     		return true;
     	}
         
         if(aState.isEnded())
         {
-        	System.out.println("game is ended()");
+        	System.out.print("game is ended()");
         	return true;
         }           
         return false;
@@ -484,5 +503,36 @@ public class SearchTreeNode {
     public String getName()
     {
 		return this.toString().substring(this.toString().indexOf("@")+1);    	
+    }
+    
+    public String getIdentifier()
+    {
+    	return " d" + this.depth + ":a" + this.action;
+    }
+    
+    public static String getFullIdentifier(SearchTreeNode baseNode)
+    {
+    	String parentIdentifier;
+    	if(baseNode.parent.action == -1)
+    	{//root node
+    		parentIdentifier = "root" + "> d" + baseNode.depth + ":a" + baseNode.action;
+    	} else {
+    		parentIdentifier = getFullIdentifier(baseNode.parent) + "> d" + baseNode.depth + ":a" + baseNode.action; 	
+    	}		
+		return parentIdentifier;    	
+    }
+    
+    public static int getTotalChildren(SearchTreeNode baseNode)
+    {
+    	int totalChildren = 0;
+    	for(SearchTreeNode aNode : baseNode.children)
+    	{
+    		if(null != aNode)
+    		{
+    			totalChildren += 1;//itself
+    			totalChildren += getTotalChildren(aNode);//its children nodes
+    		}
+    	}
+		return totalChildren;
     }
 }
