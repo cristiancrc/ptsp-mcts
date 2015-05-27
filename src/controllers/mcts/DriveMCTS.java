@@ -24,7 +24,7 @@ import framework.utils.Vector2d;
 
 /**
  * monte carlo tree search driver
- * @version 150113
+ * @version 150515
  * @author Cristian
  *
  */
@@ -44,7 +44,9 @@ public class DriveMCTS extends Controller
     static Node aimedNode = null;//the farthest node in the path that can be seen
     static Node aimedNodeNext = null;//the farthest node in the path that can be seen from aimedNode
     private Path pathToFollow;
-    static ArrayList<Vector2d> possiblePosition = new ArrayList<>();
+    static ArrayList<Vector2d> possiblePosition = new ArrayList<>();    
+    static HashMap<Vector2d, Double> possiblePositionScore = new HashMap<Vector2d, Double>();
+//    static ArrayList<Vector2d> possiblePositionEnd = new ArrayList<Vector2d>();
     static ArrayList<Vector2d> panicPosition = new ArrayList<>();
     
     private SearchTreeNode searchTree;
@@ -56,12 +58,14 @@ public class DriveMCTS extends Controller
     int panicModeNextCheck = panicModeCheckInterval;    
     int panicModeAction = 1;//action to take while in panic mode
     Vector2d previousShipPosition;
-    
+    //TODO 5 what's wrong with setting this to 1?
     static int macroActionsCount = 5;
     int macroActionsRemaining = 0;
     int macroAction;
 
     public static int searchDepth = 10;
+
+	
     /*
      * searchDepth * macroActionsCount should be around 100
      * 
@@ -120,14 +124,8 @@ public class DriveMCTS extends Controller
         long timeIn = System.currentTimeMillis();
         if(verbose) System.out.println("\n>>>in\t\t" + timeIn);
         if(verbose) System.out.println("---due on\t" + a_timeDue);
-        //TODO: if not much time left, return something to avoid being disqualified
-//        if(a_timeDue-timeIn < 40) 
-//        {
-//        	if(verbose) System.out.println("+++++++rush");
-//        	return 0;
-//        }
         
-		//TODO: do something useful with this time
+		//TODO 6 do something useful with this time macroRS is doing that
 		if(macroActionsRemaining-- > 0)
 		{
 			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]");
@@ -135,6 +133,7 @@ public class DriveMCTS extends Controller
 		}        
               
         possiblePosition.clear();//display just one level of search
+        possiblePositionScore.clear();
     	
     	int bestAction = -1;
         if(inPanicMode)
@@ -180,12 +179,7 @@ public class DriveMCTS extends Controller
     		pathToFollowFarther = m_plannedPath.get(nextWaypoint);
     		aimedNodeNext = Navigator.getLastNodeVisible(pathToFollowFarther, a_gameCopyForAimedNode, m_graph);    		
     	}
-    	//TODO: can the tree be copied for the next level? just the needed action tree.
-    	bestAction = mctsSearch(a_gameCopy, a_timeDue);
-    	
-    	System.out.println("search tree action " + searchTree.action);
-    	System.out.println("search tree parents " + SearchTreeNode.getFullIdentifier(searchTree));
-    	
+    	bestAction = mctsSearch(a_gameCopy, a_timeDue);      
         macroAction = bestAction;
         macroActionsRemaining = macroActionsCount;    	               
     	
@@ -209,7 +203,7 @@ public class DriveMCTS extends Controller
     	}    	
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
 
-        //TODO: this stops the execution
+        //TODO - this stops the execution
 //        System.exit(1);////////////////////////////////////////////////////////////////////////////
         
         return bestAction;    	
@@ -226,7 +220,8 @@ public class DriveMCTS extends Controller
         
     	//create root node for initial state
     	SearchTreeNode rootNode = new SearchTreeNode(a_gameCopy, null);
-    	System.out.println(" root data: " + rootNode.getIdentifier());
+    	System.out.println(" root data: " + SearchTreeNode.getTotalChildren(rootNode));
+    	
     	int bestAction = -1;    	    	
     	int playouts = 0;
         while(remainingTime > 5)
@@ -248,24 +243,27 @@ public class DriveMCTS extends Controller
         	if (verbose) System.out.print("\n" + ticks + " : "  + playouts + " value:" + matchValue + " remaining: " + remainingTime );        	
         	System.out.println("\ntotal children nodes : " + SearchTreeNode.getTotalChildren(rootNode));
         }
-        //TODO: time this and set search alloted time accordingly
+        //TODO 0 time this and set search alloted time accordingly
         //select child node
 //		bestAction = rootNode.getActionRobustChild();//most visited child		
 //		bestAction = rootNode.getActionSecureChild();//lowest average score child
         bestAction = rootNode.getActionMinValue();//lowest average score child                 
 //      System.out.println("selected "+ bestAction);  
         
-        //TODO:store resulting tree to use next
-        searchTree = rootNode.getChild(bestAction);
+        System.out.println("\n=====full tree");
+        rootNode.present(0);
         
+        System.out.println("\n=====leaf");
+        searchTree = SearchTreeNode.copyTree(rootNode.getChild(bestAction));        
+        searchTree.present(0);
+               
+        System.exit(1);
     	return bestAction;
     }      
 
 	private SearchTreeNode treePolicy(SearchTreeNode incomingNode) {
     	SearchTreeNode currentNode = incomingNode;
 
-    	//TODO: limit by depth here? if not here where?
-    	// isWaypointReached needed to limit search also?
         while (currentNode.depth < searchDepth)
         {
 	        if (currentNode.notFullyExpanded()) {
@@ -305,7 +303,7 @@ public class DriveMCTS extends Controller
 		
 		//set next waypoint
 		nextWaypoint = m_orderedWaypoints.indexOf(m_nextWaypoint)+1;
-		m_nextWaypoint = m_orderedWaypoints.get(m_orderedWaypoints.indexOf(m_nextWaypoint)+1);//TODO: end game error?
+		m_nextWaypoint = m_orderedWaypoints.get(m_orderedWaypoints.indexOf(m_nextWaypoint)+1);
     }
 
 	/**
@@ -314,6 +312,7 @@ public class DriveMCTS extends Controller
     public void paint(Graphics2D a_gr)
     {  
     	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
+    	Painter.paintPossibleShipPositions(a_gr, possiblePositionScore);
     	Painter.paintPanicPositions(a_gr, panicPosition);
     	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
     	Painter.paintAimedNode(a_gr, aimedNode);

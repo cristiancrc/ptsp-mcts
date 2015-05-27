@@ -196,7 +196,7 @@ public class CMAParameters implements java.io.Serializable {
 		if (mucov < 0)
 			mucov = mueff;
 
-		if (ccov < 0) { // TODO: setting should depend on gendiagonalcov 
+		if (ccov < 0) { // TDO: setting should depend on gendiagonalcov 
 			ccov = 2.0 / (N + 1.41) / (N + 1.41) / mucov
 			+ (1 - (1.0 / mucov))
 			* Math.min(1, (2 * mueff - 1) / (mueff + (N + 2) * (N + 2)));
@@ -500,7 +500,7 @@ public class CMAParameters implements java.io.Serializable {
         System.out.println(" CMA-ES error: " + s);
         //e.printStackTrace();            // output goes to System.err
         //e.printStackTrace(System.out);  // send trace to stdout
-        throw new CMAEvolutionStrategy().new CMAException(" CMA-ES error: " + s); // TODO this looks like a real hack
+        throw new CMAEvolutionStrategy().new CMAException(" CMA-ES error: " + s);
         //      System.exit(-1); 
     }
 

@@ -13,7 +13,7 @@ public interface ISolutionPoint {
     public double[] getX();
     
     /** objective function value (fitness) of the search point x */ 
-    public void setFitness( double fitness); // TODO better FunctionValue than Fitness ? 
+    public void setFitness( double fitness); 
     /** count at what evaluation number the search point x was evaluated */
     public void setEvaluationNumber( long evaluation);
     /** value of the solution point in search space, the 

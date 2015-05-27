@@ -37,9 +37,8 @@ public class GreedyController extends Controller
     /**
      * Path to all waypoints in the map
      */
-    //TODO: set this values from a_game
-	private Path[] m_pathToWaypoints = new Path[10];
-	private Path[] m_pathToFuelTanks = new Path[4];
+	private Path[] m_pathToWaypoints;
+	private Path[] m_pathToFuelTanks;
 
     /**
      * Hash map that matches waypoints in the map with their closest node in the graph.
@@ -66,7 +65,10 @@ public class GreedyController extends Controller
     {
         //Init the graph.
         m_graph = new Graph(a_gameCopy);
-
+        
+        m_pathToFuelTanks = new Path[a_gameCopy.getFuelTanks().size()];
+        m_pathToWaypoints = new Path[a_gameCopy.getWaypoints().size()];
+        
         //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
         m_collectNodes = new HashMap<GameObject, Node>();
         for(Waypoint way: a_gameCopy.getWaypoints())

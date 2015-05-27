@@ -15,11 +15,8 @@ import framework.utils.Vector2d;
 /**
  *  cost greedy planner
  *  goes through the list waypoints and gets the closest one
- *  TODO:
- *  - find out the signed angle between two nodes
- *  - implement turning costs (negative values, so left 90 right 90 = 0)
- *  - for directness, negative degrees would cancel out jagged paths
- *  - copy this in a new planner and use the cost function from the paper
+ *  evaluation function is my own, does not follow paper
+ *  TODO: useless
  *  @author Cristian
  *  @version 141128
  */	
@@ -142,7 +139,6 @@ public class PlannerGreedyEvolved extends Planner {
 		                pathHeadingInit = pathHeading.copy();//set new init heading as the last heading used for previous node    
 		            }
 
-		        	//TODO: use constants as multipliers for heading, lava, distance
 		        	pathCost = weightDistance * distanceCost + weightAngles * headingDiffCost;
 		        	if(verbose) System.out.println(" this path distance cost " + distanceCost + " , heading cost " + headingDiffCost + ", total cost " + pathCost + ", minPath " + minPathCost );
 		           

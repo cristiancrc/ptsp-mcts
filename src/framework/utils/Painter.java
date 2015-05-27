@@ -3,6 +3,7 @@ package framework.utils;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import framework.graph.Graph;
@@ -47,7 +48,26 @@ public class Painter {
     			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
         	}	
     	}  	    	
-    }    
+    }
+	public static void paintPossibleShipPositions(Graphics2D a_gr, HashMap<Vector2d, Double> possiblePositionScore) {		
+    	if (null != possiblePositionScore)
+    	{
+    		for(Vector2d position : possiblePositionScore.keySet()) 
+        	{
+    			a_gr.setColor(Color.green);
+    			if(possiblePositionScore.get(position) > 5)
+    			{
+    				a_gr.setColor(Color.orange);
+    			}
+    			if(possiblePositionScore.get(position) > 10)
+    			{
+    				a_gr.setColor(Color.red);
+    			}
+    			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
+        	}	
+    	}
+		
+	}    
     
     /**
      * plot panic positions
@@ -135,5 +155,4 @@ public class Painter {
 
         System.out.println("Waited " + waitTime + " ms");
     }
-
 }

@@ -58,8 +58,8 @@ public class ExecSync extends Exec
         while(!m_game.isEnded())
         {
         	
-        	//TODO: remove time limit between waypoints
-        	m_game.setStepsLeft(1000);
+        	//TODO: time limit between waypoints
+//        	m_game.setStepsLeft(1000);
 
             //When the result is expected:
             long then = System.currentTimeMillis();
@@ -301,20 +301,16 @@ public class ExecSync extends Exec
         //45 - tight walled inside 2
         //56 - labyrinth //going off path getting stuck in corners
         //61 - wide open
-        
-        
-        //TODO: worthy of notice
-        //exec 153 controller init time = 1000ms (10 waypoints * 10)
-        //exec sync 61 time between checkpoints 
-        
+                      
+        //TODO - this selects the controller
         //completed controller
         m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver        
 //        m_controllerName = "controllers.greedy.DriveDfs"; //dfs controller        
-//      m_controllerName = "controllers.greedy.DriveGreedy"; //greedy controller with planner selection
+//        m_controllerName = "controllers.greedy.DriveGreedy"; //greedy controller with planner selection
 
         //defaults
 //        m_controllerName = "controllers.greedy.GreedyController"; // default greedy
-//        m_controllerName = "controllers.MacroRandomSearch.MacroRSController"; //default macro actions (TODO: check if time is wasted when macroing)
+//        m_controllerName = "controllers.MacroRandomSearch.MacroRSController"; //default macro actions
 //        m_controllerName = "controllers.lineofsight.LineOfSight";//default line of sight greedy
 //        m_controllerName = "controllers.random.RandomController";//default random walker
 //        m_controllerName = "controllers.WoxController.WoxController"; //default

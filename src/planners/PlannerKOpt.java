@@ -7,7 +7,7 @@ import framework.core.Waypoint;
 import framework.graph.Graph;
 
 /**
- *  TODO:
+ *  TODO: implement
  *  - based on working 3Opt
  *  - find a general solution, most probably recursive calls
  *  - remove first path, as its always the one without any removals (solved in 3opt)

@@ -408,7 +408,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
     long counteval;
     long countiter;
 
-    long bestever_eval; // C style, TODO:  better make use of class CMASolution?
+    long bestever_eval; // C style, 
     double[] bestever_x;
     double bestever_fit = Double.NaN; 
     // CMASolution bestever; // used as output variable
@@ -669,7 +669,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
     				&& math.min(LBound) > -Double.MAX_VALUE) {
     			error("no initial search point (solution) X or typical X specified");
     			xmean = new double[N];
-    			for (i = 0; i < N; ++i) { /* TODO: reconsider this algorithm to set X0 */
+    			for (i = 0; i < N; ++i) { /* TDO: reconsider this algorithm to set X0 */
     				double offset = sigma*diagD[i];
     				double range = (UBound[i] - LBound[i] - 2*sigma*diagD[i]); 
     				if (offset > 0.4 * (UBound[i] - LBound[i])) {
@@ -1570,7 +1570,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
     
     /** compute Mahalanobis norm of x - mean w.r.t. the current distribution 
      * (using covariance matrix times squared step-size for the inner product). 
-     * TODO: to be tested. 
+     * TDO: to be tested. 
      * @param x
      * @param mean
      * @return Malanobis norm of x - mean: sqrt((x-mean)' C^-1 (x-mean)) / sigma
@@ -1612,7 +1612,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
 	 * function values, an alternative interface for
      * {@link #updateDistribution(double[] functionValues)}. functionValues is used to establish an 
      * ordering of the elements in population. The first nInjected elements do not need to originate 
-     * from #samplePopulation() or can have been modified (TODO: to be tested). 
+     * from #samplePopulation() or can have been modified (TDO: to be tested). 
      * 
      * @param population  double[lambda][N], lambda solutions
      * @param functionValues  double[lambda], respective objective values of population
@@ -1623,9 +1623,9 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
      * @see #updateDistribution(double[])
      */
     public void updateDistribution(double[][] population, double[] functionValues, int nInjected) {
-   	    // TODO: Needs to be tested yet for nInjected > 0
+   	    // TDO: Needs to be tested yet for nInjected > 0
     	// pass first input argument
-    	arx = phenoGenoTransformation(population, null); // TODO should still be tested
+    	arx = phenoGenoTransformation(population, null);
     	for (int i = 0; i < nInjected; ++i) {
     		warning("TODO: checking of injected solution has not yet been tested");
             // if (mahalanobisNorm(arx[0], xmean) > Math.sqrt(N) + 2) // testing: seems fine
@@ -1669,7 +1669,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
 //    private IntDouble[] computePenalties() {
 //    	int i, j, iNk;
 //    	/* penalize repairment, eg. for boundaries */
-//    	// TODO: figure out whether the change of penalty is too large or fast which can disturb selection
+//    	// TDO: figure out whether the change of penalty is too large or fast which can disturb selection
 //    	//       this depence in particular on the length of fit.medianDeltaFit
 //    	if (true || countiter < fit.deltaFitHist.length || countiter % 1*(N+2) == 0) {
 //    		// minimum of differences with distance lambda/2, better the 25%tile?

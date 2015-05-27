@@ -7,8 +7,7 @@ import framework.core.Waypoint;
 import framework.graph.Graph;
 
 /**
- *  TODO:
- *  - consider generating up to half of the list and then reverse the result
+ *  TODO 9 consider generating up to half of the list and then reverse the result
  *  @author Cristian
  *  @version 141208
  */
@@ -56,7 +55,7 @@ public class Planner3Opt extends Planner {
 			waypointList = shortList;			
 		}
 
-		//3OPT break points
+		//3OPT three break points, start and end position
 		int b1_s = 0, b1_e = 0, b2_s = 0, b2_e = 0 , b3_s = 0, b3_e = 0;			
 		for (int i = 0; i < searchLimit; i++) //i denotes first break
 		{

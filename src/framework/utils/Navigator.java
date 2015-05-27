@@ -16,8 +16,7 @@ public class Navigator {
     /**
      * Returns the last visible node in the path to the next waypoint
      * @return the node in the way to destination.
-     * TODO:
-     *  - due to inertia ship can not see the path at all: find a solution
+     * TODO: due to inertia ship can go behind a wall and end up not seeing the path at all: find a solution
      */
 	public static Node getLastNodeVisible(Path a_Path, Game a_gameCopy, Graph m_graph)
     {
@@ -57,7 +56,7 @@ public class Navigator {
 		Value value = new Value();
 		value.distance = dist;
 		value.direction = dot;
-		value.value = dist + dot;//TODO: this is a very bad heuristic
+		value.value = dist + dot;//TODO 0 this is a very bad heuristic
 		return value;
 	}
 
