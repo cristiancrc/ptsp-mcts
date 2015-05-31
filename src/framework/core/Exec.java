@@ -40,7 +40,7 @@ public class Exec
     public static boolean m_writeOutput = false;
 
     /**
-     * Indicates if the graphics are enabled for the executmmion.
+     * Indicates if the graphics are enabled for the execution.
      */
     public static boolean m_visibility = true;
 

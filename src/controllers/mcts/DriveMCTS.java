@@ -14,10 +14,12 @@ import framework.core.Controller;
 import framework.core.FuelTank;
 import framework.core.Game;
 import framework.core.GameObject;
+import framework.core.PTSPView;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
 import framework.graph.Path;
+import framework.utils.JEasyFrame;
 import framework.utils.Navigator;
 import framework.utils.Painter;
 import framework.utils.Vector2d;
@@ -89,13 +91,17 @@ public class DriveMCTS extends Controller
     	System.out.println("**** mcts controller ****");
         m_graph = new Graph(a_gameCopy);//Init the graph.
 
-//        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph
-        //use greedy for testing
-        Planner planner = new PlannerGreedy(a_gameCopy);//remove three edges and reconnect the graph
+        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph
+//        Planner planner = new PlannerGreedy(a_gameCopy);//use greedy for testing
         m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
         m_nextWaypoint = m_orderedWaypoints.get(0);//set immediate goal        
         planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
         m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
+        
+//        System.out.println("planned path " + m_plannedPath.get(0).m_cost);
+        
+        //TODO - this stops the execution
+//        System.exit(1);////////////////////////////////////////////////////////////////////////////
         
         //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
         m_collectNodes = new HashMap<GameObject, Node>();
@@ -203,6 +209,9 @@ public class DriveMCTS extends Controller
     	}    	
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
 
+//        //View of the game, if applicable.
+//        PTSPView aView = new PTSPView(a_gameCopy, a_gameCopy.getMapSize(), a_gameCopy.getMap(), a_gameCopy.getShip(), null);
+//        JEasyFrame frame = new JEasyFrame(aView, "imagine");
         //TODO - this stops the execution
 //        System.exit(1);////////////////////////////////////////////////////////////////////////////
         
@@ -257,7 +266,8 @@ public class DriveMCTS extends Controller
         searchTree = SearchTreeNode.copyTree(rootNode.getChild(bestAction));        
         searchTree.present(0);
                
-        System.exit(1);
+        //TODO - this stops the execution
+//      System.exit(1);////////////////////////////////////////////////////////////////////////////
     	return bestAction;
     }      
 

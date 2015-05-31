@@ -19,7 +19,9 @@ public class Planner3Opt extends Planner {
     	System.out.println("***3Opt planner***");
         long timeStart = System.currentTimeMillis();
     	m_graph = new Graph(a_gameCopy);
+    	this.aGameCopy = a_gameCopy;
     	
+    	//TODO 8 use multiple fragment instead of greedy for the base
     	//get a base plan
 		Planner planner = new PlannerGreedy(a_gameCopy);
 //    	Planner planner = new PlannerMC(a_gameCopy);//limit by time
@@ -31,10 +33,15 @@ public class Planner3Opt extends Planner {
 		//add ship position as waypoint
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
     	m_orderedWaypoints = (LinkedList<Waypoint>) waypointList.clone();//an initial list is needed
+    	
     	distanceMatrix = createDistanceMatrix(waypointList);            	
 		long timeAfterMatrix = System.currentTimeMillis();
 		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");
 		
+		distanceMatrixLava = createDistanceMatrixLava(waypointList);
+		long timeAfterMatrixLava = System.currentTimeMillis();
+		System.out.println(" Time spent to build distance matrix with lava: " + (timeAfterMatrixLava - timeAfterMatrix) + " ms.");
+
 		//build paths, based on the greedy result
     	double pathMinCost = getPathDistance(waypointList);//result from greedy	
 		double pathCost = 0;//local search result
@@ -140,7 +147,8 @@ public class Planner3Opt extends Planner {
 					}
 				}
 			}
-		}	
+		}
+		double cost2 = getPathCost(aPath, 1, 1, 1);
 		long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
 		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			

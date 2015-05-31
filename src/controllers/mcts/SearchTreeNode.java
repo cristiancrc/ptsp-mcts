@@ -351,8 +351,7 @@ public class SearchTreeNode {
             return true;            
         }  
         
-        //TODO 1 slowdown towards the end of the run. why?! check tree size. 
-        
+        //TODO 1 slowdown towards the end of the run. why?! check tree size.         
 //        //TODO 1 target reached? aimedNode.RADIUS? why should this even stop?
         if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
         {           

@@ -16,7 +16,7 @@ import framework.utils.Vector2d;
  *  cost greedy planner
  *  goes through the list waypoints and gets the closest one
  *  evaluation function is my own, does not follow paper
- *  TODO: useless
+ *  TODO: intuitive implementation
  *  @author Cristian
  *  @version 141128
  */	

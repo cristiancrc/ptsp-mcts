@@ -47,6 +47,7 @@ public abstract class PTSPConstants
     /**
      * Time for the controller to provide an action every step.
      */
+    //TODO ~ controls game speed
     public final static int ACTION_TIME_MS = 40;
 
     /**
