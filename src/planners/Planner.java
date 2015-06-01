@@ -300,39 +300,62 @@ public abstract class Planner {
 	 */
 	private double getPathCostAngleChange(LinkedList<Waypoint> waypointList) {
 		long timeIn = System.currentTimeMillis();
-		Vector2d shipInit = aGameCopy.getShip().d;	
-		System.out.println("ship initial vector : " + shipInit);
-		//TODO -1 this raw approach does not represent the actual angle that the ship will have!
-		// a node by node walk approach is still better!
-		Vector2d v0v1 = new Vector2d(waypointList.get(1).s.x - waypointList.get(0).s.x, waypointList.get(1).s.y - waypointList.get(0).s.y);
-		System.out.println("v0v1 vector : " + v0v1);
-		
 		double pathCost = 0;
-		Vector2d entryVector = null;
-		Vector2d exitVector = v0v1;
-		for(int i = 1; i < waypointList.size(); i++)
+		
+		System.out.println("ship direction " + aGameCopy.getShip().d);
+		Vector2d shipInit = aGameCopy.getShip().d;
+		System.out.println("way1 position " + waypointList.get(1).s);
+		System.out.println("ship position " + aGameCopy.getShip().ps);
+		
+		//initial ship heading and first waypoint
+		//waypointList[0] is the ship position
+		Waypoint wpFrom = waypointList.get(1);
+		Waypoint wpEnd = waypointList.get(2);
+		Node nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
+		Node nodeTo = m_graph.getClosestNodeTo(wpEnd.s.x, wpEnd.s.y, false);
+		Path pathIncoming = null;
+		Path pathOutgoing = m_graph.getPath(nodeFrom.id(), nodeTo.id());
+		System.out.println("node 0 " + m_graph.getNode(pathOutgoing.m_points.get(0)).x() + " : " + m_graph.getNode(pathOutgoing.m_points.get(0)).y());
+		System.out.println("node 1 " + m_graph.getNode(pathOutgoing.m_points.get(1)).x() + " : " + m_graph.getNode(pathOutgoing.m_points.get(1)).y());
+		Node firstNode = m_graph.getNode(pathOutgoing.m_points.get(1));
+		Node lastNode;
+		
+		Vector2d entryVector = shipInit;
+		Vector2d exitVector = new Vector2d(firstNode.x() - nodeFrom.x(), firstNode.y() - nodeFrom.y());
+		System.out.println("from way0 to way1 actual exit vector : " + exitVector);
+		exitVector.normalise();
+		double dotVector = -entryVector.dot(exitVector);
+		
+		System.out.printf("node direction: %f\n", dotVector);
+		dotVector = 0.;
+		pathCost += dotVector;		
+		
+		for(int i = 1; i < waypointList.size()-1; i++)
    		{
-			Waypoint wpFrom = waypointList.get(i-1);
-			Waypoint wpEnd = waypointList.get(i);
-			Node nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
-			Node nodeTo = m_graph.getClosestNodeTo(wpEnd.s.x, wpEnd.s.y, false);			
-			Path aPath = m_graph.getPath(nodeFrom.id(), nodeTo.id());		
-												
-			Node firstNode = m_graph.getNode(1);
-			exitVector = new Vector2d( firstNode.x() - nodeFrom.x(), firstNode.y() - nodeFrom.y());
 			
-			double dotVector = entryVector.dot(exitVector);
+			wpFrom = waypointList.get(i);
+			wpEnd = waypointList.get(i+1);
+			nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
+			nodeTo = m_graph.getClosestNodeTo(wpEnd.s.x, wpEnd.s.y, false);			
+			pathIncoming = pathOutgoing;
+			pathOutgoing = m_graph.getPath(nodeFrom.id(), nodeTo.id());
 			
-			Node lastNode = m_graph.getNode(aPath.m_points.get(aPath.m_points.size()-2));//size-1 is last, size-2 is next to last
-			entryVector = new Vector2d(nodeTo.x() - lastNode.x(), nodeTo.y() - lastNode.y() );
+			lastNode = m_graph.getNode(pathIncoming.m_points.get(pathIncoming.m_points.size()-2));//size-1 is last, size-2 is next to last
+			entryVector = new Vector2d(nodeFrom.x() - lastNode.x(), nodeFrom.y() - lastNode.y() );
+			entryVector.normalise();
 
-			
-			System.out.println("entry vector : " + entryVector);					
+			firstNode = m_graph.getNode(pathOutgoing.m_points.get(1));
+			exitVector = new Vector2d(firstNode.x() - nodeFrom.x(), firstNode.y() - nodeFrom.y());
+			exitVector.normalise();
+
+			dotVector = entryVector.dot(exitVector);
+			System.out.printf("\nw[%d]->w[%d] : entry(%f,%f) . exit(%f,%f) = dot(%f)", i, i+1, entryVector.x, entryVector.y, exitVector.x, exitVector.y, dotVector);
+			pathCost += dotVector;						
    		}
 		
 		long timeOut = System.currentTimeMillis();
-		System.out.println(" Time spent inside getPathAngleChange: " + (timeOut - timeIn) + " ms.");
-		return 0.;
+		System.out.println("\nTime spent inside getPathAngleChange: " + (timeOut - timeIn) + " ms.");
+		return pathCost;
 	}
 	
 	/**
