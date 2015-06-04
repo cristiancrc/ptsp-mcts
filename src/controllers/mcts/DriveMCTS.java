@@ -33,7 +33,7 @@ import framework.utils.Vector2d;
 
 public class DriveMCTS extends Controller
 {
-	private boolean verbose = true;
+	public static boolean verbose = true;
 	
     private Graph m_graph; //     * Graph for this controller.
     private Node m_shipNode; //     * Node in the graph, closest to the ship position.
@@ -99,21 +99,22 @@ public class DriveMCTS extends Controller
         m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
         
 //        System.out.println("planned path " + m_plannedPath.get(0).m_cost);
-        
+                
         //TODO - this stops the execution
 //        System.exit(1);////////////////////////////////////////////////////////////////////////////
         
+        //TODO 1 is this still needed? maybe for nice shows. yea.
         //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
-        m_collectNodes = new HashMap<GameObject, Node>();
-        for(Waypoint way: m_orderedWaypoints)
-        {
-            m_collectNodes.put(way, m_graph.getClosestNodeTo(way.s.x, way.s.y,true));
-        }
-
-        for(FuelTank ft: a_gameCopy.getFuelTanks())
-        {
-            m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
-        }
+//        m_collectNodes = new HashMap<GameObject, Node>();
+//        for(Waypoint way: m_orderedWaypXXaoints)
+//        {
+//            m_collectNodes.put(way, m_graph.getClosestNodeTo(way.s.x, way.s.y,true));
+//        }
+//
+//        for(FuelTank ft: a_gameCopy.getFuelTanks())
+//        {
+//            m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
+//        }
     }
     
     /**

@@ -2,6 +2,7 @@ package planners;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+
 import framework.core.Game;
 import framework.core.Waypoint;
 import framework.graph.Graph;
@@ -23,27 +24,30 @@ public class Planner3Opt extends Planner {
     	
     	//TODO 8 use multiple fragment instead of greedy for the base
     	//get a base plan
+    	//TODO 0 not calling greedy results in an error in get patch cost while retrieving matrix data
 		Planner planner = new PlannerGreedy(a_gameCopy);
-//    	Planner planner = new PlannerMC(a_gameCopy);//limit by time
+//    	Planner planner = new PlannerMC(a_gameCopy, 1);
 		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
 		waypointList = planner.getOrderedWaypoints();//get the planned route
 		long timeAfterGreedy = System.currentTimeMillis();
 		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeStart) + " ms.");		
-
-		//add ship position as waypoint
-    	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
-    	m_orderedWaypoints = (LinkedList<Waypoint>) waypointList.clone();//an initial list is needed
-    	
-    	distanceMatrix = createDistanceMatrix(waypointList);            	
-		long timeAfterMatrix = System.currentTimeMillis();
-		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");
 		
-		distanceMatrixLava = createDistanceMatrixLava(waypointList);
-		long timeAfterMatrixLava = System.currentTimeMillis();
-		System.out.println(" Time spent to build distance matrix with lava: " + (timeAfterMatrixLava - timeAfterMatrix) + " ms.");
-
+		matrixCostAngle = createAngleMatrix(waypointList);
+			
+		//add ship position as waypoint
+    	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);    	
+    	m_orderedWaypoints = (LinkedList<Waypoint>) waypointList.clone();//an initial list is needed    	   
+    	
+    	HashMap<Waypoint, HashMap<Waypoint, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
+    	distanceMatrix = distanceMatrices[0];
+    	matrixCostLava = distanceMatrices[1];
+    	long timeAfterMatrices = System.currentTimeMillis();
+    	System.out.println(" Time spent for both matrices at once: " + (timeAfterMatrices - timeAfterGreedy) + " ms.");
+    	
+    	matrixCostDirectness = createDirectnessMatrix(waypointList);
+    	    	
 		//build paths, based on the greedy result
-    	double pathMinCost = getPathDistance(waypointList);//result from greedy	
+    	double pathMinCost = getPathCost(waypointList);//result from greedy	
 		double pathCost = 0;//local search result
 		LinkedList<Waypoint> aPath = new LinkedList<>();//stores built paths
 		
@@ -135,7 +139,7 @@ public class Planner3Opt extends Planner {
 							}
 							aPath.addFirst(wpShip);
 							if (verbose) showList(aPath);							
-							pathCost = getPathDistance(aPath);
+							pathCost = getPathCost(aPath);
 			            	if (verbose) System.out.println(" generated " + pathCost + "(" + pathMinCost + ")");
 			            	if(pathCost < pathMinCost)
 			            	{
@@ -148,11 +152,13 @@ public class Planner3Opt extends Planner {
 				}
 			}
 		}
-		double cost2 = getPathCost(aPath, 1, 1, 1);
+		double cost2 = getPathCost(aPath);
 		long timeAfter = System.currentTimeMillis();
-    	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
-		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			
-		System.out.println("3Opt Planner time: " + (timeAfter - timeStart) + " ms.");	
+    	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrices) + " ms.");    	
+		System.out.println("Path cost:" + getPathCost(m_orderedWaypoints));			
+		System.out.println("3Opt Planner time: " + (timeAfter - timeStart) + " ms.");
+		System.out.println("calls ang: " + callsAngMatrix);		
+		System.out.println("calls calc: " + callsCalc);
     }
 	
 	/**
