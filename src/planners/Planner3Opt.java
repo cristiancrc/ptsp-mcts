@@ -11,6 +11,7 @@ import framework.graph.Graph;
  *  TODO 9 consider generating up to half of the list and then reverse the result
  *  @author Cristian
  *  @version 141208
+ *  TODO 0 read about the fuel tanks and add them where they need to be
  */
 
 public class Planner3Opt extends Planner {
@@ -41,8 +42,6 @@ public class Planner3Opt extends Planner {
     	HashMap<Waypoint, HashMap<Waypoint, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
     	distanceMatrix = distanceMatrices[0];
     	matrixCostLava = distanceMatrices[1];
-    	long timeAfterMatrices = System.currentTimeMillis();
-    	System.out.println(" Time spent for both matrices at once: " + (timeAfterMatrices - timeAfterGreedy) + " ms.");
     	
     	matrixCostDirectness = createDirectnessMatrix(waypointList);
     	    	
@@ -65,7 +64,7 @@ public class Planner3Opt extends Planner {
 			}
 			waypointList = shortList;			
 		}
-
+		long timeBeforeSearching = System.currentTimeMillis();
 		//3OPT three break points, start and end position
 		int b1_s = 0, b1_e = 0, b2_s = 0, b2_e = 0 , b3_s = 0, b3_e = 0;			
 		for (int i = 0; i < searchLimit; i++) //i denotes first break
@@ -152,13 +151,10 @@ public class Planner3Opt extends Planner {
 				}
 			}
 		}
-		double cost2 = getPathCost(aPath);
 		long timeAfter = System.currentTimeMillis();
-    	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrices) + " ms.");    	
+    	System.out.println(" Time spent searching: " + (timeAfter - timeBeforeSearching) + " ms.");    	
 		System.out.println("Path cost:" + getPathCost(m_orderedWaypoints));			
 		System.out.println("3Opt Planner time: " + (timeAfter - timeStart) + " ms.");
-		System.out.println("calls ang: " + callsAngMatrix);		
-		System.out.println("calls calc: " + callsCalc);
     }
 	
 	/**

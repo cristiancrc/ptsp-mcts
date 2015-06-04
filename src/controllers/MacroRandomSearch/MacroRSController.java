@@ -11,7 +11,7 @@ import java.awt.*;
  * Created by Diego Perez, University of Essex.
  * Date: 17/10/12
  */
-//TODO 0 this searches while macro actions are ran, check how that works
+//TODO 1 this searches while macro actions are ran, check how that works
 public class MacroRSController extends Controller {
 
     /**

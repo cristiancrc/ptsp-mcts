@@ -30,14 +30,11 @@ public abstract class Planner {
 	ArrayList<Path> m_plannedPath = new ArrayList<>();//path between waypoints ready to be displayed on-screen
 	Graph m_graph;
 	Game aGameCopy;
-	static double b0 = 1.5;
-	static double b1 = 1;
-	static double b2 = 1;
-	static double b3 = 1;
-	
-	static int callsCalc = 0;
-	static int callsAngMatrix = 0;
-	
+	static double weightLava = 1.5;
+	static double weightDistance = 1;
+	static double weightDirectness = 1;
+	static double weightAngle = 1;
+		
     /**
      * store paths from one point to another, in the order resulted by a planner
      * @param a_gameCopy
@@ -56,38 +53,70 @@ public abstract class Planner {
     }
     
     /**
-     * create the 3d matrix containing angle changes between wapyoints
+     * create the 3d matrix containing angle changes between wapyoints, counting the last and first steps of the path
      * @param waypointList
      * @return 3d hash map, double
-     * TODO 0 implement 
      */
     protected HashMap<Waypoint , HashMap<Waypoint, HashMap<Waypoint , Double>>> createAngleMatrix(LinkedList<Waypoint> waypointList)
     {
 		long timeIn = System.currentTimeMillis();
     	HashMap<Waypoint, HashMap<Waypoint, HashMap<Waypoint, Double>>> matrixCostAngle = new HashMap<>();//directness matrix from each waypoint, through each other, to each other
+    	HashMap<Waypoint, Double> wpTo_Value = new HashMap<Waypoint, Double>();
+    	HashMap<Waypoint, HashMap<Waypoint, Double>> wpThrough_wpTo = new HashMap<Waypoint, HashMap<Waypoint, Double>>();
 		for(int i = 0; i < waypointList.size(); i++)
    		{
 			Waypoint wpFrom = waypointList.get(i);
 			Node nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
+			wpThrough_wpTo.clear();
 			for (int j = 0; j < waypointList.size(); j++)
 			{
 				if(j == i) continue;
 				Waypoint wpThrough = waypointList.get(j);
 				Node nodeThrough = m_graph.getClosestNodeTo(wpThrough.s.x, wpThrough.s.y, false);
+				wpTo_Value.clear();
 				for(int k =0; k < waypointList.size(); k++)
-				{
+				{					
 					if(k == j) continue;
 					if(k == i) continue;
-					
-					callsAngMatrix++;
 					Waypoint wpTo = waypointList.get(k);				
 					Node nodeTo = m_graph.getClosestNodeTo(wpTo.s.x, wpTo.s.y, false);
-					System.out.println(wpFrom.getName() + " > " + wpThrough.getName() + " > " + wpTo.getName());
+					double dotVector = 0;
+//					System.out.println(wpFrom.getName() + " > " + wpThrough.getName() + " > " + wpTo.getName());
+//					System.out.print("i:" + i + ",j:" + j + ",k:" + k);
+					if(k < i)
+					{
+						//retrieve
+//						System.out.print(" retrieve from ");
+//						System.out.println("k:" + k + ",j:" + j + ",i:" + i);
+						dotVector = matrixCostAngle.get(wpTo).get(wpThrough).get(wpFrom);
+					}
+					else
+					{
+						//calculate
+//						System.out.println(" calculate");
+						Path pathIncoming = m_graph.getPath(nodeFrom.id(), nodeThrough.id());
+						Path pathOutgoing = m_graph.getPath(nodeThrough.id(), nodeTo.id());
+											
+						Node lastNode = m_graph.getNode(pathIncoming.m_points.get(pathIncoming.m_points.size()-2));//size-1 is last, size-2 is next to last
+						Vector2d entryVector = new Vector2d(nodeFrom.x() - lastNode.x(), nodeFrom.y() - lastNode.y() );					
+						entryVector.normalise();
+
+						Node firstNode = m_graph.getNode(pathOutgoing.m_points.get(1));
+						Vector2d exitVector = new Vector2d(firstNode.x() - nodeFrom.x(), firstNode.y() - nodeFrom.y());
+						exitVector.normalise();
+						
+						dotVector = entryVector.dot(exitVector);
+						System.out.printf("\nw[%d][%s] -> w[%d][%s] -> w[%d][%s] : entry(%f,%f) . exit(%f,%f) = dot(%f)", i, wpFrom.getName(), j, wpThrough.getName(), k, wpTo.getName(), entryVector.x, entryVector.y, exitVector.x, exitVector.y, dotVector);																	
+					}
+					wpTo_Value.put(wpTo, dotVector);
 				}
-			}			
+				wpThrough_wpTo.put(wpThrough, (HashMap<Waypoint, Double>) wpTo_Value.clone());
+			}
+			matrixCostAngle.put(wpFrom, (HashMap<Waypoint, HashMap<Waypoint, Double>>) wpThrough_wpTo.clone());
    		}
 		long timeOut = System.currentTimeMillis();
-		System.out.println(" Time spent inside createAngleMatrix: " + (timeOut - timeIn) + " ms.");
+		System.out.println(" Time spent inside create angle matrix: " + (timeOut - timeIn) + " ms.");
+		present3dMatrix(matrixCostAngle);
 		return matrixCostAngle;
 	}
     
@@ -133,7 +162,7 @@ public abstract class Planner {
 			}			
    		}
 		long timeOut = System.currentTimeMillis();
-		System.out.println(" Time spent inside createDirectnessMatrix: " + (timeOut - timeIn) + " ms.");
+		System.out.println(" Time spent inside create directness matrix: " + (timeOut - timeIn) + " ms.");
 		return matrixCostDirectness;
 	}
     
@@ -144,7 +173,7 @@ public abstract class Planner {
 	 * TODO 3 set to private and see if instances need cost not just distance
 	 */
 	protected HashMap<Waypoint, HashMap<Waypoint, Double>> createDistanceMatrix(LinkedList<Waypoint> waypointList) {
-    	
+		long timeIn = System.currentTimeMillis();
 		//compute distance matrix for waypoints
 		HashMap<Waypoint, HashMap<Waypoint, Double>> distanceMatrix = new HashMap<>();//distance from -each- waypoint to each of the others
        	HashMap<Waypoint, Double> distanceList = new HashMap<>();//distance from -one- waypoint to each of the others
@@ -179,6 +208,8 @@ public abstract class Planner {
     		}
     		distanceMatrix.put(wpFrom, (HashMap<Waypoint, Double>) distanceList.clone());
     	}
+    	long timeOut = System.currentTimeMillis();
+		System.out.println(" Time spent inside create distance matrix: " + (timeOut - timeIn) + " ms.");
     	return distanceMatrix;
 	}
 	
@@ -189,7 +220,7 @@ public abstract class Planner {
 	 * @return a distance matrix
 	 */
 	private HashMap<Waypoint, HashMap<Waypoint, Double>> createDistanceMatrixLava(LinkedList<Waypoint> waypointList) {
-    	
+		long timeIn = System.currentTimeMillis();
 		//compute distance matrix for waypoints
 		HashMap<Waypoint, HashMap<Waypoint, Double>> distanceMatrix = new HashMap<>();//distance from -each- waypoint to each of the others
        	HashMap<Waypoint, Double> distanceList = new HashMap<>();//distance from -one- waypoint to each of the others
@@ -217,7 +248,7 @@ public abstract class Planner {
     				Node nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
     				Node nodeTo = m_graph.getClosestNodeTo(wpTo.s.x, wpTo.s.y, false);					
     				Path aPath = m_graph.getPath(nodeFrom.id(), nodeTo.id());
-    	    		pathCost = aPath.m_cost;//TODO 1 init cost
+    	    		pathCost = aPath.m_cost;
     	    		double distanceCost = 0;
     	    		for(int k = 0; k < aPath.m_points.size()-1; k++)
 		            {
@@ -231,7 +262,7 @@ public abstract class Planner {
 		                tempGame.setShip(tempShip);
 		                tempGame.tick(Controller.ACTION_NO_LEFT);//this tick is needed to register if the ship is above lava, using ACTION_NO_FRONT will not work for tempShip.isOnLava()
 		                if(tempShip.isOnLava()) {
-		                	distanceCost += b0*thisNode.euclideanDistanceTo(nextNode);
+		                	distanceCost += weightLava*thisNode.euclideanDistanceTo(nextNode);
 		                }
 		                else {
 		                	distanceCost += thisNode.euclideanDistanceTo(nextNode);
@@ -244,6 +275,8 @@ public abstract class Planner {
     		}
     		distanceMatrix.put(wpFrom, (HashMap<Waypoint, Double>) distanceList.clone());
     	}
+    	long timeOut = System.currentTimeMillis();
+		System.out.println(" Time spent inside create lava distance matrix: " + (timeOut - timeIn) + " ms.");    	    
     	return distanceMatrix;
 	}
 
@@ -255,7 +288,7 @@ public abstract class Planner {
 	 * TODO ~ incomplete implementation
 	 */
 	protected HashMap<Waypoint, HashMap<Waypoint, Double>>[] createDistanceMatrices(LinkedList<Waypoint> waypointList) {
-    	
+		long timeIn = System.currentTimeMillis();
 		HashMap<Waypoint, HashMap<Waypoint, Double>>[] result = new HashMap[2];
 		
 		//compute distance matrix for waypoints
@@ -304,7 +337,7 @@ public abstract class Planner {
 		                tempGame.setShip(tempShip);
 		                tempGame.tick(Controller.ACTION_NO_LEFT);//this tick is needed to register if the ship is above lava, using ACTION_NO_FRONT will not work for tempShip.isOnLava()
 		                if(tempShip.isOnLava()) {
-		                	distanceCost += b0*thisNode.euclideanDistanceTo(nextNode);
+		                	distanceCost += weightLava*thisNode.euclideanDistanceTo(nextNode);
 		                }
 		                else {
 		                	distanceCost += thisNode.euclideanDistanceTo(nextNode);
@@ -320,6 +353,8 @@ public abstract class Planner {
     	}
     	result[0] = distanceMatrix;
     	result[1] = distanceMatrixLava;
+		long timeOut = System.currentTimeMillis();
+		System.out.println(" Time spent inside create distance matrices: " + (timeOut - timeIn) + " ms.");    	
     	return result;
 	}
 
@@ -327,7 +362,7 @@ public abstract class Planner {
 	 * displays a matrix in a humanly readable form
 	 * @param matrix
 	 */
-	protected void presentMatrix(HashMap<Waypoint, HashMap<Waypoint, Double>> matrix)
+	protected void present2dMatrix(HashMap<Waypoint, HashMap<Waypoint, Double>> matrix)
 	{
 		for (Waypoint wpFrom : matrix.keySet())    		
     	{
@@ -339,7 +374,32 @@ public abstract class Planner {
     			System.out.println(" =" + matrix.get(wpFrom).get(wpTo));
     		}
     	}
-	}    
+	}
+	
+	/**
+	 * displays a matrix in a humanly readable form
+	 * TODO 9 present [n]d matrix
+	 * @param matrix
+	 */
+	protected void present3dMatrix(HashMap<Waypoint, HashMap<Waypoint, HashMap<Waypoint, Double>>> matrix)
+	{
+		for (Waypoint wpFrom : matrix.keySet())    		
+    	{
+			for (Waypoint wpThrough : matrix.keySet())
+			{
+				if(wpThrough.equals(wpFrom)) continue;
+				for (Waypoint wpTo : matrix.keySet()) //j = i for symmetric weights    			
+	    		{
+	    			if(wpTo.equals(wpFrom)) continue; //is 0
+	    			if(wpTo.equals(wpThrough)) continue; //is 0
+	    			System.out.print("from:" + wpFrom.getName());
+	    			System.out.print(" through:" + wpThrough.getName());
+	    			System.out.print(" to:" + wpTo.getName());
+	    			System.out.println(" = " + matrix.get(wpFrom).get(wpThrough).get(wpTo));
+	    		}	
+			}    		
+    	}
+	} 
 	
 	/**
 	 * show a list as consecutive waypoints
@@ -427,7 +487,6 @@ public abstract class Planner {
 	 * calculates the cost of angle change for a list of waypoints
 	 * @param waypointList
 	 * @return total cost
-	 * TODO 2 create 3d matrix with values
 	 */
 	private double calculateCostAngleChange(LinkedList<Waypoint> waypointList) {
 		boolean verbose = DriveMCTS.verbose;
@@ -464,7 +523,6 @@ public abstract class Planner {
 					
 		for(int i = 1; i < waypointList.size()-1; i++)
    		{			
-			callsCalc++;
 			wpFrom = waypointList.get(i);
 			wpEnd = waypointList.get(i+1);
 			nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
@@ -484,7 +542,6 @@ public abstract class Planner {
 //			System.out.printf("\nw[%d]->w[%d] : entry(%f,%f) . exit(%f,%f) = dot(%f)", i, i+1, entryVector.x, entryVector.y, exitVector.x, exitVector.y, dotVector);
 			pathCost += dotVector;						
    		}
-		
 		long timeOut = System.currentTimeMillis();
 //		System.out.println("\nTime spent inside getPathAngleChange: " + (timeOut - timeIn) + " ms.");
 		return pathCost;
@@ -492,14 +549,14 @@ public abstract class Planner {
 	
 	/**
 	 * cost for a route is composed of:
-	 *  distance cost
+	 *  distance cost, including lava
 	 *  indirectness, how much the shortest path deviates from a straight line
-	 *  change in angle between entering and leaving w[i+1]
+	 *  change in angle between entering and leaving a waypoint
 	 * @param waypointList
 	 * @return total cost
 	 */
-	public double getPathCost(LinkedList<Waypoint> waypointList, double b1, double b2, double b3)
-	{		
+	public double getPathCost(LinkedList<Waypoint> waypointList, double weightDistance, double weightDirectness, double weightAngle)
+	{	
 //		double costDistance = 0;		
 //		costDistance = getPathDistance(waypointList);
 //		System.out.println("distance matrix: " + costDistance);
@@ -513,19 +570,18 @@ public abstract class Planner {
 //		System.out.println("directness: " + costDirectness);
 		
 		double costAngleChange = 0;
-//		costAngleChange = getPathCostAngleChange(waypointList);		
+		costAngleChange = getPathCostAngleChange(waypointList);		
 //		System.out.println("angle change: " + costAngleChange);
-		
-		calculateCostAngleChange(waypointList);
-		
-		double totalCost = Math.pow(costDistanceLava, b1) + b2 *costDirectness + b3*costAngleChange;
+			
+		double totalCost = Math.pow(costDistanceLava, weightDistance) + weightDirectness *costDirectness + weightAngle*costAngleChange;
+		System.out.printf("\ncost: distance [%f] directness [%f]  angle [%f] = total[%f]", costDistanceLava, weightDirectness, weightAngle, totalCost);
 		return totalCost;
 	}	
 
 
 	public double getPathCost(LinkedList<Waypoint> waypointList)
 	{
-		return getPathCost(waypointList, b1, b2, b3);		
+		return getPathCost(waypointList, weightDistance, weightDirectness, weightAngle);		
 	}        
 	public ArrayList<Path> getPlannedPath() 
 	{

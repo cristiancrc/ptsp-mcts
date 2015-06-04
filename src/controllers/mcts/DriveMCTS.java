@@ -39,7 +39,6 @@ public class DriveMCTS extends Controller
     private Node m_shipNode; //     * Node in the graph, closest to the ship position.
     private ArrayList<Path> m_plannedPath = new ArrayList<>();//      * Paths to the waypoints based on the planner
 	private LinkedList<Waypoint> m_orderedWaypoints = new LinkedList<>(); //waypoints in the order they should be visited as computed by the planner
-    private HashMap<GameObject, Node> m_collectNodes;//     * Hash map that matches waypoints in the map with their closest node in the graph.
 	private Waypoint m_nextWaypoint;
 	private Integer nextWaypoint = null; // index of next waypoint in m_orderedWaypoints
     private int ticks = 0;
@@ -101,20 +100,7 @@ public class DriveMCTS extends Controller
 //        System.out.println("planned path " + m_plannedPath.get(0).m_cost);
                 
         //TODO - this stops the execution
-//        System.exit(1);////////////////////////////////////////////////////////////////////////////
-        
-        //TODO 1 is this still needed? maybe for nice shows. yea.
-        //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
-//        m_collectNodes = new HashMap<GameObject, Node>();
-//        for(Waypoint way: m_orderedWaypXXaoints)
-//        {
-//            m_collectNodes.put(way, m_graph.getClosestNodeTo(way.s.x, way.s.y,true));
-//        }
-//
-//        for(FuelTank ft: a_gameCopy.getFuelTanks())
-//        {
-//            m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
-//        }
+//        System.exit(1);////////////////////////////////////////////////////////////////////////////       
     }
     
     /**
@@ -210,9 +196,6 @@ public class DriveMCTS extends Controller
     	}    	
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
 
-//        //View of the game, if applicable.
-//        PTSPView aView = new PTSPView(a_gameCopy, a_gameCopy.getMapSize(), a_gameCopy.getMap(), a_gameCopy.getShip(), null);
-//        JEasyFrame frame = new JEasyFrame(aView, "imagine");
         //TODO - this stops the execution
 //        System.exit(1);////////////////////////////////////////////////////////////////////////////
         
@@ -253,7 +236,6 @@ public class DriveMCTS extends Controller
         	if (verbose) System.out.print("\n" + ticks + " : "  + playouts + " value:" + matchValue + " remaining: " + remainingTime );        	
         	System.out.println("\ntotal children nodes : " + SearchTreeNode.getTotalChildren(rootNode));
         }
-        //TODO 0 time this and set search alloted time accordingly
         //select child node
 //		bestAction = rootNode.getActionRobustChild();//most visited child		
 //		bestAction = rootNode.getActionSecureChild();//lowest average score child

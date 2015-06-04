@@ -285,7 +285,7 @@ public class SearchTreeNode {
      * select a random action and apply it to the current state until one of the finishRollout conditions is met
      * @param aimedNode
      * @return
-     * TODO 5 consider using just the state without the aimed node (update evaluation fn)
+     * TODO 0 consider using just the state without the aimed node (update evaluation fn)
      * TODO 9 consider using dynamic depth
      */
     public double simulate(Node aimedNode) 
@@ -310,6 +310,7 @@ public class SearchTreeNode {
             }
         }
         
+        //TODO 0 update ship position evaluation with paper equation
         Value newStateValue = Navigator.evaluateShipPosition(nextState, DriveMCTS.aimedNode);        
         double localNewValue = newStateValue.value;
 
@@ -350,9 +351,7 @@ public class SearchTreeNode {
             System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
             return true;            
         }  
-        
-        //TODO 1 slowdown towards the end of the run. why?! check tree size.         
-//        //TODO 1 target reached? aimedNode.RADIUS? why should this even stop?
+        //TODO 0 combine with updated evaluate position and remove the aimed node target
         if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
         {           
             System.out.print("target checkpoint reached");
@@ -584,7 +583,8 @@ public class SearchTreeNode {
     }
 
 	/**
-	 * recursively returns a tree with all the children of the input node 
+	 * recursively returns a tree with all the children of the input node
+	 * used to search while macroing another action 
 	 * @param nodeStartFrom
 	 * @return new node
 	 * TODO 2 does not make a complete and correct copy
@@ -607,7 +607,6 @@ public class SearchTreeNode {
             		newRoot.children[aNode.action] = SearchTreeNode.copyTree(aNode);
             	}                     		
         	}
-        	
         }
         return newRoot;
     }
