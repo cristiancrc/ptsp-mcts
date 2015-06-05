@@ -16,7 +16,7 @@ import framework.utils.Vector2d;
  *  cost greedy planner
  *  goes through the list waypoints and gets the closest one
  *  evaluation function is my own, does not follow paper
- *  TODO: intuitive implementation
+ *  TODO: intuitive implementation, useful for snippets. remove.
  *  @author Cristian
  *  @version 141128
  */	
@@ -115,13 +115,11 @@ public class PlannerGreedyEvolved extends Planner {
 		                if(verbose) System.out.println("\t" + k + " base vector: " + pathHeadingInit.x + " , " + pathHeadingInit.y);
 		                
 		                //increase cost for going over lava
-		                //TODO: maybe this is why a flood fill is needed, to go around lava instead of over it...
 		                Game tempGame = a_gameCopy.getCopy();		                
 		                Ship tempShip = tempGame.getShip();
 		                tempShip.s.x = nextNode.x();
 		                tempShip.s.y = nextNode.y();
 		                tempGame.setShip(tempShip);
-		                //TODO: use actual heading resulted from planned path
 		                System.out.println("ship heading: " + tempGame.getShip().d);
 		                tempGame.tick(Controller.ACTION_NO_LEFT);//this tick is needed to register if the ship is above lava, using ACTION_NO_FRONT will not work for tempShip.isOnLava()
 		                if(tempShip.isOnLava()) {

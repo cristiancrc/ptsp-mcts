@@ -1,5 +1,6 @@
 package planners;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -30,7 +31,9 @@ public class PlannerMC extends Planner {
     	LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();    
         Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
         waypointList.add(0, wpShip);//add ship position as waypoint, to be included in the distance matrix
-    	distanceMatrix = createDistanceMatrix(waypointList);    	
+    	HashMap<Waypoint, HashMap<Waypoint, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
+    	distanceMatrix = distanceMatrices[0];
+    	matrixCostLava = distanceMatrices[1];  	
 		long timeAfterMatrix = System.currentTimeMillis();
 		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeStart) + " ms.");		
     	
@@ -59,7 +62,7 @@ public class PlannerMC extends Planner {
         		aPath.add(thePoppedWay);
         	}    	
         	
-        	pathCost = getPathDistance(aPath);
+        	pathCost = getPathCost(aPath);
         	if (verbose) System.out.println(tries + " : generated " + pathCost + "(" + pathMinCost + ")");
         	if(pathCost < pathMinCost)
         	{
@@ -73,7 +76,7 @@ public class PlannerMC extends Planner {
     	}    	
     	long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent randomizing " + tries + " paths: " + (timeAfter - timeAfterMatrix) + " ms.");    	
-		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			
+		System.out.println("Path distance:" + getPathCost(m_orderedWaypoints));			
 		System.out.println("MC Planner time: " + (timeAfter - timeStart) + " ms.");	
     }
 }

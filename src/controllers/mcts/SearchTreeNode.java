@@ -2,6 +2,7 @@ package controllers.mcts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Random;
 
 import framework.core.Controller;
@@ -18,6 +19,7 @@ public class SearchTreeNode {
     public Game worldSate;//current world state 
     public int depth;
     public boolean fullyExpanded = false;
+    public int name;
     
     public int visited = 0;
     public double score = 0;
@@ -25,7 +27,8 @@ public class SearchTreeNode {
     public double bestPossible = Double.MAX_VALUE;
     protected static double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
     
-    public SearchTreeNode[] children = new SearchTreeNode[Controller.NUM_ACTIONS];  
+    public SearchTreeNode[] children = new SearchTreeNode[Controller.NUM_ACTIONS];
+//    public LinkedList<SearchTreeNode> children = new LinkedList<SearchTreeNode>();
     public Random rnd = new Random();
     public static double epsilon = 1e-6;
     public static double egreedyEpsilon = 0.05;
@@ -34,6 +37,7 @@ public class SearchTreeNode {
     
     public SearchTreeNode(Game a_gameCopy, SearchTreeNode parent) 
     {
+    	this.name = hashCode();
         this.worldSate = a_gameCopy;
         this.parent = parent;
         
@@ -85,6 +89,10 @@ public class SearchTreeNode {
         return null;
     }      
     
+    /**
+     * update the score of a node only if it is HIGHER than the current
+     * @param actionScore
+     */
     public void trySetScore(double actionScore) 
     {
         System.out.println(actionScore + " ? " + this.value);
@@ -95,36 +103,23 @@ public class SearchTreeNode {
         }
     }
 
-    //TODO 0 use a standard approach - is instead of is not
-    public boolean notFullyExpanded() 
-    {
-        System.out.println("\nfully expanded check on " + this.getIdentifier());        
-        int whichOne = 0;
-        int notfullyExp = 0;
+    /**
+     * fast check if all the children nodes have been visited
+     * @return
+     */
+    public boolean isFullyExpanded() 
+    {    	
+        System.out.println("\nfully expanded fast check on " + this.getIdentifier());        
         for (SearchTreeNode aNode : this.children) 
         {        
             if (aNode == null) 
             {
-                notfullyExp = 1;
-//              System.out.println("-missing: " + whichOne);
-//                return true;
-            } else {
-//              System.out.println("+present: " + whichOne);
+                return false;
             }
-            whichOne++;
         }
-        if(1 == notfullyExp) 
-        {
-            return true;    
-        } else 
-        {
-            //TODO ~ when fully expanded, remove game state from memory.
-//            this.worldSate = null;
-            return false;
-        }
-        
+        return true;
     }
-    
+        
     /**
      * return a random child from the unexpanded ones
      * @return
@@ -170,12 +165,14 @@ public class SearchTreeNode {
     
     /**
      * upper confidence tree
-     * TODO 0 check uctvalue against paper
      * @return
      */
     public SearchTreeNode uct() {
+    	//uctVal = number of wins / number of simulations of this child + exploration parameter * sqrt( log (total simulations) / number of simulations of this child
         SearchTreeNode selectedNode = null;
         double bestValue = Double.MAX_VALUE;
+        double explorationParameter = sqrt2;
+       
         for (SearchTreeNode child : this.children)
         {
             double hvVal = child.value;
@@ -184,7 +181,7 @@ public class SearchTreeNode {
             //TODO 9 why normalize? bounds change
             childValue = normalise(childValue, bounds[0], bounds[1]);
 
-            double uctValue = childValue - sqrt2 * Math.sqrt(Math.log(this.visited + 1) / (child.visited + epsilon));
+            double uctValue = childValue - explorationParameter * Math.sqrt(Math.log(this.visited + 1) / (child.visited + epsilon));
 
             // small sampleRandom numbers: break ties in unexpanded nodes
             uctValue = noise(uctValue, epsilon, this.rnd.nextDouble());     //break ties randomly
@@ -285,7 +282,7 @@ public class SearchTreeNode {
      * select a random action and apply it to the current state until one of the finishRollout conditions is met
      * @param aimedNode
      * @return
-     * TODO 0 consider using just the state without the aimed node (update evaluation fn)
+     * TODO 1 consider using just the state without the aimed node (update evaluation fn)
      * TODO 9 consider using dynamic depth
      */
     public double simulate(Node aimedNode) 
@@ -351,7 +348,7 @@ public class SearchTreeNode {
             System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
             return true;            
         }  
-        //TODO 0 combine with updated evaluate position and remove the aimed node target
+        //TODO 1 combine with updated evaluate position and remove the aimed node target
         if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
         {           
             System.out.print("target checkpoint reached");
@@ -510,14 +507,13 @@ public class SearchTreeNode {
     
     /**
      * draw the tree starting at the current node up to a specified depth
-     * TODO 6 children length is always 6 , consider using a list to remove all the null checks
      * @param depth
      */
     public void present(int depth)
     {
-        System.out.print("\n" +this.getName() + " <"+this.hashCode()+">" 
+        System.out.print(this.getName() + " h<"+this.hashCode()+">" + " n<"+this.name+">" 
         		+ " {" + this.getIdentifier() + "} " 
-        		+ "(p:" + (this.parent != null ? this.parent.getName() : "-") + ")" 
+        		+ "(p:" + (this.parent != null ? this.parent.getName() + ", " + this.parent.name : "-") + ")" 
         		+ " [V:" + this.value + "] [a:" + this.action + "] [s:" + this.score + "] [v:" + this.visited + "] [c:" + this.children.length+"]");
         depth++;
         for(SearchTreeNode aNode : this.children)
@@ -525,11 +521,15 @@ public class SearchTreeNode {
         	if(null != aNode)
         	{
         		System.out.print("\n");
-                for(int i = 0; i < depth; i++) System.out.print("\t");
+                for(int i = 0; i < depth; i++) System.out.print("\t ");
                 aNode.present(depth);	
         	}
             
         }
+    }
+    public void present()
+    {
+    	present(0);
     }
     
     /**
@@ -587,25 +587,31 @@ public class SearchTreeNode {
 	 * used to search while macroing another action 
 	 * @param nodeStartFrom
 	 * @return new node
-	 * TODO 2 does not make a complete and correct copy
+	 * TODO 2 use this for macroing, current copy looks fine
 	 */
     public static SearchTreeNode copyTree(SearchTreeNode nodeStartFrom) 
     {
-    	System.out.print("c");
         SearchTreeNode newRoot = new SearchTreeNode(nodeStartFrom.worldSate, nodeStartFrom);
+        newRoot.worldSate = nodeStartFrom.worldSate;
+        newRoot.parent = nodeStartFrom.parent;
         newRoot.action = nodeStartFrom.action;
         newRoot.score = nodeStartFrom.score;
         newRoot.visited = nodeStartFrom.visited;
-        newRoot.value = nodeStartFrom.value;  
+        newRoot.value = nodeStartFrom.value;
+        newRoot.depth = nodeStartFrom.depth-1;//otherwise it is increased
+        newRoot.name = nodeStartFrom.name;//copy hash code
+        
+        if(nodeStartFrom.depth == 1) 
+        {
+        	newRoot.parent = null;
+        	newRoot.action = -1;
+    	}
 
         for(SearchTreeNode aNode : nodeStartFrom.children)
         {        	
         	if(null != aNode)
         	{
-        		if(null == newRoot.children[aNode.action])
-            	{
-            		newRoot.children[aNode.action] = SearchTreeNode.copyTree(aNode);
-            	}                     		
+        		newRoot.children[aNode.action] = SearchTreeNode.copyTree(aNode);        	
         	}
         }
         return newRoot;

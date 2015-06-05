@@ -1,0 +1,42 @@
+this is a test that builds a tree and copies a leaf
+        SearchTreeNode aRoot = new SearchTreeNode(a_gameCopy, null);
+        aRoot.score = 1;
+        aRoot.value = 1;
+        aRoot.visited = 1;
+        for (int i = 0; i < 6; i++)
+        {
+            SearchTreeNode aChild = new SearchTreeNode(a_gameCopy, aRoot);
+            aChild.score = 100*i;
+            aChild.value = 100*i;
+            aChild.visited = 100*i;
+            aChild.action = i;
+            aRoot.children[i] = aChild;
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            SearchTreeNode baseNode = aRoot.children[i];
+            for (int j = 0; j < 6; j++)
+            {
+                SearchTreeNode aChild = new SearchTreeNode(a_gameCopy, baseNode);
+                aChild.score = 100*i+j;
+                aChild.value = 100*i+j;
+                aChild.visited = 100*i+j;
+                aChild.action = j;
+                baseNode.children[j] = aChild;
+                for (int k = 0; k < 6; k++)
+                {
+                    SearchTreeNode aChild2 = new SearchTreeNode(a_gameCopy, aChild);
+                    aChild2.score = 100*i + 10*j + k;
+                    aChild2.value = 100*i + 10*j + k;
+                    aChild2.visited = 100*i + 10*j + k;
+                    aChild2.action = k;
+                    aChild.children[k] = aChild2;               
+                }
+            }           
+        }        
+        aRoot.present();
+        
+        System.out.println("+");
+        SearchTreeNode aLeaf = SearchTreeNode.copyTree(aRoot.getChild(3));
+        System.out.println("");
+        aLeaf.present();
