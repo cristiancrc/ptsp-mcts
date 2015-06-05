@@ -118,7 +118,7 @@ public class DriveMCTS extends Controller
         if(verbose) System.out.println("\n>>>in\t\t" + timeIn);
         if(verbose) System.out.println("---due on\t" + a_timeDue);
         
-		//TODO 6 do something useful with this time macroRS is doing that
+		//TODO 2 do something useful with this time
 		if(macroActionsRemaining-- > 0)
 		{
 			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]");
@@ -240,17 +240,15 @@ public class DriveMCTS extends Controller
 //		bestAction = rootNode.getActionRobustChild();//most visited child		
 //		bestAction = rootNode.getActionSecureChild();//lowest average score child
         bestAction = rootNode.getActionMinValue();//lowest average score child                 
-//      System.out.println("selected "+ bestAction);  
-        
-        System.out.println("\n=====full tree");
-        rootNode.present(0);
-        
-        System.out.println("\n=====leaf");
-        searchTree = SearchTreeNode.copyTree(rootNode.getChild(bestAction));        
-        searchTree.present(0);
-               
-        //TODO - this stops the execution
-//      System.exit(1);////////////////////////////////////////////////////////////////////////////
+//      System.out.println("selected "+ bestAction);               
+       
+//        System.out.println("\n=====full tree");
+//        rootNode.present();
+        //store the selected tree
+        searchTree = SearchTreeNode.copyTree(rootNode.getChild(bestAction));
+//        System.out.println("\nselected : " + bestAction);
+//        System.out.println("\n=====leaf");
+//        searchTree.present();               
     	return bestAction;
     }      
 
@@ -259,7 +257,7 @@ public class DriveMCTS extends Controller
 
         while (currentNode.depth < searchDepth)
         {
-	        if (currentNode.notFullyExpanded()) {
+	        if (!currentNode.isFullyExpanded()) {
 	        	System.out.println(currentNode.getIdentifier() + " expanding");
 	            return currentNode.expand();
 	        } else {        	

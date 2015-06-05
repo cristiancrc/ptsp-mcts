@@ -11,7 +11,7 @@ import framework.graph.Graph;
  *  TODO 9 consider generating up to half of the list and then reverse the result
  *  @author Cristian
  *  @version 141208
- *  TODO 0 read about the fuel tanks and add them where they need to be
+ *  TODO 1 read about the fuel tanks and add them where they need to be
  */
 
 public class Planner3Opt extends Planner {
@@ -25,7 +25,7 @@ public class Planner3Opt extends Planner {
     	
     	//TODO 8 use multiple fragment instead of greedy for the base
     	//get a base plan
-    	//TODO 0 not calling greedy results in an error in get patch cost while retrieving matrix data
+    	//TODO 2 not calling greedy results in an error in get patch cost while retrieving matrix data
 		Planner planner = new PlannerGreedy(a_gameCopy);
 //    	Planner planner = new PlannerMC(a_gameCopy, 1);
 		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints

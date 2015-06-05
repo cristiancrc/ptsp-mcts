@@ -24,9 +24,6 @@ import framework.utils.Vector2d;
 
 /**
  * monte carlo simulation driver
- * TODO: probably useless
- *  - check implementation, this should be a naive mcts
- *  - takes pauses after a  while, something is not cleaned up
  * @version 141128
  * @author Cristian
  *

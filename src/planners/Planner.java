@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import com.sun.xml.internal.ws.util.StringUtils;
+
 import controllers.mcts.DriveMCTS;
 import framework.core.Controller;
 import framework.core.Game;
@@ -106,7 +108,7 @@ public abstract class Planner {
 						exitVector.normalise();
 						
 						dotVector = entryVector.dot(exitVector);
-						System.out.printf("\nw[%d][%s] -> w[%d][%s] -> w[%d][%s] : entry(%f,%f) . exit(%f,%f) = dot(%f)", i, wpFrom.getName(), j, wpThrough.getName(), k, wpTo.getName(), entryVector.x, entryVector.y, exitVector.x, exitVector.y, dotVector);																	
+//						System.out.printf("\nw[%d][%s] -> w[%d][%s] -> w[%d][%s] : entry(%f,%f) . exit(%f,%f) = dot(%f)", i, wpFrom.getName(), j, wpThrough.getName(), k, wpTo.getName(), entryVector.x, entryVector.y, exitVector.x, exitVector.y, dotVector);																	
 					}
 					wpTo_Value.put(wpTo, dotVector);
 				}
@@ -116,7 +118,7 @@ public abstract class Planner {
    		}
 		long timeOut = System.currentTimeMillis();
 		System.out.println(" Time spent inside create angle matrix: " + (timeOut - timeIn) + " ms.");
-		present3dMatrix(matrixCostAngle);
+//		present3dMatrix(matrixCostAngle);
 		return matrixCostAngle;
 	}
     
@@ -168,9 +170,9 @@ public abstract class Planner {
     
     /**
      * creates a distance matrix for a list of waypoints
+     * faster than walking for lava matrix
 	 * @param a list of waypoints
 	 * @return a distance matrix
-	 * TODO 3 set to private and see if instances need cost not just distance
 	 */
 	protected HashMap<Waypoint, HashMap<Waypoint, Double>> createDistanceMatrix(LinkedList<Waypoint> waypointList) {
 		long timeIn = System.currentTimeMillis();
@@ -285,7 +287,6 @@ public abstract class Planner {
 	 * is usually faster than creating both of them separately
 	 * @param waypointList
 	 * @return array with two distance matrices
-	 * TODO ~ incomplete implementation
 	 */
 	protected HashMap<Waypoint, HashMap<Waypoint, Double>>[] createDistanceMatrices(LinkedList<Waypoint> waypointList) {
 		long timeIn = System.currentTimeMillis();
@@ -378,7 +379,6 @@ public abstract class Planner {
 	
 	/**
 	 * displays a matrix in a humanly readable form
-	 * TODO 9 present [n]d matrix
 	 * @param matrix
 	 */
 	protected void present3dMatrix(HashMap<Waypoint, HashMap<Waypoint, HashMap<Waypoint, Double>>> matrix)
@@ -401,6 +401,7 @@ public abstract class Planner {
     	}
 	} 
 	
+	
 	/**
 	 * show a list as consecutive waypoints
 	 * @param waypointList
@@ -420,7 +421,6 @@ public abstract class Planner {
      * look-up in distanceMatrix 
      * @param waypointList
      * @return
-     * TODO 3 set to private and see if calls need cost not just distance 
      */
 	protected double getPathDistance(LinkedList<Waypoint> waypointList) {
 
@@ -574,7 +574,7 @@ public abstract class Planner {
 //		System.out.println("angle change: " + costAngleChange);
 			
 		double totalCost = Math.pow(costDistanceLava, weightDistance) + weightDirectness *costDirectness + weightAngle*costAngleChange;
-		System.out.printf("\ncost: distance [%f] directness [%f]  angle [%f] = total[%f]", costDistanceLava, weightDirectness, weightAngle, totalCost);
+//		System.out.printf("\ncost: distance [%f] directness [%f]  angle [%f] = total[%f]", Math.pow(costDistanceLava, weightDistance), weightDirectness *costDirectness, weightAngle*costAngleChange, totalCost);
 		return totalCost;
 	}	
 

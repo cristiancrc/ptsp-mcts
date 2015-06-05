@@ -143,7 +143,7 @@ public class Exec
             long timeAfter = System.currentTimeMillis();
             if(timeAfter > finalDateMs)
             {
-            	//TODO: planner time restriction
+            	//TODO~ planner time restriction
                 if(m_verbose) System.err.println("Controller initialization time out (" +
                         (PTSPConstants.getStepsInit(m_game.getNumWaypoints()) + timeAfter - finalDateMs) + " ms > " +
                         PTSPConstants.getStepsInit(m_game.getNumWaypoints()) + ").");

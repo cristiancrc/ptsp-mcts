@@ -58,7 +58,7 @@ public class ExecSync extends Exec
         while(!m_game.isEnded())
         {
         	
-        	//TODO: time limit between waypoints
+        	//TODO~ time limit between waypoints
 //        	m_game.setStepsLeft(1000);
 
             //When the result is expected:
@@ -302,7 +302,7 @@ public class ExecSync extends Exec
         //56 - labyrinth //going off path getting stuck in corners
         //61 - wide open
                       
-        //TODO - this selects the controller
+        //TODO~ this selects the controller
         //completed controller
         m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver        
 //        m_controllerName = "controllers.greedy.DriveDfs"; //dfs controller        

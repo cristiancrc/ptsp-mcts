@@ -1,6 +1,8 @@
 package planners;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+
 import framework.core.Game;
 import framework.core.Waypoint;
 import framework.graph.Graph;
@@ -29,13 +31,15 @@ public class Planner2Opt extends Planner {
 		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeStart) + " ms.");		
 
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);//add ship position as waypoint        
-    	distanceMatrix = createDistanceMatrix(waypointList);            	
+    	HashMap<Waypoint, HashMap<Waypoint, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
+    	distanceMatrix = distanceMatrices[0];
+    	matrixCostLava = distanceMatrices[1];
 		long timeAfterMatrix = System.currentTimeMillis();
 		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");		
 		
 
 		//build paths, based on the greedy result
-    	double pathMinCost = getPathDistance(waypointList);//result from greedy	
+    	double pathMinCost = getPathCost(waypointList);//result from greedy	
 		double pathCost = 0;//local search result
 		LinkedList<Waypoint> aPath = new LinkedList<>();//stores built paths
 		LinkedList<Waypoint> aPathRev = new LinkedList<>();//stores built paths
@@ -91,7 +95,7 @@ public class Planner2Opt extends Planner {
 				// check if one of the resulting paths is shorter than minimum
 //				aPath.addFirst(wpShip);
 				if (verbose) showList(aPath);
-            	pathCost = getPathDistance(aPath);
+            	pathCost = getPathCost(aPath);
             	if (verbose) System.out.println("\n generated " + pathCost + "(" + pathMinCost + ")");
             	if(pathCost < pathMinCost)
             	{
@@ -102,7 +106,7 @@ public class Planner2Opt extends Planner {
             	
 				aPathRev.addFirst(wpShip);
 				if (verbose) showList(aPathRev);
-            	pathCost = getPathDistance(aPathRev);
+            	pathCost = getPathCost(aPathRev);
             	if (verbose) System.out.println(" generated " + pathCost + "(" + pathMinCost + ")");
             	if(pathCost < pathMinCost)
             	{
@@ -114,7 +118,7 @@ public class Planner2Opt extends Planner {
     	}    	
     	long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
-		System.out.println("Path distance:" + getPathDistance(m_orderedWaypoints));			
+		System.out.println("Path distance:" + getPathCost(m_orderedWaypoints));			
 		System.out.println("2Opt Planner time: " + (timeAfter - timeStart) + " ms.");	
     }
 }

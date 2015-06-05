@@ -16,7 +16,7 @@ public class Navigator {
     /**
      * Returns the last visible node in the path to the next waypoint
      * @return the node in the way to destination.
-     * TODO: due to inertia ship can go behind a wall and end up not seeing the path at all: find a solution
+     * TODO 9 due to inertia ship can go behind a wall and end up not seeing the path at all: find a solution
      */
 	public static Node getLastNodeVisible(Path a_Path, Game a_gameCopy, Graph m_graph)
     {
