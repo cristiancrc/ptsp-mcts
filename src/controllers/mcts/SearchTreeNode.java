@@ -276,22 +276,19 @@ public class SearchTreeNode {
         }
     }
 
-
-    //
     /**
      * select a random action and apply it to the current state until one of the finishRollout conditions is met
      * @param aimedNode
      * @return
-     * TODO 1 consider using just the state without the aimed node (update evaluation fn)
      * TODO 9 consider using dynamic depth
      */
-    public double simulate(Node aimedNode) 
+    public double simulate() 
     {       
         Game nextState = worldSate.getCopy();       
         int thisDepth = this.depth;
         Vector2d nextPosition = new Vector2d();
                 
-        while (!finishRollout(nextState, thisDepth, aimedNode)) 
+        while (!finishRollout(nextState, thisDepth)) 
         {
             int action = rnd.nextInt(Controller.NUM_ACTIONS);
             for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
@@ -307,8 +304,55 @@ public class SearchTreeNode {
             }
         }
         
+        Value newStateValue = Navigator.evaluateShipPosition(nextState);        
+        double localNewValue = newStateValue.value;
+
+        nextPosition = nextState.getShip().s;
+        DriveMCTS.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
+        
+        if(localNewValue < bounds[0])
+        {
+            bounds[0] = localNewValue;
+        }
+
+        if(localNewValue > bounds[1])
+        {
+            bounds[1] = localNewValue;
+        }
+
+        return localNewValue;       
+    }
+    
+    /**
+     * select a random action and apply it to the current state until one of the finishRollout conditions is met or the target is reached
+     * TODO 8 the node would be better in the evaluation function than in the finish rollout
+     * @param aimedNode
+     * @return
+     */
+    public double simulateTarget(Node aimedNode) 
+    {       
+        Game nextState = worldSate.getCopy();       
+        int thisDepth = this.depth;
+        Vector2d nextPosition = new Vector2d();
+                
+    	while (!finishRolloutTarget(nextState, thisDepth, aimedNode))
+        {
+            int action = rnd.nextInt(Controller.NUM_ACTIONS);
+            for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
+            {
+//              System.out.print(action);
+                nextState.tick(action);
+            }            
+            thisDepth++;
+            nextPosition = nextState.getShip().s;
+            if(!DriveMCTS.possiblePosition.contains(nextPosition))
+            {
+                DriveMCTS.possiblePosition.add(nextPosition);
+            }
+        }
+        
         //TODO 0 update ship position evaluation with paper equation
-        Value newStateValue = Navigator.evaluateShipPosition(nextState, DriveMCTS.aimedNode);        
+        Value newStateValue = Navigator.evaluateShipPositionVisibleNode(nextState, DriveMCTS.aimedNode);        
         double localNewValue = newStateValue.value;
 
         nextPosition = nextState.getShip().s;
@@ -336,10 +380,9 @@ public class SearchTreeNode {
      * check if this state is an end state to finish the simulation
      * @param aState
      * @param depth
-     * @param aimedNode
      * @return
      */
-    public boolean finishRollout(Game aState, int depth, Node aimedNode)
+    public boolean finishRollout(Game aState, int depth)
     {
         //rollout end conditions        
         System.out.print(".");
@@ -348,7 +391,33 @@ public class SearchTreeNode {
             System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
             return true;            
         }  
-        //TODO 1 combine with updated evaluate position and remove the aimed node target
+        
+        if(aState.isEnded())
+        {
+            System.out.print("game is ended()");
+            return true;
+        }           
+        return false;
+    }
+    
+    
+    /**
+     * check if this state is an end state to finish the simulation
+     * @param aState
+     * @param depth
+     * @param aimedNode
+     * @return
+     */
+    private boolean finishRolloutTarget(Game aState, int depth, Node aimedNode)
+    {
+        //rollout end conditions        
+        System.out.print(".");
+        if(depth >= DriveMCTS.searchDepth)
+        {
+            System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
+            return true;            
+        }  
+        //TODO 9 combine with updated evaluate position and remove the aimed node target
         if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
         {           
             System.out.print("target checkpoint reached");
@@ -588,6 +657,8 @@ public class SearchTreeNode {
 	 * @param nodeStartFrom
 	 * @return new node
 	 * TODO 2 use this for macroing, current copy looks fine
+	 * TODO 9 reuse the tree - this was reported bad due to different depth, so consider copying the tree and 
+	 * first updating it before continuing with "normal" search
 	 */
     public static SearchTreeNode copyTree(SearchTreeNode nodeStartFrom) 
     {

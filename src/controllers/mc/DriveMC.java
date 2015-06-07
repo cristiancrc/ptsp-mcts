@@ -26,7 +26,7 @@ import framework.utils.Vector2d;
  * monte carlo simulation driver
  * @version 141128
  * @author Cristian
- *
+ * TODO 9 this should be like the macro rs controller but worse, without macro; consider adding ucb
  */
 
 public class DriveMC extends Controller
@@ -146,7 +146,7 @@ public class DriveMC extends Controller
                 if(!possiblePosition.contains(nextPosition)) possiblePosition.add(nextPosition);	            	
             	
                 // check position where we end up
-            	playoutScore = Navigator.evaluateShipPosition(forThisAction, aimedNode);
+            	playoutScore = Navigator.evaluateShipPositionVisibleNode(forThisAction, aimedNode);
                 if (playoutScore.distance < baseActionScore.distance)
                 {
                 	baseActionScore.distance = playoutScore.distance;

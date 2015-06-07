@@ -129,7 +129,7 @@ public class DriveDfs extends Controller
              {
         		 possiblePosition.add(nextPosition);	
              }        	
-        	 return Navigator.evaluateShipPosition(a_gameCopy, aimedNode);
+        	 return Navigator.evaluateShipPositionVisibleNode(a_gameCopy, aimedNode);
     	}
     	else if (depth < maxDepth)
         {

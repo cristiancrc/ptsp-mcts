@@ -18,6 +18,7 @@ import planners.Planner;
 import planners.Planner3Opt;
 import planners.PlannerBruteForce;
 import planners.PlannerGreedy;
+import planners.PlannerGreedyEvolved;
 import planners.PlannerKOpt;
 import planners.PlannerMC;
 
@@ -59,10 +60,10 @@ public class DriveGreedy extends Controller
         m_graph = new Graph(a_gameCopy);//Init the graph.
 
 //      Planner planner = new PlannerKOpt(a_gameCopy);//general solution, not yet complete
-//      Planner planner = new PlannerGreedyEvolved(a_gameCopy);//plan a cost based route through the waypoints   
+      Planner planner = new PlannerGreedyEvolved(a_gameCopy);//plan a cost based route through the waypoints   
         
         //completed planners
-        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph        
+//        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph        
 //        Planner planner = new Planner2Opt(a_gameCopy);//remove two edges and reconnect the graph    
 //        Planner planner = new PlannerMC(a_gameCopy);//search through random paths to find a small one // 1512 ... 1680
 //        Planner planner = new PlannerBruteForce(a_gameCopy);//brute force search planner  //1512

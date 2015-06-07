@@ -1,0 +1,13 @@
+Maps are in ASCII format.
+This is the meaning of the characters:
+
+@ - obstacle
+E - obstacle
+T - obstacle
+D - damage obstacle
+L - elastic obstacle
+: - lava
+. - ground
+F - fuel canister
+C - checkpoint
+S - ship position

@@ -1,0 +1,25 @@
+planners:
+	nearest waypoint live
+	nearest waypoint now (greedy)
+	tsp
+	ptsp (distance, directness, angle)
+
+controllers:
+	dfs
+	mcs ucb1
+	mcts uct
+	ga
+	
+evaluation:
+	myopic
+	stepping
+	
+	
+TODO:
+- set eclipse on hp to read dict in dropbox
+- for a* is it run each time or do we just query a matrix?
+- use evaluators with weight zero for fuel and damage, for comparison purposes
+- implement panic mode as paper
+- macroing is used but the child is not used
+- check the random / sequential node selection in tree policy / default policy
+- panic mode exact parameters are in nsga2 paper

@@ -32,10 +32,15 @@ public abstract class Planner {
 	ArrayList<Path> m_plannedPath = new ArrayList<>();//path between waypoints ready to be displayed on-screen
 	Graph m_graph;
 	Game aGameCopy;
-	static double weightLava = 1.5;
-	static double weightDistance = 1;
-	static double weightDirectness = 1;
+	static double weightLava = 1;
+	static double weightDistance = 0;
+	static double weightDirectness = 0;
 	static double weightAngle = 1;
+	//TODO 8 if a waypoint is taken out of order, what do we do? should we replan? remove it from the path?
+	//TODO 0 use live target instead of path in path out for angle
+	//fuel true
+	//bonus fuel 200
+	//penalty for consecutive tanks 1000
 		
     /**
      * store paths from one point to another, in the order resulted by a planner
@@ -58,7 +63,8 @@ public abstract class Planner {
      * create the 3d matrix containing angle changes between wapyoints, counting the last and first steps of the path
      * @param waypointList
      * @return 3d hash map, double
-     */
+     * TODO 0 use navigator > get node visible instead of using path angles
+     */    
     protected HashMap<Waypoint , HashMap<Waypoint, HashMap<Waypoint , Double>>> createAngleMatrix(LinkedList<Waypoint> waypointList)
     {
 		long timeIn = System.currentTimeMillis();
@@ -556,7 +562,7 @@ public abstract class Planner {
 	 * @return total cost
 	 */
 	public double getPathCost(LinkedList<Waypoint> waypointList, double weightDistance, double weightDirectness, double weightAngle)
-	{	
+	{			
 //		double costDistance = 0;		
 //		costDistance = getPathDistance(waypointList);
 //		System.out.println("distance matrix: " + costDistance);
@@ -574,7 +580,7 @@ public abstract class Planner {
 //		System.out.println("angle change: " + costAngleChange);
 			
 		double totalCost = Math.pow(costDistanceLava, weightDistance) + weightDirectness *costDirectness + weightAngle*costAngleChange;
-//		System.out.printf("\ncost: distance [%f] directness [%f]  angle [%f] = total[%f]", Math.pow(costDistanceLava, weightDistance), weightDirectness *costDirectness, weightAngle*costAngleChange, totalCost);
+		System.out.printf("\ncost: distance [%f] directness [%f]  angle [%f] = total[%f]", Math.pow(costDistanceLava, weightDistance), weightDirectness *costDirectness, weightAngle*costAngleChange, totalCost);
 		return totalCost;
 	}	
 

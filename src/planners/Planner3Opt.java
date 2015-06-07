@@ -23,7 +23,7 @@ public class Planner3Opt extends Planner {
     	m_graph = new Graph(a_gameCopy);
     	this.aGameCopy = a_gameCopy;
     	
-    	//TODO 8 use multiple fragment instead of greedy for the base
+    	//TODO 0 use multiple fragment instead of greedy for the base
     	//get a base plan
     	//TODO 2 not calling greedy results in an error in get patch cost while retrieving matrix data
 		Planner planner = new PlannerGreedy(a_gameCopy);

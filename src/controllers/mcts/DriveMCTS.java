@@ -28,7 +28,9 @@ import framework.utils.Vector2d;
  * monte carlo tree search driver
  * @version 150515
  * @author Cristian
- *
+ * TODO 0 implement controller's 18 parameters
+ * TODO 1 create the distance map flood fill
+ * TODO 7 implement transposition tables for states (see 2013 detail paper)
  */
 
 public class DriveMCTS extends Controller
@@ -227,7 +229,7 @@ public class DriveMCTS extends Controller
         	
         	// simulate
         	System.out.println(" simulating from " + SearchTreeNode.getFullIdentifier(urgentNode));
-        	double matchValue = urgentNode.simulate(aimedNode);
+        	double matchValue = urgentNode.simulateTarget(aimedNode);
         	
         	// back propagate
         	urgentNode.backPropagate(urgentNode, matchValue);

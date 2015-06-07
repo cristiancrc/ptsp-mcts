@@ -174,6 +174,5 @@ public class PlannerGreedyEvolved extends Planner {
 		System.out.println("Path cost:" + distanceTravelled);
 		System.out.println("Path distance " + getPathDistance(m_orderedWaypoints));
 		System.out.println("Greedy Evolved Planner time: " + (timeAfter - timeStart) + " ms.");
-		System.exit(0);
     }	
 }

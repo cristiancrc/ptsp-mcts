@@ -35,13 +35,30 @@ public class Navigator {
     }
     
     /**
-     * based on Diego Perez' code
      * computes a score / cost for getting from the current position to the aimedNode
      * @param a_gameCopy
      * @param aimedNode
      * @return
+     * TODO 0 implement evaluator
      */
-    public static Value evaluateShipPosition(Game a_gameCopy, Node aimedNode) 
+    public static Value evaluateShipPosition(Game a_gameCopy) 
+    {
+    	Vector2d nextPosition = a_gameCopy.getShip().s;
+		Vector2d potentialDirection = a_gameCopy.getShip().d;
+
+		Value value = new Value();
+		return value;
+	}
+
+	
+	/**
+     * computes a score / cost for getting from the current position to the aimedNode
+     * @param a_gameCopy
+     * @param aimedNode
+     * @return
+     * //TODO 8 implement this as a double view a* live alternative to flood fills
+     */
+    public static Value evaluateShipPositionVisibleNode(Game a_gameCopy, Node aimedNode) 
     {
     	Vector2d nextPosition = a_gameCopy.getShip().s;
 		Vector2d potentialDirection = a_gameCopy.getShip().d;
@@ -56,7 +73,7 @@ public class Navigator {
 		Value value = new Value();
 		value.distance = dist;
 		value.direction = dot;
-		value.value = dist + dot;//TODO 0 this is a very bad heuristic
+		value.value = dist + dot;
 		return value;
 	}
 
