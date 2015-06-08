@@ -14,6 +14,7 @@ import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
 import framework.graph.Path;
+import framework.utils.Navigator;
 import framework.utils.Vector2d;
 
 /**
@@ -33,10 +34,10 @@ public abstract class Planner {
 	Graph m_graph;
 	Game aGameCopy;
 	static double weightLava = 1;
-	static double weightDistance = 0;
-	static double weightDirectness = 0;
+	static double weightDistance = 1;
+	static double weightDirectness = 1;
 	static double weightAngle = 1;
-	//TODO 8 if a waypoint is taken out of order, what do we do? should we replan? remove it from the path?
+	//TODO 8 if a waypoint is taken out of order, what do we do? should we replan? remove it from the path? with 1 0 0 1 this happens
 	//TODO 0 use live target instead of path in path out for angle
 	//fuel true
 	//bonus fuel 200
@@ -73,6 +74,7 @@ public abstract class Planner {
     	HashMap<Waypoint, HashMap<Waypoint, Double>> wpThrough_wpTo = new HashMap<Waypoint, HashMap<Waypoint, Double>>();
 		for(int i = 0; i < waypointList.size(); i++)
    		{
+			// TODO 1 don't we have these paths somewhere?
 			Waypoint wpFrom = waypointList.get(i);
 			Node nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
 			wpThrough_wpTo.clear();
@@ -81,13 +83,32 @@ public abstract class Planner {
 				if(j == i) continue;
 				Waypoint wpThrough = waypointList.get(j);
 				Node nodeThrough = m_graph.getClosestNodeTo(wpThrough.s.x, wpThrough.s.y, false);
+				Path pathIncoming = m_graph.getPath(nodeFrom.id(), nodeThrough.id());
+				int counted = 0;
+				Node nodeIncoming =  m_graph.getNode(pathIncoming.m_points.get(0));
+				for(int n = pathIncoming.m_points.size()-1; n > 0 ; n--)
+				{                           
+					Node itNode = m_graph.getNode(pathIncoming.m_points.get(n));
+					Vector2d itNodePos = new Vector2d(itNode.x(),itNode.y());
+					counted++;
+				      
+				    boolean isThereLineOfSight = aGameCopy.getMap().LineOfSight(wpFrom.s, itNodePos);
+				    if(isThereLineOfSight)
+				    {
+				        nodeIncoming = itNode;
+				        break;
+				    }
+				}
+				System.out.println("count " + counted);
+				Vector2d entryVector = new Vector2d(nodeThrough.x() - nodeIncoming.x(), nodeThrough.y() - nodeIncoming.y() );					
+				entryVector.normalise();				
+
 				wpTo_Value.clear();
 				for(int k =0; k < waypointList.size(); k++)
 				{					
 					if(k == j) continue;
 					if(k == i) continue;
 					Waypoint wpTo = waypointList.get(k);				
-					Node nodeTo = m_graph.getClosestNodeTo(wpTo.s.x, wpTo.s.y, false);
 					double dotVector = 0;
 //					System.out.println(wpFrom.getName() + " > " + wpThrough.getName() + " > " + wpTo.getName());
 //					System.out.print("i:" + i + ",j:" + j + ",k:" + k);
@@ -102,15 +123,27 @@ public abstract class Planner {
 					{
 						//calculate
 //						System.out.println(" calculate");
-						Path pathIncoming = m_graph.getPath(nodeFrom.id(), nodeThrough.id());
-						Path pathOutgoing = m_graph.getPath(nodeThrough.id(), nodeTo.id());
-											
-						Node lastNode = m_graph.getNode(pathIncoming.m_points.get(pathIncoming.m_points.size()-2));//size-1 is last, size-2 is next to last
-						Vector2d entryVector = new Vector2d(nodeFrom.x() - lastNode.x(), nodeFrom.y() - lastNode.y() );					
-						entryVector.normalise();
+						Node nodeTo = m_graph.getClosestNodeTo(wpTo.s.x, wpTo.s.y, false);						
+                        Path pathOutgoing = m_graph.getPath(nodeThrough.id(), nodeTo.id());
+                        int counted2 = 0;                        
+                        Node nodeOutgoing =  m_graph.getNode(pathOutgoing.m_points.get(0));
+        				for(int n = pathOutgoing.m_points.size()-1; n > 0 ; n--)
+        				{                           
+        					Node itNode = m_graph.getNode(pathOutgoing.m_points.get(n));
+        					Vector2d itNodePos = new Vector2d(itNode.x(),itNode.y());
+//        					System.out.println("iterator node " + itNode.id());
+        					counted2++;
+        				      
+        				    boolean isThereLineOfSight = aGameCopy.getMap().LineOfSight(wpThrough.s, itNodePos);
+        				    if(isThereLineOfSight)
+        				    {
+        				        nodeOutgoing = itNode;
+        				        break;
+        				    }
+        				}
+        				System.out.println("count out " + counted2);                        
 
-						Node firstNode = m_graph.getNode(pathOutgoing.m_points.get(1));
-						Vector2d exitVector = new Vector2d(firstNode.x() - nodeFrom.x(), firstNode.y() - nodeFrom.y());
+						Vector2d exitVector = new Vector2d(nodeThrough.x() - nodeOutgoing.x(), nodeThrough.y() - nodeOutgoing.y());
 						exitVector.normalise();
 						
 						dotVector = entryVector.dot(exitVector);
