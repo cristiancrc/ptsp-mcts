@@ -9,6 +9,7 @@ import framework.graph.Graph;
 
 /**
  *  TODO: implement after all else is done
+ *  - do not delete, some code is tried in here
  *  - based on working 3Opt
  *  - find a general solution, most probably recursive calls
  *  - remove first path, as its always the one without any removals (solved in 3opt)

@@ -22,21 +22,17 @@ public class Planner2Opt extends Planner {
     	System.out.println("***2 opt planner***");
         long timeStart = System.currentTimeMillis();
     	m_graph = new Graph(a_gameCopy);
-    	
+    	this.aGameCopy = a_gameCopy;    	
+    	createMatrices();
+        long timeAfterMatrices = System.currentTimeMillis();
+		System.out.println(" Total time spent for matrices init: " + (timeAfterMatrices - timeStart) + " ms.");
     	//get a greedy plan
 		Planner planner = new PlannerGreedy(a_gameCopy);
     	LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
 		waypointList = planner.getOrderedWaypoints();//get the planned route
 		long timeAfterGreedy = System.currentTimeMillis();
-		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeStart) + " ms.");		
-
+		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeAfterMatrices) + " ms.");		
     	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);//add ship position as waypoint        
-    	HashMap<Waypoint, HashMap<Waypoint, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
-    	distanceMatrix = distanceMatrices[0];
-    	matrixCostLava = distanceMatrices[1];
-		long timeAfterMatrix = System.currentTimeMillis();
-		System.out.println(" Time spent to build distance matrix: " + (timeAfterMatrix - timeAfterGreedy) + " ms.");		
-		
 
 		//build paths, based on the greedy result
     	double pathMinCost = getPathCost(waypointList);//result from greedy	
@@ -117,7 +113,7 @@ public class Planner2Opt extends Planner {
 			if (verbose) System.out.println("");   		
     	}    	
     	long timeAfter = System.currentTimeMillis();
-    	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
+    	System.out.println(" Time spent searching: " + (timeAfter - timeAfterGreedy) + " ms.");    	
 		System.out.println("Path distance:" + getPathCost(m_orderedWaypoints));			
 		System.out.println("2Opt Planner time: " + (timeAfter - timeStart) + " ms.");	
     }

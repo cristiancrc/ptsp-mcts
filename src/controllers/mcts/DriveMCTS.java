@@ -8,8 +8,10 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import planners.Planner;
+import planners.Planner2Opt;
 import planners.Planner3Opt;
 import planners.PlannerGreedy;
+import planners.PlannerMC;
 import framework.core.Controller;
 import framework.core.FuelTank;
 import framework.core.Game;
@@ -35,7 +37,7 @@ import framework.utils.Vector2d;
 
 public class DriveMCTS extends Controller
 {
-	public static boolean verbose = true;
+	public static boolean verbose = false;
 	
     private Graph m_graph; //     * Graph for this controller.
     private Node m_shipNode; //     * Node in the graph, closest to the ship position.
@@ -94,6 +96,7 @@ public class DriveMCTS extends Controller
 
         Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph
 //        Planner planner = new PlannerGreedy(a_gameCopy);//use greedy for testing
+//        Planner planner = new PlannerMC(a_gameCopy, a_timeDue);//use greedy for testing
         m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
         m_nextWaypoint = m_orderedWaypoints.get(0);//set immediate goal        
         planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
@@ -122,11 +125,13 @@ public class DriveMCTS extends Controller
         
 		//TODO 2 do something useful with this time
 		if(macroActionsRemaining-- > 0)
-		{
+		{ 
+			//mctsSearch call
+			mctsSearch(a_gameCopy, a_timeDue);
 			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]");
 			return macroAction;			
 		}        
-              
+        searchTree = null;      
         possiblePosition.clear();//display just one level of search
         possiblePositionScore.clear();
     	
@@ -213,9 +218,21 @@ public class DriveMCTS extends Controller
 //        System.out.print("\n due:" + timeDue);
 //    	System.out.print("\n remaining:" + remainingTime );
         
+//        SearchTreeNode rootNode;
+        if(searchTree == null)
+        {
+        	System.out.println("+++++++++new search");        
+        	//create root node for initial state
+//        	rootNode = new SearchTreeNode(a_gameCopy, null);
+        } else 
+        {
+        	System.out.println("+++++++++continuing search...");
+//        	rootNode = SearchTreeNode.copyTree(searchTree);        	
+        }
+        
     	//create root node for initial state
     	SearchTreeNode rootNode = new SearchTreeNode(a_gameCopy, null);
-    	System.out.println(" root data: " + SearchTreeNode.getTotalChildren(rootNode));
+    	if (verbose) System.out.println(" root data: " + SearchTreeNode.getTotalChildren(rootNode));
     	
     	int bestAction = -1;    	    	
     	int playouts = 0;
@@ -236,18 +253,20 @@ public class DriveMCTS extends Controller
         	
         	remainingTime = timeDue - System.currentTimeMillis();
         	if (verbose) System.out.print("\n" + ticks + " : "  + playouts + " value:" + matchValue + " remaining: " + remainingTime );        	
-        	System.out.println("\ntotal children nodes : " + SearchTreeNode.getTotalChildren(rootNode));
+        	if (verbose) System.out.println("\ntotal children nodes : " + SearchTreeNode.getTotalChildren(rootNode));
         }
         //select child node
-//		bestAction = rootNode.getActionRobustChild();//most visited child		
+		bestAction = rootNode.getActionRobustChild();//most visited child		
 //		bestAction = rootNode.getActionSecureChild();//lowest average score child
-        bestAction = rootNode.getActionMinValue();//lowest average score child                 
+//        bestAction = rootNode.getActionMinValue();//lowest average score child                 
 //      System.out.println("selected "+ bestAction);               
        
 //        System.out.println("\n=====full tree");
 //        rootNode.present();
+        //TODO 9 supposedly erratic when copying the child, due to different depth end
         //store the selected tree
-        searchTree = SearchTreeNode.copyTree(rootNode.getChild(bestAction));
+//        searchTree = SearchTreeNode.copyTree(rootNode.getChild(bestAction));
+        searchTree = SearchTreeNode.copyTree(rootNode);
 //        System.out.println("\nselected : " + bestAction);
 //        System.out.println("\n=====leaf");
 //        searchTree.present();               
@@ -260,11 +279,11 @@ public class DriveMCTS extends Controller
         while (currentNode.depth < searchDepth)
         {
 	        if (!currentNode.isFullyExpanded()) {
-	        	System.out.println(currentNode.getIdentifier() + " expanding");
+	        	System.out.println("\n" + currentNode.getIdentifier() + " expanding");
 	            return currentNode.expand();
 	        } else {        	
 	        	SearchTreeNode nextNode = currentNode.uct();
-	        	System.out.println(currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );
+	        	System.out.println("\n" + currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );
 	//                SearchTreeNode nextNode = currentNode.egreedy();
 	//                SearchTreeNode nextNode = currentNode.random();//MC search
 	            currentNode = nextNode;

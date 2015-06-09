@@ -14,6 +14,7 @@ import framework.utils.Value;
 import framework.utils.Vector2d;
 
 public class SearchTreeNode {
+	static boolean verbose = false;
     public SearchTreeNode parent = null;//parent node   
     public int action = -1;//action performed in parent node that got us here
     public Game worldSate;//current world state 
@@ -95,10 +96,10 @@ public class SearchTreeNode {
      */
     public void trySetScore(double actionScore) 
     {
-        System.out.println(actionScore + " ? " + this.value);
+    	if (verbose) System.out.println(actionScore + " ? " + this.value);
         if(actionScore < this.value) 
         {
-            System.out.println(actionScore + " < " + this.value);
+        	if (verbose) System.out.println(actionScore + " < " + this.value);
             this.value = actionScore;
         }
     }
@@ -109,7 +110,7 @@ public class SearchTreeNode {
      */
     public boolean isFullyExpanded() 
     {    	
-        System.out.println("\nfully expanded fast check on " + this.getIdentifier());        
+//        System.out.println("\nfully expanded fast check on " + this.getIdentifier());        
         for (SearchTreeNode aNode : this.children) 
         {        
             if (aNode == null) 
@@ -147,7 +148,7 @@ public class SearchTreeNode {
         }       
         
         
-        System.out.println(" expand action : " + bestAction);
+        if (verbose) System.out.println(" expand action : " + bestAction);
         Game nextState = worldSate.getCopy();
         for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
         {
@@ -351,17 +352,11 @@ public class SearchTreeNode {
             }
         }
         
-        //TODO 0 update ship position evaluation with paper equation
         Value newStateValue = Navigator.evaluateShipPositionVisibleNode(nextState, DriveMCTS.aimedNode);        
         double localNewValue = newStateValue.value;
 
         nextPosition = nextState.getShip().s;
         DriveMCTS.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
-//          if(!DriveMCTS.possiblePositionScore.containsKey(nextPosition))
-//        {
-//              DriveMCTS.possiblePositionScore.put(nextPosition, localNewValue);   
-//        }
-
         
         if(localNewValue < bounds[0])
         {
@@ -388,13 +383,13 @@ public class SearchTreeNode {
         System.out.print(".");
         if(depth >= DriveMCTS.searchDepth)
         {
-            System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
+        	if (verbose) System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
             return true;            
         }  
         
         if(aState.isEnded())
         {
-            System.out.print("game is ended()");
+        	if (verbose) System.out.print("game is ended()");
             return true;
         }           
         return false;
@@ -414,19 +409,19 @@ public class SearchTreeNode {
         System.out.print(".");
         if(depth >= DriveMCTS.searchDepth)
         {
-            System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
+        	if (verbose) System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
             return true;            
         }  
         //TODO 9 combine with updated evaluate position and remove the aimed node target
         if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
         {           
-            System.out.print("target checkpoint reached");
+        	if (verbose) System.out.print("target checkpoint reached");
             return true;
         }
         
         if(aState.isEnded())
         {
-            System.out.print("game is ended()");
+        	if (verbose) System.out.print("game is ended()");
             return true;
         }           
         return false;
@@ -458,15 +453,17 @@ public class SearchTreeNode {
         boolean allEqual = true;
         double initVisit = -1;
 
-        System.out.println("bounds : " + SearchTreeNode.bounds[0] + " <> " + SearchTreeNode.bounds[1]);
+        if (verbose) System.out.println("bounds : " + SearchTreeNode.bounds[0] + " <> " + SearchTreeNode.bounds[1]);
         for (int i = 0; i < children.length; i++) 
         {
-            System.out.println("\nat child " + i + " with data");
-            System.out.println("visited : " + children[i].visited);
-            System.out.println("score : " + children[i].score);
-            System.out.println("best child : " + children[i].bestPossible);         
-            System.out.println("value : " + children[i].value);
-            
+        	if (verbose) 
+        	{
+        		System.out.println("\nat child " + i + " with data");
+        		System.out.println("visited : " + children[i].visited);
+        		System.out.println("score : " + children[i].score);
+        		System.out.println("best child : " + children[i].bestPossible);         
+        		System.out.println("value : " + children[i].value);
+        	}
             if(children[i] != null)
             {
                 //check if all children have the same visited count
@@ -516,12 +513,15 @@ public class SearchTreeNode {
         {
             if(null != children[i])
             {
-//              System.out.println("\nat child " + i + " with data");                           
-//              System.out.println("visited : " + children[i].visited);
-//              System.out.println("score : " + children[i].score);
-//              System.out.println("best child : " + children[i].bestPossible);             
-//              System.out.println("value : " + children[i].value);
-                
+            	if (verbose) 
+            	{
+		              System.out.println("\nat child " + i + " with data");                           
+		              System.out.println("visited : " + children[i].visited);
+		              System.out.println("score : " + children[i].score);
+		              System.out.println("best child : " + children[i].bestPossible);             
+		              System.out.println("value : " + children[i].value);
+            	}
+		                
                 if (children[i].value < bestValue) {
                     bestValue = children[i].value;
                     selectedAction = i;
@@ -551,11 +551,14 @@ public class SearchTreeNode {
         {
             if(null != children[i])
             {
-                System.out.println("\nat child " + i + " with data");                           
-                System.out.println("visited : " + children[i].visited);
-                System.out.println("score : " + children[i].score);
-                System.out.println("best child : " + children[i].bestPossible);             
-                System.out.println("value : " + children[i].value);
+            	if (verbose) 
+            	{
+            		System.out.println("\nat child " + i + " with data");                           
+	                System.out.println("visited : " + children[i].visited);
+	                System.out.println("score : " + children[i].score);
+	                System.out.println("best child : " + children[i].bestPossible);             
+	                System.out.println("value : " + children[i].value);
+            	}
                 
                 if (children[i].bestPossible < bestValue) {
                     bestValue = children[i].bestPossible;
@@ -580,7 +583,7 @@ public class SearchTreeNode {
      */
     public void present(int depth)
     {
-        System.out.print(this.getName() + " h<"+this.hashCode()+">" + " n<"+this.name+">" 
+    	if (verbose) System.out.print(this.getName() + " h<"+this.hashCode()+">" + " n<"+this.name+">" 
         		+ " {" + this.getIdentifier() + "} " 
         		+ "(p:" + (this.parent != null ? this.parent.getName() + ", " + this.parent.name : "-") + ")" 
         		+ " [V:" + this.value + "] [a:" + this.action + "] [s:" + this.score + "] [v:" + this.visited + "] [c:" + this.children.length+"]");
@@ -589,7 +592,7 @@ public class SearchTreeNode {
         {        	
         	if(null != aNode)
         	{
-        		System.out.print("\n");
+        		if (verbose) System.out.print("\n");
                 for(int i = 0; i < depth; i++) System.out.print("\t ");
                 aNode.present(depth);	
         	}

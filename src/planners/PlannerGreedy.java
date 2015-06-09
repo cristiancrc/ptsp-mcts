@@ -11,7 +11,7 @@ import framework.graph.Path;
 /**
  *  greedy planner
  *  goes through the list waypoints and gets the closest one
- *  does not create a distance matrix
+ *  creates just the distance matrix if it isn't present
  *  @author Cristian
  *  @version 141128
  */
@@ -26,8 +26,14 @@ public class PlannerGreedy extends Planner {
 		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//a list of all waypoints 
 
     	//add ship position as waypoint
-        Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
-    	m_orderedWaypoints.add(wpShip);
+        Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);    	
+    	if(distanceMatrix.size() == 0)
+    	{
+    		waypointList.addFirst(wpShip);
+    		distanceMatrix = createDistanceMatrix(waypointList);
+    		waypointList.removeFirst();
+    	}    	    	
+    	m_orderedWaypoints.addFirst(wpShip);
     	
 		//iterate through the other waypoints to find the closest one to each next one
 		int checkedWaypoints = 0;
@@ -42,16 +48,13 @@ public class PlannerGreedy extends Planner {
 	    	
 			for(Waypoint wpEnd : waypointList)
 			{
-				if(verbose) System.out.print("...checking " + wpEnd.getName());
-				Node nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
-				Node nodeTo = m_graph.getClosestNodeTo(wpEnd.s.x, wpEnd.s.y, false);					
-				Path aPath = m_graph.getPath(nodeFrom.id(), nodeTo.id());	    		   		
-	    		if(verbose) System.out.println(" cost " + aPath.m_cost);
-	    		if (aPath.m_cost < minPathCost)
-	    		{
-	    			closestWaypoint = wpEnd;
-	    			minPathCost = aPath.m_cost;
-	    		}	    		
+				if(verbose) System.out.print("...checking " + wpEnd.getName());				
+				double distance = distanceMatrix.get(wpFrom).get(wpEnd);		
+				if(distance < minPathCost)
+				{
+					closestWaypoint = wpEnd;
+					minPathCost = distance;
+				}			
 			}			
 			if(verbose) System.out.println("closest is " + closestWaypoint.getName());
 			distanceTravelled += minPathCost;

@@ -315,7 +315,6 @@ public class Game
     /**
      * Updates the game logic: all entities in the game and game state.
      * @param a_shipMove Move to execute.
-     * TODO 1 check tick vs getShip().update()
      */
     public void tick(int a_shipMove)
     {
