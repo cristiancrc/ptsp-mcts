@@ -355,8 +355,9 @@ public class SearchTreeNode {
         Value newStateValue = Navigator.evaluateShipPositionVisibleNode(nextState, DriveMCTS.aimedNode);        
         double localNewValue = newStateValue.value;
 
-        nextPosition = nextState.getShip().s;
-        DriveMCTS.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
+// TODO 9 this is modified while it is being drawn, resulting in problems
+//        nextPosition = nextState.getShip().s;
+//        DriveMCTS.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
         
         if(localNewValue < bounds[0])
         {
@@ -406,7 +407,7 @@ public class SearchTreeNode {
     private boolean finishRolloutTarget(Game aState, int depth, Node aimedNode)
     {
         //rollout end conditions        
-        System.out.print(".");
+    	if (verbose) System.out.print(".");//TODO 1 basic debug mcts
         if(depth >= DriveMCTS.searchDepth)
         {
         	if (verbose) System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);

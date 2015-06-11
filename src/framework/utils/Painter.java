@@ -40,34 +40,32 @@ public class Painter {
     public static void paintPossibleShipPositions(Graphics2D a_gr, ArrayList<Vector2d> possiblePosition)
     {
     	a_gr.setColor(Color.lightGray);
-//    	ArrayList<Vector2d> possiblePositionCopy = (ArrayList<Vector2d>) possiblePosition.clone();
+    	//a copy is used to avoid comodification issues
+    	ArrayList<Vector2d> possiblePositionCopy = (ArrayList<Vector2d>) possiblePosition.clone();
     	if (null != possiblePosition)
     	{
-    		for(Vector2d position : possiblePosition) 
+    		for(Vector2d position : possiblePositionCopy) 
         	{
     			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
         	}	
     	}  	    	
     }
-	public static void paintPossibleShipPositions(Graphics2D a_gr, HashMap<Vector2d, Double> possiblePositionScore) {		
-    	if (null != possiblePositionScore)
+	public static void paintPossibleShipPositions(Graphics2D a_gr, HashMap<Vector2d, Double> possiblePositionScore)
+	{		
+		for(Vector2d position : possiblePositionScore.keySet()) 
     	{
-    		for(Vector2d position : possiblePositionScore.keySet()) 
-        	{
-    			a_gr.setColor(Color.green);
-    			if(possiblePositionScore.get(position) > 5)
-    			{
-    				a_gr.setColor(Color.orange);
-    			}
-    			if(possiblePositionScore.get(position) > 10)
-    			{
-    				a_gr.setColor(Color.red);
-    			}
-    			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
-        	}	
-    	}
-		
-	}    
+			a_gr.setColor(Color.green);
+			if(possiblePositionScore.get(position) > 5)
+			{
+				a_gr.setColor(Color.orange);
+			}
+			if(possiblePositionScore.get(position) > 10)
+			{
+				a_gr.setColor(Color.red);
+			}
+			a_gr.drawRect((int)position.x, (int)position.y, 1, 1);	
+    	}	
+    }    
     
     /**
      * plot panic positions

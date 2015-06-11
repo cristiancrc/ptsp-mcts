@@ -63,10 +63,11 @@ public class DriveMCTS extends Controller
     int panicModeNextCheck = panicModeCheckInterval;    
     int panicModeAction = 1;//action to take while in panic mode
     Vector2d previousShipPosition;
-    //TODO 5 what's wrong with setting this to 1?
+    //TODO 3 what's wrong with setting this to 1? even without macro time.
     static int macroActionsCount = 5;
     int macroActionsRemaining = 0;
     int macroAction;
+    int ongoingsearchresult = -1;
 
     public static int searchDepth = 10;
 
@@ -118,43 +119,40 @@ public class DriveMCTS extends Controller
     {
     	ticks++;
     	//verbose = ((ticks % 10 == 0) ? true : false);    	
-    	
         long timeIn = System.currentTimeMillis();
         if(verbose) System.out.println("\n>>>in\t\t" + timeIn);
         if(verbose) System.out.println("---due on\t" + a_timeDue);
         
-		//TODO 2 do something useful with this time
+		//TODO 2 macro action are slower than normal actions. better evaluation might fix? macro in simulation?
 		if(macroActionsRemaining-- > 0)
 		{ 
 			//mctsSearch call
-			mctsSearch(a_gameCopy, a_timeDue);
-			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]");
+			System.out.println("---continuing");
+			ongoingsearchresult = mctsSearch(a_gameCopy, a_timeDue);
+			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]\n");
 			return macroAction;			
-		}        
+		}
         searchTree = null;      
         possiblePosition.clear();//display just one level of search
-        possiblePositionScore.clear();
-    	
     	int bestAction = -1;
-        if(inPanicMode)
-    	{        
-        	if (System.currentTimeMillis() > panicModeStart + panicModeLength)
-        	{
-        		if (verbose) System.out.println("\t<<<out of panic mode");
-        		/*
-        		 * the panic mode action can take longer than the normal next interval
-        		 * so push next check further so a normal action can be applied
-        		 */
-        		panicModeNextCheck += 100 *panicModeCheckInterval;
-        		inPanicMode = false;
-        	}
-        	else
-        	{
-        		if (verbose) System.out.println("panic mode!!!");
-        		return panicModeAction;
-        	}
-        		
-    	}
+//        if(inPanicMode)
+//    	{        
+//        	if (System.currentTimeMillis() > panicModeStart + panicModeLength)
+//        	{
+//        		if (verbose) System.out.println("\t<<<out of panic mode");
+//        		/*
+//        		 * the panic mode action can take longer than the normal next interval
+//        		 * so push next check further so a normal action can be applied
+//        		 */
+//        		panicModeNextCheck += 100 *panicModeCheckInterval;
+//        		inPanicMode = false;
+//        	}
+//        	else
+//        	{
+//        		if (verbose) System.out.println("panic mode!!!");
+//        		return panicModeAction;
+//        	}        		
+//    	}
     	if(isWaypointReached(a_gameCopy)) advanceWaypointTarget();
         
         //get path the next waypoint    	    
@@ -179,28 +177,34 @@ public class DriveMCTS extends Controller
     		pathToFollowFarther = m_plannedPath.get(nextWaypoint);
     		aimedNodeNext = Navigator.getLastNodeVisible(pathToFollowFarther, a_gameCopyForAimedNode, m_graph);    		
     	}
-    	bestAction = mctsSearch(a_gameCopy, a_timeDue);      
-        macroAction = bestAction;
-        macroActionsRemaining = macroActionsCount;    	               
+		if(macroActionsRemaining <= 0)
+		{ 
+			//mctsSearch call
+			System.out.println("\n---new search");
+			ongoingsearchresult = mctsSearch(a_gameCopy, a_timeDue);
+		} 		
+        macroAction = ongoingsearchresult;
+        macroActionsRemaining = macroActionsCount;
+        bestAction = macroAction;
     	
-    	//check if ship is stuck in the same position
-    	if(ticks >= panicModeNextCheck)
-    	{
-        	Vector2d currentShipPosition = a_gameCopy.getShip().s;
-        	if(currentShipPosition.equals(previousShipPosition))
-        	{
-        		if (verbose) System.out.println(">>>entering panic mode");
-        		inPanicMode = true;
-        		panicModeStart = System.currentTimeMillis();
-           	 	if(!panicPosition.contains(currentShipPosition))
-                {
-           	 		panicPosition.add(currentShipPosition);	
-                }        		
-        		return panicModeAction;         		
-        	}
-        	previousShipPosition = a_gameCopy.getShip().s;
-        	panicModeNextCheck = ticks + panicModeCheckInterval;
-    	}    	
+//    	//check if ship is stuck in the same position
+//    	if(ticks >= panicModeNextCheck)
+//    	{
+//        	Vector2d currentShipPosition = a_gameCopy.getShip().s;
+//        	if(currentShipPosition.equals(previousShipPosition))
+//        	{
+//        		if (verbose) System.out.println(">>>entering panic mode");
+//        		inPanicMode = true;
+//        		panicModeStart = System.currentTimeMillis();
+//           	 	if(!panicPosition.contains(currentShipPosition))
+//                {
+//           	 		panicPosition.add(currentShipPosition);	
+//                }        		
+//        		return panicModeAction;         		
+//        	}
+//        	previousShipPosition = a_gameCopy.getShip().s;
+//        	panicModeNextCheck = ticks + panicModeCheckInterval;
+//    	}    	
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
 
         //TODO - this stops the execution
@@ -245,7 +249,7 @@ public class DriveMCTS extends Controller
         	SearchTreeNode urgentNode = treePolicy(rootNode);
         	
         	// simulate
-        	System.out.println(" simulating from " + SearchTreeNode.getFullIdentifier(urgentNode));
+        	if (verbose) System.out.println(" simulating from " + SearchTreeNode.getFullIdentifier(urgentNode));//TODO 1 mcts debug
         	double matchValue = urgentNode.simulateTarget(aimedNode);
         	
         	// back propagate
@@ -275,15 +279,15 @@ public class DriveMCTS extends Controller
 
 	private SearchTreeNode treePolicy(SearchTreeNode incomingNode) {
     	SearchTreeNode currentNode = incomingNode;
-
+    	//TODO 1 mcts basic debug
         while (currentNode.depth < searchDepth)
         {
 	        if (!currentNode.isFullyExpanded()) {
-	        	System.out.println("\n" + currentNode.getIdentifier() + " expanding");
+	        	if (verbose) System.out.println("\n" + currentNode.getIdentifier() + " expanding");
 	            return currentNode.expand();
 	        } else {        	
 	        	SearchTreeNode nextNode = currentNode.uct();
-	        	System.out.println("\n" + currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );
+	        	if (verbose) System.out.println("\n" + currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );
 	//                SearchTreeNode nextNode = currentNode.egreedy();
 	//                SearchTreeNode nextNode = currentNode.random();//MC search
 	            currentNode = nextNode;
@@ -309,7 +313,7 @@ public class DriveMCTS extends Controller
     
     public void advanceWaypointTarget()
     {
-    	System.out.println("!!!!!marked as completed " + m_nextWaypoint);
+    	if (verbose) System.out.println("!!!!!marked as completed " + m_nextWaypoint);
 		m_nextWaypoint.setCollected(true);
 		m_orderedWaypoints.get(m_orderedWaypoints.indexOf(m_nextWaypoint)).setCollected(true);    		
 		
@@ -324,7 +328,7 @@ public class DriveMCTS extends Controller
     public void paint(Graphics2D a_gr)
     {  
     	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
-    	Painter.paintPossibleShipPositions(a_gr, possiblePositionScore);
+//    	Painter.paintPossibleShipPositions(a_gr, (HashMap<Vector2d, Double>) possiblePositionScore.clone());
     	Painter.paintPanicPositions(a_gr, panicPosition);
     	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
     	Painter.paintAimedNode(a_gr, aimedNode);
