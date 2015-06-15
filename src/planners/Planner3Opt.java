@@ -11,7 +11,7 @@ import framework.graph.Graph;
  *  TODO 9 consider generating up to half of the list and then reverse the result
  *  @author Cristian
  *  @version 141208
- *  TODO 1 read about the fuel tanks and add them where they need to be
+ *  TODO 0 read about the fuel tanks and add them where they need to be
  */
 
 public class Planner3Opt extends Planner {
@@ -27,6 +27,8 @@ public class Planner3Opt extends Planner {
     	createMatrices();  	    	
         long timeAfterMatrices = System.currentTimeMillis();
 		System.out.println(" Total time spent for matrices init: " + (timeAfterMatrices - timeStart) + " ms.");
+		
+		Planner.floodFill(aGameCopy.getMap());
 		
     	//TODO 8 use multiple fragment for the base
     	//get a base plan		

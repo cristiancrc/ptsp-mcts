@@ -40,7 +40,7 @@ public class Navigator {
      * @param a_gameCopy
      * @param aimedNode
      * @return
-     * TODO 0 implement evaluator
+     * TODO 0 implement 18 param evaluator
      */
     public static Value evaluateShipPosition(Game a_gameCopy) 
     {

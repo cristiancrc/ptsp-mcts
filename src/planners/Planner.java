@@ -9,6 +9,7 @@ import com.sun.xml.internal.ws.util.StringUtils;
 import controllers.mcts.DriveMCTS;
 import framework.core.Controller;
 import framework.core.Game;
+import framework.core.Map;
 import framework.core.Ship;
 import framework.core.Waypoint;
 import framework.graph.Graph;
@@ -256,7 +257,8 @@ public abstract class Planner {
 		HashMap<Waypoint, HashMap<Waypoint, Double>> distanceMatrixLava = new HashMap<>();//distance from -each- waypoint to each of the others
        	HashMap<Waypoint, Double> distanceList = new HashMap<>();//distance from -one- waypoint to each of the others
        	HashMap<Waypoint, Double> distanceListLava = new HashMap<>();//distance from -one- waypoint to each of the others
-       		
+       	Map a_map = aGameCopy.getMap();       
+       	
     	for (int i = 0; i < waypointList.size(); i++)    		
     	{
     		Waypoint wpFrom = waypointList.get(i);
@@ -286,23 +288,17 @@ public abstract class Planner {
     	    		pathCost = aPath.m_cost;
     	    		double distanceCost = 0;
     	    		for(int k = 0; k < aPath.m_points.size()-1; k++)
-		            {    	    			
-		                Node thisNode = m_graph.getNode(aPath.m_points.get(k));
+		            {    	    	    	    			
+		                Node thisNode = m_graph.getNode(aPath.m_points.get(k));		                
 		                Node nextNode = m_graph.getNode(aPath.m_points.get(k+1));
-		                Game tempGame = aGameCopy.getCopy();		                
-		                Ship tempShip = tempGame.getShip();
-		                tempShip.s.x = nextNode.x();
-		                tempShip.s.y = nextNode.y();
-		                
-		                //this action is needed to register if the ship is above lava, using ACTION_NO_FRONT will not work for tempShip.isOnLava()
-		                tempGame.getShip().update(Controller.ACTION_NO_LEFT);
-//		                tempGame.tick(Controller.ACTION_NO_LEFT);//ship.update only updates ship, tick updates the whole world
-		                if(tempShip.isOnLava()) {		                	
+		                if(a_map.isLava(nextNode.x(), nextNode.y()))
+		                {
 		                	distanceCost += weightLava*thisNode.euclideanDistanceTo(nextNode);
 		                }
-		                else {
+		                else
+		                {
 		                	distanceCost += thisNode.euclideanDistanceTo(nextNode);
-		                }		               		                  
+		                }	               		                  
 		            }    	    		
     	    		lavaCost = distanceCost;    				
     			}    			
@@ -319,6 +315,9 @@ public abstract class Planner {
     	return result;
 	}
 	
+	/**
+	 * creates the distance and cost matrices
+	 */
 	protected void createMatrices()
 	{
 		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) aGameCopy.getWaypoints().clone();//start with all the waypoints
@@ -329,6 +328,26 @@ public abstract class Planner {
     	matrixCostLava = distanceMatrices[1];  
     	matrixCostDirectness = createDirectnessMatrix(waypointList);
     	matrixCostAngle = createAngleMatrix(waypointList);
+	}
+	
+	/**
+	 * flood fill the map and create the distance matrices
+	 * TODO 1 flood fill map
+	 * @param aMap
+	 */
+	public static void floodFill(Map aMap)
+	{
+		char[][] charMap = aMap.getMapChar();
+		System.out.println("size x " + charMap.length);
+		System.out.println("size y " + charMap[0].length);
+		for(int i = 0; i < charMap.length; i++)
+		{
+			System.out.println("");
+			for(int j =0; j < charMap[i].length; j++)
+			{
+				System.out.print(charMap[i][j]);				
+			}
+		}
 	}
 
 	/**
