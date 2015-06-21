@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import framework.core.Game;
+import framework.core.GameObject;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 
@@ -19,28 +20,38 @@ import framework.graph.Graph;
  */
 
 public class PlannerKOpt extends Planner {
+	
+	private int Kopt;
 
 	@SuppressWarnings("unchecked")
-	public PlannerKOpt(Game a_gameCopy, int Kopt)
+	public PlannerKOpt(Game aGameCopy, int Kopt)
     {
     	System.out.println("***KOpt planner***");
     	System.out.println("running with K = " + Kopt);
+    	this.aGameCopy = aGameCopy;
+    	this.Kopt = Kopt;
+    }
+	
+	public void runPlanner()
+	{
         long timeStart = System.currentTimeMillis();
-    	m_graph = new Graph(a_gameCopy);
+    	aGraph = new Graph(aGameCopy);
     	
     	verbose = true;
     	
     	//get a greedy plan
-		Planner planner = new PlannerGreedy(a_gameCopy);
-    	LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
+		Planner planner = new PlannerGreedy(aGameCopy);
+		planner.runPlanner();
+    	LinkedList<GameObject> waypointList = (LinkedList<GameObject>) aGameCopy.getWaypoints().clone();//the list of waypoints
 		waypointList = planner.getOrderedWaypoints();//get the planned route
+		
 		long timeAfterGreedy = System.currentTimeMillis();
 		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeStart) + " ms.");		
 
 		//add ship position as waypoint
-    	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
-    	m_orderedWaypoints.add(wpShip);
-    	HashMap<Waypoint, HashMap<Waypoint, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
+    	Waypoint wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);        
+    	orderedWaypoints.add(wpShip);
+    	HashMap<GameObject, HashMap<GameObject, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
     	distanceMatrix = distanceMatrices[0];
     	matrixCostLava = distanceMatrices[1];            	
 		long timeAfterMatrix = System.currentTimeMillis();
@@ -49,7 +60,7 @@ public class PlannerKOpt extends Planner {
 		//build paths, based on the greedy result
     	double pathMinCost = getPathCost(waypointList);//result from greedy	
 		double pathCost = 0;//local search result
-		LinkedList<Waypoint> aPath = new LinkedList<>();//stores built paths
+		LinkedList<GameObject> aPath = new LinkedList<>();//stores built paths
 		
 		//reduce number of waypoints
 		int tempLimit = waypointList.size();
@@ -58,7 +69,7 @@ public class PlannerKOpt extends Planner {
 		{
 			System.out.println("limiting waypoint list to " + tempLimit);
 			//actually reduce no of waypoints
-			LinkedList<Waypoint> shortList = new LinkedList<>();
+			LinkedList<GameObject> shortList = new LinkedList<>();
 			for (int i = 0; i < tempLimit; i++)
 			{
 				shortList.add(waypointList.get(i));
@@ -147,13 +158,13 @@ public class PlannerKOpt extends Planner {
 								aPath.add(waypointList.get(w));
 							}
 							aPath.addFirst(wpShip);
-							if (verbose) showList(aPath);						
+							if (verbose) presentList(aPath);						
 							pathCost = getPathCost(aPath);
 			            	if (verbose) System.out.println(" generated " + pathCost + "(" + pathMinCost + ")");
 			            	if(pathCost < pathMinCost)
 			            	{
 			            		pathMinCost = pathCost;
-			            		m_orderedWaypoints = (LinkedList<Waypoint>) aPath.clone();
+			            		orderedWaypoints = (LinkedList<GameObject>) aPath.clone();
 			            	}  								
 						}
 					}
@@ -195,7 +206,7 @@ public class PlannerKOpt extends Planner {
 		
 		long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent searching: " + (timeAfter - timeAfterMatrix) + " ms.");    	
-		System.out.println("Path distance:" + getPathCost(m_orderedWaypoints));			
+		System.out.println("Path distance:" + getPathCost(orderedWaypoints));			
 		System.out.println("KOpt Planner time: " + (timeAfter - timeStart) + " ms.");	
 		System.exit(0);
     }

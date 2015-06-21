@@ -22,12 +22,18 @@ import framework.utils.Vector2d;
  */	
 public class PlannerGreedyEvolved extends Planner {
 	
-	public PlannerGreedyEvolved(Game a_gameCopy)
+	
+	public PlannerGreedyEvolved(Game aGameCopy)
 	{
     	System.out.println("***greedy evolved planner***");
+    	this.aGameCopy = aGameCopy;
+	}
+	
+	public void runPlanner()
+	{
         long timeStart = System.currentTimeMillis();
 		verbose = true;        
-        m_graph = new Graph(a_gameCopy);
+        aGraph = new Graph(aGameCopy);
 
     	//weights
     	double weightDistance = 1.0;
@@ -35,10 +41,10 @@ public class PlannerGreedyEvolved extends Planner {
     	double weightLava = 1.0;//multiplier for distances over lava
     	
     	//add ship position as starting waypoint
-        Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        
-    	m_orderedWaypoints.add(wpShip);
+        Waypoint wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);        
+    	orderedWaypoints.add(wpShip);
 		
-    	Vector2d shipHeading = a_gameCopy.getShip().d;//ship heading
+    	Vector2d shipHeading = aGameCopy.getShip().d;//ship heading
     	shipHeading.normalise();
     	System.out.println("ship heading " + shipHeading);    	
     	Vector2d entryHeading = shipHeading;
@@ -71,7 +77,7 @@ public class PlannerGreedyEvolved extends Planner {
 		//iterate through the other waypoints to find the closest one to each next one
     	double distanceTravelled = 0;//not using distance matrix
     	@SuppressWarnings("unchecked")
-		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//a list of all waypoints    	
+		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) aGameCopy.getWaypoints().clone();//a list of all waypoints    	
 		int checkedWaypoints = 0;
 		Waypoint wpFrom = wpShip;
 		while(waypointList.size() > 0 )
@@ -93,16 +99,16 @@ public class PlannerGreedyEvolved extends Planner {
 				double distanceCost = 0;
 				double degreesToTurn = 0;
 				
-				Node nodeFrom = m_graph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
-				Node nodeTo = m_graph.getClosestNodeTo(wpEnd.s.x, wpEnd.s.y, false);					
-	    		Path aPath = m_graph.getPath(nodeFrom.id(), nodeTo.id());
+				Node nodeFrom = aGraph.getClosestNodeTo(wpFrom.s.x, wpFrom.s.y, false);
+				Node nodeTo = aGraph.getClosestNodeTo(wpEnd.s.x, wpEnd.s.y, false);					
+	    		Path aPath = aGraph.getPath(nodeFrom.id(), nodeTo.id());
 				
 	    		if (null != aPath)
 	        	{
 		        	for(int k = 0; k < aPath.m_points.size()-1; k++)
 		            {
-		                Node thisNode = m_graph.getNode(aPath.m_points.get(k));
-		                Node nextNode = m_graph.getNode(aPath.m_points.get(k+1));
+		                Node thisNode = aGraph.getNode(aPath.m_points.get(k));
+		                Node nextNode = aGraph.getNode(aPath.m_points.get(k+1));
 		                
 		                //add up all the turns needed to the next waypoint (directness)
 		                distanceCost += thisNode.euclideanDistanceTo(nextNode);
@@ -115,7 +121,7 @@ public class PlannerGreedyEvolved extends Planner {
 		                if(verbose) System.out.println("\t" + k + " base vector: " + pathHeadingInit.x + " , " + pathHeadingInit.y);
 		                
 		                //increase cost for going over lava
-		                Game tempGame = a_gameCopy.getCopy();		                
+		                Game tempGame = aGameCopy.getCopy();		                
 		                Ship tempShip = tempGame.getShip();
 		                tempShip.s.x = nextNode.x();
 		                tempShip.s.y = nextNode.y();
@@ -150,10 +156,10 @@ public class PlannerGreedyEvolved extends Planner {
 	        	}
 			}			
 			if(verbose) System.out.println("\nclosest is " + closestWaypoint.getName());			
-			m_orderedWaypoints.add(closestWaypoint);
+			orderedWaypoints.add(closestWaypoint);
 			
-			showList(m_orderedWaypoints);
-			distanceMatrix = createDistanceMatrix(m_orderedWaypoints);
+			presentList(orderedWaypoints);
+			distanceMatrix = createDistanceMatrix(orderedWaypoints);
 			
 
 			
@@ -165,14 +171,14 @@ public class PlannerGreedyEvolved extends Planner {
 			entryHeading = lastHeadingForMinimum.copy();
 			
 			//next search starting from this node
-			wpFrom = closestWaypoint.getCopy(a_gameCopy);
+			wpFrom = closestWaypoint.getCopy(aGameCopy);
 			
 			//remove node from list
 			waypointList.remove(closestWaypoint);
 		}
 		long timeAfter = System.currentTimeMillis();
 		System.out.println("Path cost:" + distanceTravelled);
-		System.out.println("Path distance " + getPathDistance(m_orderedWaypoints));
+		System.out.println("Path distance " + getPathDistance(orderedWaypoints));
 		System.out.println("Greedy Evolved Planner time: " + (timeAfter - timeStart) + " ms.");
     }	
 }

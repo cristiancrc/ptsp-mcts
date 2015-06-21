@@ -4,78 +4,63 @@ import framework.core.*;
 import framework.graph.Graph;
 import framework.graph.Node;
 import framework.graph.Path;
-import framework.utils.Navigator;
-import framework.utils.Painter;
 import framework.utils.Vector2d;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-
-
-import planners.Planner;
-import planners.Planner3Opt;
-import planners.PlannerBruteForce;
-import planners.PlannerGreedy;
-import planners.PlannerGreedyEvolved;
-import planners.PlannerKOpt;
-import planners.PlannerMC;
 
 /**
- * greedy controller
- * added planner to Diego Perez' GreedyController
- * 
- * @version 141128
- * @author Cristian
- *
+ * This is a sample controller for the PTSP that makes use of the graph for pathfinding.
+ * PTSP-Competition
+ * Created by Diego Perez, University of Essex.
+ * Date: 20/12/11
  */
-
 public class DriveGreedy extends Controller
 {
-    private Graph m_graph;//graph for this controller
-
-    private Node m_shipNode; //closest node to the ship position
-    private Node oldShipId;
-    private Path m_pathToClosest;//path to closest waypoint
-    private ArrayList<Path> m_plannedPath = new ArrayList<>();
-	
-	private LinkedList<Waypoint> m_orderedWaypoints = new LinkedList<>();//waypoints in the order they should be visited as computed by the planner
-    private GameObject m_closestPickUp;//Closest object (waypoint or fuel tank) to the ship.
-	private Waypoint m_nextWaypoint;// Next waypoint in the list resulted by planner
-
-    private HashMap<GameObject, Node> m_collectNodes;//Hash map that matches waypoints in the map with their closest node in the graph.
-	
-    private ArrayList<Vector2d> possiblePosition = new ArrayList<>();	
-    
     /**
-     * Constructor
+     * Graph for this controller.
+     */
+    private Graph m_graph;
+
+    /**
+     * Node in the graph, closest to the ship position.
+     */
+    private Node m_shipNode;
+
+    /**
+     * Path to the closest waypoint in the map
+     */
+    private Path m_pathToClosest;
+
+    /**
+     * Hash map that matches waypoints in the map with their closest node in the graph.
+     */
+    private HashMap<GameObject, Node> m_collectNodes;
+
+    /**
+     * Closest waypoint to the ship.
+     */
+    private GameObject m_closestPickUp;
+
+    /**
+     * Distance to fuel tank penalization: as collecting a fuel tank does not reset the timer, it might be dangerous going after a fuel tank
+     * instead of a waypoint. Hence, we apply this value to the distance in order to go only after those that are really closer than a waypoint.
+     */
+    private float FUEL_TANK_PEN = 1.9f;
+
+    /**
+     * Constructor, that receives a copy of the game state
      * @param a_gameCopy a copy of the game state
      * @param a_timeDue The time the initialization is due. Finishing this method after a_timeDue will disqualify this controller.
      */
     public DriveGreedy(Game a_gameCopy, long a_timeDue)
     {
-    	System.out.println("***greedy controller***");
-        
-        m_graph = new Graph(a_gameCopy);//Init the graph.
+        //Init the graph.
+        m_graph = new Graph(a_gameCopy);
 
-//      Planner planner = new PlannerKOpt(a_gameCopy);//general solution, not yet complete
-      Planner planner = new PlannerGreedyEvolved(a_gameCopy);//plan a cost based route through the waypoints   
-        
-        //completed planners
-//        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph        
-//        Planner planner = new Planner2Opt(a_gameCopy);//remove two edges and reconnect the graph    
-//        Planner planner = new PlannerMC(a_gameCopy);//search through random paths to find a small one // 1512 ... 1680
-//        Planner planner = new PlannerBruteForce(a_gameCopy);//brute force search planner  //1512
-//        Planner planner = new PlannerGreedy(a_gameCopy);//plan a distance based route through the waypoints //1614
-
-        m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
-        planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
-        m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
-        
         //Init the structure that stores the nodes closest to all waypoints and fuel tanks.
         m_collectNodes = new HashMap<GameObject, Node>();
-        for(Waypoint way: m_orderedWaypoints)
+        for(Waypoint way: a_gameCopy.getWaypoints())
         {
             m_collectNodes.put(way, m_graph.getClosestNodeTo(way.s.x, way.s.y,true));
         }
@@ -84,9 +69,11 @@ public class DriveGreedy extends Controller
         {
             m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
         }
-        
+
+        //Calculate the closest waypoint or fuel tank to the ship.
+        calculateClosestPickUp(a_gameCopy);
     }
-    
+
     /**
      * This function is called every execution step to get the action to execute.
      * @param a_gameCopy Copy of the current game state.
@@ -95,33 +82,32 @@ public class DriveGreedy extends Controller
      */
     public int getAction(Game a_gameCopy, long a_timeDue)
     {
-        //Get the closest node to the ship, if my ship moved.
-        oldShipId = m_shipNode;
+        //Get the path to the closest node, if my ship moved.
+        Node oldShipId = m_shipNode;
         m_shipNode = m_graph.getClosestNodeTo(a_gameCopy.getShip().s.x, a_gameCopy.getShip().s.y,true);
         if(oldShipId != m_shipNode || m_pathToClosest == null)
-        {          
-            //get next pickup from planned list
-            getNextPlannedWaypoint(a_gameCopy);
-            m_closestPickUp = m_nextWaypoint;
-           
-            //update collected waypoints
-        	if(m_nextWaypoint.checkCollected(a_gameCopy.getShip().ps, m_nextWaypoint.radius))
-        	{
-        		m_nextWaypoint.setCollected(true);
-        	}
-            
+        {
+            //Calculate the closest waypoint/fuel tank to the ship.
+            calculateClosestPickUp(a_gameCopy);
+
             if(m_shipNode == null)
             {
+                //No node close enough and collision free. Just go for the closest.
                 m_shipNode = m_graph.getClosestNodeTo(a_gameCopy.getShip().s.x, a_gameCopy.getShip().s.y,false);
             }
 
-            m_pathToClosest = m_graph.getPath(m_shipNode.id(), m_collectNodes.get(m_closestPickUp).id());//get path to closest waypoint
+            //And get the path to it from my location.
+            m_pathToClosest = m_graph.getPath(m_shipNode.id(), m_collectNodes.get(m_closestPickUp).id());
         }
-        
-        //can we can see the waypoint:
-        boolean isThereLineOfSight = a_gameCopy.getMap().LineOfSight(a_gameCopy.getShip().s, m_closestPickUp.s);        
+
+        //Wanna know the distance to the closest obstacle ahead of the ship? Try:
+        //double distanceToColl = a_gameCopy.getMap().distanceToCollision(a_gameCopy.getShip().s, a_gameCopy.getShip().d, 1000);
+        //System.out.println("DIST: " + distanceToColl);
+
+        //We treat this differently if we can see the waypoint:
+        boolean isThereLineOfSight = a_gameCopy.getMap().LineOfSight(a_gameCopy.getShip().s, m_closestPickUp.s);
         if(isThereLineOfSight)
-        {   
+        {
             return manageStraightTravel(a_gameCopy);
         }
 
@@ -130,7 +116,7 @@ public class DriveGreedy extends Controller
         int bestAction = -1;
         double bestDot = -2;
 
-        if(m_pathToClosest != null)//We should have a path...
+        if(m_pathToClosest != null)  //We should have a path...
         {
             int startAction = Controller.ACTION_NO_FRONT;
             //For each possible action...
@@ -143,7 +129,7 @@ public class DriveGreedy extends Controller
                 Vector2d potentialDirection = forThisAction.getShip().d;
 
                 //Get the next node to go to, from the path to the closest waypoint/ft
-                Node nextNode = getNextPathNode();
+                Node nextNode = getNextNode();
                 Vector2d nextNodeV = new Vector2d(nextNode.x(),nextNode.y());
                 nextNodeV.subtract(nextPosition);
                 nextNodeV.normalise();   //This is a unit vector from my position pointing towards the next node to go to.
@@ -170,16 +156,20 @@ public class DriveGreedy extends Controller
                     bestDot = dot;
                 }
             }
-            return bestAction;//This is the best action to take.
+
+            //This is the best action to take.
+            return bestAction;
         }
-        return Controller.ACTION_NO_FRONT;//Default (something went wrong).
+
+        //Default (something went wrong).
+        return Controller.ACTION_NO_FRONT;
     }
 
     /**
      * Returns the first node in the way to the destination
      * @return the node in the way to destination.
      */
-    private Node getNextPathNode()
+    private Node getNextNode()
     {
         Node n0 = m_graph.getNode(m_pathToClosest.m_points.get(0));
 
@@ -195,9 +185,50 @@ public class DriveGreedy extends Controller
             return n0;
         else return n1;
     }
-   
+
+
     /**
-     * Manages straight traveling.
+     * Calculates the closest waypoint or fuel tank to the ship.
+     * @param a_gameCopy the game copy.
+     */
+    private void calculateClosestPickUp(Game a_gameCopy)
+    {
+        double minDistance = Double.MAX_VALUE;
+        for(Waypoint way: a_gameCopy.getWaypoints())
+        {
+            if(!way.isCollected())     //Only consider those not collected yet.
+            {
+                double fx = way.s.x-a_gameCopy.getShip().s.x, fy = way.s.y-a_gameCopy.getShip().s.y;
+                double dist = Math.sqrt(fx*fx+fy*fy);
+                if( dist < minDistance )
+                {
+                    //Keep the minimum distance.
+                    minDistance = dist;
+                    m_closestPickUp = way;
+                }
+            }
+        }
+
+        //Also check for fuel tanks:
+        for(FuelTank ft: a_gameCopy.getFuelTanks())
+        {
+            if(!ft.isCollected())     //Only consider those not collected yet.
+            {
+                double fx = ft.s.x-a_gameCopy.getShip().s.x, fy = ft.s.y-a_gameCopy.getShip().s.y;
+                double dist = Math.sqrt(fx*fx+fy*fy);
+                dist = dist * FUEL_TANK_PEN; //Apply penalization to only chase those fuel tanks really close.
+                if( dist < minDistance )
+                {
+                    //Keep the minimum distance.
+                    minDistance = dist;
+                    m_closestPickUp = ft;
+                }
+            }
+        }
+    }
+
+    /**
+     * Manages straight travelling.
      * @param a_gameCopy the game copy
      * @return the id of the best action to execute.
      */
@@ -238,11 +269,6 @@ public class DriveGreedy extends Controller
                     bestDot = newDot;
                     bestAction = i;
                 }
-            	Vector2d nextPosition = forThisAction.getShip().s;
-           	 	if(!possiblePosition.contains(nextPosition))
-                {
-           	 		possiblePosition.add(nextPosition);	
-                } 
             }
         } else //We can thrust
             return Controller.ACTION_THR_FRONT;
@@ -250,36 +276,34 @@ public class DriveGreedy extends Controller
         //There we go!
         return bestAction;
     }
-    
-    /**
-     * set next waypoint to visit from the planned path
-     * @param a_gameCopy
-     */
-    public void getNextPlannedWaypoint(Game a_gameCopy)
-    {
 
-    	if (m_nextWaypoint == null || m_nextWaypoint.isCollected())
-    	{
-    		for(Waypoint way: m_orderedWaypoints)
-            {
-                if(!way.isCollected())     //Only consider those not collected yet.
-                {
-               	 System.out.println("next waypoint:" + way.getName());
-                       m_nextWaypoint = way;
-                       break;
-                }
-            }
-    	}
-    }
-    
-    
-    
     /**
-     * paint additional info
+     * This is a debug function that can be used to paint on the screen.
+     * @param a_gr Graphics device to paint.
      */
     public void paint(Graphics2D a_gr)
-    {  
-    	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
-    	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
-    }  
+    {
+//        m_graph.draw(a_gr);
+        a_gr.setColor(Color.yellow);
+        Path pathToClosest = getPathToClosest();
+        if(pathToClosest != null) for(int i = 0; i < pathToClosest.m_points.size()-1; ++i)
+        {
+            Node thisNode = m_graph.getNode(pathToClosest.m_points.get(i));
+            Node nextNode = m_graph.getNode(pathToClosest.m_points.get(i+1));
+            a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
+        }
+    }
+
+    /**
+     * Returns the path to the closest waypoint. (for debugging purposes)
+     * @return the path to the closest waypoint
+     */
+    public Path getPathToClosest() {return m_pathToClosest;}
+
+    /**
+     * Returns the graph. (for debugging purposes)
+     * @return the graph.
+     */
+    public Graph getGraph() {return m_graph;}
+
 }

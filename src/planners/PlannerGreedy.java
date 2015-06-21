@@ -3,6 +3,7 @@ package planners;
 import java.util.LinkedList;
 
 import framework.core.Game;
+import framework.core.GameObject;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
@@ -17,36 +18,41 @@ import framework.graph.Path;
  */
 public class PlannerGreedy extends Planner {
 		
-	public PlannerGreedy(Game a_gameCopy)
+	public PlannerGreedy(Game aGameCopy)
 	{
     	System.out.println("***greedy planner***");
+    	this.aGameCopy = aGameCopy;
+	}
+	
+	public void runPlanner()
+	{
         long timeStart = System.currentTimeMillis();
-    	m_graph = new Graph(a_gameCopy);
+    	aGraph = new Graph(aGameCopy);
     	@SuppressWarnings("unchecked")
-		LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//a list of all waypoints 
+		LinkedList<GameObject> waypointList = (LinkedList<GameObject>) aGameCopy.getWaypoints().clone();//a list of all waypoints 
 
     	//add ship position as waypoint
-        Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);    	
+        Waypoint wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);    	
     	if(distanceMatrix.size() == 0)
     	{
     		waypointList.addFirst(wpShip);
     		distanceMatrix = createDistanceMatrix(waypointList);
     		waypointList.removeFirst();
     	}    	    	
-    	m_orderedWaypoints.addFirst(wpShip);
+    	orderedWaypoints.addFirst(wpShip);
     	
 		//iterate through the other waypoints to find the closest one to each next one
 		int checkedWaypoints = 0;
-		Waypoint wpFrom = wpShip;		
+		GameObject wpFrom = wpShip;		
     	double distanceTravelled = 0;//total distance, no distance matrix needed	
 		while(waypointList.size() > 0 )
 		{
 			if(verbose) System.out.println("\n" + checkedWaypoints++ + ": wpFrom: " + wpFrom.getName() + ", wpList size " + waypointList.size());// + ", ordered " + orderedWaypoints.size());
 			
-			Waypoint closestWaypoint = null;
+			GameObject closestWaypoint = null;
 			double minPathCost = Double.MAX_VALUE;//path between the two waypoints we are checking
 	    	
-			for(Waypoint wpEnd : waypointList)
+			for(GameObject wpEnd : waypointList)
 			{
 				if(verbose) System.out.print("...checking " + wpEnd.getName());				
 				double distance = distanceMatrix.get(wpFrom).get(wpEnd);		
@@ -58,7 +64,7 @@ public class PlannerGreedy extends Planner {
 			}			
 			if(verbose) System.out.println("closest is " + closestWaypoint.getName());
 			distanceTravelled += minPathCost;
-			m_orderedWaypoints.add(closestWaypoint);
+			orderedWaypoints.add(closestWaypoint);
 			wpFrom = closestWaypoint;//next search starting from this node
 			waypointList.remove(closestWaypoint);//remove node from list
 		}		

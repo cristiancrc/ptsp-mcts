@@ -1,10 +1,12 @@
 package planners;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
 import framework.core.Game;
+import framework.core.GameObject;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 
@@ -18,21 +20,27 @@ import framework.graph.Graph;
 public class PlannerMC extends Planner {
 	
 	int bufferTime = 5;
+	long timeDue;
 	
-    @SuppressWarnings("unchecked")
-    public PlannerMC(Game a_gameCopy, int timeAllowed)
+	public PlannerMC(Game aGameCopy)
     {
-    	this(a_gameCopy, System.currentTimeMillis() + timeAllowed);    
+    	this(aGameCopy, 0);
     }
-	public PlannerMC(Game a_gameCopy, long timeDue)
+	
+    public PlannerMC(Game aGameCopy, int timeAllowed)
     {
     	System.out.println("***monte carlo planner***");
+    	this.aGameCopy = aGameCopy;
+    	this.timeDue = System.currentTimeMillis() + timeAllowed;
+    }
+    	
+	public void runPlanner()
+	{
         long timeStart = System.currentTimeMillis();
-        this.aGameCopy = a_gameCopy;
-    	m_graph = new Graph(a_gameCopy);
+    	aGraph = new Graph(aGameCopy);
    	    	
-    	LinkedList<Waypoint> waypointList;    
-        Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);
+    	LinkedList<GameObject> waypointList;    
+    	GameObject wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);
         
         //if this is the main planner, build distance and cost matrices
         if(distanceMatrix.size() == 0)
@@ -44,7 +52,7 @@ public class PlannerMC extends Planner {
     	
     	// find the shortest path among the randomly generated paths    	
     	Random rand = new Random();
-    	LinkedList<Waypoint> aPath = new LinkedList<>();//the random path    	
+    	LinkedList<GameObject> aPath = new LinkedList<>();//the random path    	
     	double pathMinCost = Double.MAX_VALUE;    	
     	int tries = 0;    	    	
     	boolean theresstilltime = true;    	
@@ -55,14 +63,18 @@ public class PlannerMC extends Planner {
     		double pathCost = Double.MAX_VALUE;    		
     		aPath.clear();
     		aPath.add(wpShip);//add ship position as waypoint, to be included in the distance matrix
-    		waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//start with all the waypoints
-    		
+    		waypointList = (LinkedList<GameObject>) aGameCopy.getWaypoints().clone();//start with all the waypoints
+    		waypointList.addAll((Collection<? extends GameObject>) aGameCopy.getFuelTanks().clone());//add all the fuel tanks
+    		    		
     		//extract a random waypoint and add it to the path
         	while(waypointList.size() > 0)
-        	{        		
-        		int randomIndex = rand.nextInt(waypointList.size());        		
-        		Waypoint thePoppedWay = waypointList.get(randomIndex);
-        		waypointList.remove(thePoppedWay);
+        	{   
+        		//TODO ~ control actual randomness here
+//        		int randomIndex = 0;//sequential list
+        		rand.setSeed(100);//fixed random list
+        		int randomIndex = rand.nextInt(waypointList.size());
+        		GameObject thePoppedWay = waypointList.get(randomIndex);
+        		waypointList.remove(randomIndex);
         		aPath.add(thePoppedWay);
         	}    	
         	
@@ -71,7 +83,7 @@ public class PlannerMC extends Planner {
         	if(pathCost < pathMinCost)
         	{
         		pathMinCost = pathCost;
-        		m_orderedWaypoints = (LinkedList<Waypoint>) aPath.clone();
+        		orderedWaypoints = (LinkedList<GameObject>) aPath.clone();
         	}    	
         	if (System.currentTimeMillis() > timeDue - bufferTime)
         	{
@@ -80,7 +92,7 @@ public class PlannerMC extends Planner {
     	}    	
     	long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent randomizing " + tries + " paths: " + (timeAfter - timeAfterMatrices) + " ms.");    	
-		System.out.println("Path distance:" + getPathCost(m_orderedWaypoints));			
+		System.out.println("Path distance:" + getPathCost(orderedWaypoints));			
 		System.out.println("MC Planner time: " + (timeAfter - timeStart) + " ms.");	
-    }
+	}
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import framework.core.Game;
+import framework.core.GameObject;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 
@@ -17,28 +18,32 @@ import framework.graph.Graph;
 public class Planner2Opt extends Planner {
 
     @SuppressWarnings("unchecked")
-	public Planner2Opt(Game a_gameCopy)
+	public Planner2Opt(Game aGameCopy)
     {
     	System.out.println("***2 opt planner***");
+    	this.aGameCopy = aGameCopy;
+    }
+    
+    public void runPlanner()
+    {
         long timeStart = System.currentTimeMillis();
-    	m_graph = new Graph(a_gameCopy);
-    	this.aGameCopy = a_gameCopy;    	
+    	aGraph = new Graph(aGameCopy);    	
     	createMatrices();
         long timeAfterMatrices = System.currentTimeMillis();
 		System.out.println(" Total time spent for matrices init: " + (timeAfterMatrices - timeStart) + " ms.");
     	//get a greedy plan
-		Planner planner = new PlannerGreedy(a_gameCopy);
-    	LinkedList<Waypoint> waypointList = (LinkedList<Waypoint>) a_gameCopy.getWaypoints().clone();//the list of waypoints
+		Planner planner = new PlannerGreedy(aGameCopy);
+    	LinkedList<GameObject> waypointList = (LinkedList<GameObject>) aGameCopy.getWaypoints().clone();//the list of waypoints
 		waypointList = planner.getOrderedWaypoints();//get the planned route
 		long timeAfterGreedy = System.currentTimeMillis();
 		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeAfterMatrices) + " ms.");		
-    	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);//add ship position as waypoint        
+    	Waypoint wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);//add ship position as waypoint        
 
 		//build paths, based on the greedy result
     	double pathMinCost = getPathCost(waypointList);//result from greedy	
 		double pathCost = 0;//local search result
-		LinkedList<Waypoint> aPath = new LinkedList<>();//stores built paths
-		LinkedList<Waypoint> aPathRev = new LinkedList<>();//stores built paths
+		LinkedList<GameObject> aPath = new LinkedList<>();//stores built paths
+		LinkedList<GameObject> aPathRev = new LinkedList<>();//stores built paths
 
 		//full search through all edges
 		for (int i = 1; i < waypointList.size()-2; i++)//no need to check the last, 1 because counting starts at 0, another 1 because this is a graph not a circuit
@@ -90,31 +95,31 @@ public class Planner2Opt extends Planner {
 
 				// check if one of the resulting paths is shorter than minimum
 //				aPath.addFirst(wpShip);
-				if (verbose) showList(aPath);
+				if (verbose) presentList(aPath);
             	pathCost = getPathCost(aPath);
             	if (verbose) System.out.println("\n generated " + pathCost + "(" + pathMinCost + ")");
             	if(pathCost < pathMinCost)
             	{
             		pathMinCost = pathCost;
-            		m_orderedWaypoints = (LinkedList<Waypoint>) aPath.clone();
+            		orderedWaypoints = (LinkedList<GameObject>) aPath.clone();
             	}  					
             	
             	
 				aPathRev.addFirst(wpShip);
-				if (verbose) showList(aPathRev);
+				if (verbose) presentList(aPathRev);
             	pathCost = getPathCost(aPathRev);
             	if (verbose) System.out.println(" generated " + pathCost + "(" + pathMinCost + ")");
             	if(pathCost < pathMinCost)
             	{
             		pathMinCost = pathCost;
-            		m_orderedWaypoints = (LinkedList<Waypoint>) aPathRev.clone();
+            		orderedWaypoints = (LinkedList<GameObject>) aPathRev.clone();
             	}  							
     		}
 			if (verbose) System.out.println("");   		
     	}    	
     	long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent searching: " + (timeAfter - timeAfterGreedy) + " ms.");    	
-		System.out.println("Path distance:" + getPathCost(m_orderedWaypoints));			
+		System.out.println("Path distance:" + getPathCost(orderedWaypoints));			
 		System.out.println("2Opt Planner time: " + (timeAfter - timeStart) + " ms.");	
     }
 }

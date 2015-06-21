@@ -165,5 +165,28 @@ public class FuelTank extends GameObject
     {
         return 100000*(100+(int)this.s.y) + (10000+(int)this.s.x);
     }
+    
+    /**
+     * humanly readable name of waypoint
+     * @return string
+     * 
+     * @author Cristian
+     */    
+    public String getName()
+    {
+		return this.toString().substring(this.toString().indexOf("@")+1);    	
+    }
+    
+    /**
+     * humanly readable name of waypoint received as parameter
+     * @param aWaypoint
+     * @return string
+     * 
+     * @author Cristian
+     */ 
+    public static String getName(Waypoint aWaypoint)
+    {
+		return aWaypoint.toString().substring(aWaypoint.toString().indexOf("@")+1);    	
+    }
 
 }

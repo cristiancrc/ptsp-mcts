@@ -25,12 +25,12 @@ import planners.PlannerGreedy;
 
 public class DriveDfs extends Controller
 {
-	private Graph m_graph; //     * Graph for this controller.
-	private ArrayList<Path> m_plannedPath = new ArrayList<>();//      * Paths to the waypoints based on the planner
-	private LinkedList<Waypoint> m_orderedWaypoints = new LinkedList<>(); //waypoints in the order they should be visited as computed by the planner
-	private HashMap<GameObject, Node> m_collectNodes;//Hash map that matches waypoints in the map with their closest node in the graph.
-	private Waypoint m_nextWaypoint; //	Next waypoint in the list resulted by planner
-	private Integer nextWaypoint = null; // index of next waypoint in m_orderedWaypoints 
+	private Graph aGraph; //     * Graph for this controller.
+	private ArrayList<Path> plannedPath = new ArrayList<>();//      * Paths to the waypoints based on the planner
+	private LinkedList<GameObject> orderedWaypoints = new LinkedList<>(); //waypoints in the order they should be visited as computed by the planner
+	private HashMap<GameObject, Node> collectNodes;//Hash map that matches waypoints in the map with their closest node in the graph.
+	private GameObject nextWaypoint; //	Next waypoint in the list resulted by planner
+	private Integer nextWaypointIndex = null; // index of next waypoint in orderedWaypoints 
 	private Value bestValue = new Value();
 	private int bestAction;
 	private Path pathToFollow;
@@ -47,62 +47,79 @@ public class DriveDfs extends Controller
 
     /**
      * Constructor, that receives a copy of the game state
-     * @param a_gameCopy a copy of the game state
-     * @param a_timeDue The time the initialization is due. Finishing this method after a_timeDue will disqualify this controller.
+     * @param aGameCopy a copy of the game state
+     * @param timeDue The time the initialization is due. Finishing this method after a_timeDue will disqualify this controller.
      */
-    public DriveDfs(Game a_gameCopy, long a_timeDue)
+    public DriveDfs(Game aGameCopy, long timeDue)
     {
     	System.out.println("**** dfs controller ****");
-        m_graph = new Graph(a_gameCopy);//Init the graph.
+        aGraph = new Graph(aGameCopy);//Init the graph.
 
-		Planner planner = new PlannerGreedy(a_gameCopy);//plan a distance based route through the waypoints //1614
+		Planner planner = new PlannerGreedy(aGameCopy);//plan a distance based route through the waypoints //1614
+		planner.runPlanner();
 		
-		m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
-		m_nextWaypoint = m_orderedWaypoints.get(0);//set immediate goal        
+		orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
+		nextWaypoint = orderedWaypoints.get(0);//set immediate goal        
 		planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
-		m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
+		plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
 		 
 		  
 		//Init the structure that stores the nodes closest to all waypoints and fuel tanks.
-		m_collectNodes = new HashMap<GameObject, Node>();
-		for(Waypoint way: m_orderedWaypoints)
+		collectNodes = new HashMap<GameObject, Node>();
+		for(GameObject way: orderedWaypoints)
 		{
-		    m_collectNodes.put(way, m_graph.getClosestNodeTo(way.s.x, way.s.y,true));
+		    collectNodes.put(way, aGraph.getClosestNodeTo(way.s.x, way.s.y,true));
 		}
 		
-		for(FuelTank ft: a_gameCopy.getFuelTanks())
+		for(FuelTank ft: aGameCopy.getFuelTanks())
 		{
-		    m_collectNodes.put(ft, m_graph.getClosestNodeTo(ft.s.x, ft.s.y,true));
+		    collectNodes.put(ft, aGraph.getClosestNodeTo(ft.s.x, ft.s.y,true));
 		}
     }
     
     /**
      * This function is called every execution step to get the action to execute.
-     * @param a_gameCopy Copy of the current game state.
+     * @param aGameCopy Copy of the current game state.
      * @param a_timeDue The time the next move is due
      * @return the integer identifier of the action to execute (see interface framework.core.Controller for definitions)
      */
-    public int getAction(Game a_gameCopy, long a_timeDue)
+    public int getAction(Game aGameCopy, long a_timeDue)
     {   	
     	//target reached?
-        if(m_nextWaypoint.checkCollected(a_gameCopy.getShip().ps, m_nextWaypoint.radius/4*3))
+    	boolean targetReached = false;
+    	if(nextWaypoint instanceof Waypoint)
     	{
-    		if (verbose) System.out.println("!!!!!marked as completed " + m_nextWaypoint);
-    		m_nextWaypoint.setCollected(true);
-    		m_orderedWaypoints.get(m_orderedWaypoints.indexOf(m_nextWaypoint)).setCollected(true);    		
-    		
+    		if(((Waypoint) nextWaypoint).checkCollected(aGameCopy.getShip().ps, nextWaypoint.radius/4*3))
+    		{
+    			((Waypoint) nextWaypoint).setCollected(true);
+    			((Waypoint) orderedWaypoints.get(orderedWaypoints.indexOf(nextWaypoint))).setCollected(true);    			
+    			targetReached = true;
+    		}
+    	}
+    	else if(nextWaypoint instanceof FuelTank)
+    	{
+    		if(((FuelTank) nextWaypoint).checkCollected(aGameCopy.getShip().ps, nextWaypoint.radius/4*3))
+    		{
+    			((FuelTank) nextWaypoint).setCollected(true);
+    			((FuelTank) orderedWaypoints.get(orderedWaypoints.indexOf(nextWaypoint))).setCollected(true);
+    			targetReached = true;
+    		}
+    	}
+    	if(targetReached)
+    	{
+    		if (verbose) System.out.println("!!!!!marked as completed " + nextWaypoint);
     		//set next waypoint
-    		nextWaypoint = m_orderedWaypoints.indexOf(m_nextWaypoint)+1;
-    		m_nextWaypoint = m_orderedWaypoints.get(m_orderedWaypoints.indexOf(m_nextWaypoint)+1);
+    		nextWaypointIndex = orderedWaypoints.indexOf(nextWaypoint)+1;
+    		nextWaypoint = orderedWaypoints.get(orderedWaypoints.indexOf(nextWaypoint)+1);
     	}   
         //get path to it from the previous waypoint    	    
-        pathToFollow = m_plannedPath.get(nextWaypoint-1);      
+        pathToFollow = plannedPath.get(nextWaypointIndex-1);      
     	
         //Get the next node to go to, from the path to the closest waypoint/ fuel tank
-    	aimedNode = Navigator.getLastNodeVisible(pathToFollow, a_gameCopy, m_graph); 
+    	aimedNode = Navigator.getLastNodeVisible(pathToFollow, aGameCopy, aGraph); 
     	
     	possiblePosition.clear();//just one level of search
-        Game simulatedGame = a_gameCopy.getCopy();
+        Game simulatedGame = aGameCopy.getCopy();
         bestValue.reset();
         bestAction = -1;
         if (verbose) System.out.println("----------------------------------------------------" + ticks);
@@ -179,7 +196,31 @@ public class DriveDfs extends Controller
     public void paint(Graphics2D a_gr)
     {  
     	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
-    	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
+    	Painter.paintPaths(a_gr, aGraph, plannedPath, Color.gray);
     	Painter.paintAimedNode(a_gr, aimedNode);
     }  
+    
+    /**
+     * is collected for both waypoint and fueltank
+     * @param aGameObject
+     * @return
+     */
+    public boolean isCollected(GameObject aGameObject)
+    {
+    	if(aGameObject instanceof Waypoint)
+    	{
+    		if(((Waypoint) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
+    	}
+    	if(aGameObject instanceof FuelTank)
+    	{
+    		if( ((FuelTank) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
+    }
 }

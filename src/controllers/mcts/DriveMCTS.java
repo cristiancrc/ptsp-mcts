@@ -24,11 +24,12 @@ import framework.graph.Path;
 import framework.utils.JEasyFrame;
 import framework.utils.Navigator;
 import framework.utils.Painter;
+import framework.utils.Value;
 import framework.utils.Vector2d;
 
 /**
- * monte carlo tree search driver
- * @version 150515
+ * Monte-Carlo tree search driver
+ * @version 150621
  * @author Cristian
  * TODO 0 link the parameters to CMA-ES library
  * TODO 7 implement transposition tables for states (see 2013 detail paper)
@@ -37,74 +38,76 @@ import framework.utils.Vector2d;
 public class DriveMCTS extends Controller
 {
 	public static boolean verbose = false;
+	static double sqrt2 = Math.sqrt(2);
 	
-    private Graph m_graph; //     * Graph for this controller.
-    private Node m_shipNode; //     * Node in the graph, closest to the ship position.
-    private ArrayList<Path> m_plannedPath = new ArrayList<>();//      * Paths to the waypoints based on the planner
-	private LinkedList<Waypoint> m_orderedWaypoints = new LinkedList<>(); //waypoints in the order they should be visited as computed by the planner
-	private Waypoint m_nextWaypoint;
-	private Integer nextWaypoint = null; // index of next waypoint in m_orderedWaypoints
-    private int ticks = 0;
-    static Node aimedNode = null;//the farthest node in the path that can be seen
-    static Node aimedNodeNext = null;//the farthest node in the path that can be seen from aimedNode
-    private Path pathToFollow;
+	//controller weights
+	static int scorePanicMode = 0;//a0 score threshold for panic mode
+	public static int w_wpCollectedRoute = 1;//a1 waypoints collected on the planned route
+	public static int w_wpCollectedOutOfRoute = 1;//a2 waypoints collected out of the planned route
+	public static int w_wpDistance = 1;//a3 distance to next waypoint
+	public static int w_fuelConsumed = 1;//a4 total fuel consumed
+	public static int w_damageIncurred = 1;//a5 damage taken
+	public static int w_wpFuelOutOfRoute = 1;//a6 fuel tanks picked up opportunistically
+	public static int w_damageCollisions = 1;//a7 damage taken only from collisions
+	
+	//planner weights	
+	public static double w_lava = 1;//l increase distance when passing over lava
+	public static double w_distance = 1;//b1 travel distance
+	public static double w_directness = 1;//b2 ratio between travel distance and euclidean distance
+	public static double w_angle = 1;//b3 angle change between entering and exiting a waypoint
+	public static boolean p_includeFuel = true;//b4 include fuel tanks in planning	
+	public static double w_fuelTankCost = 1;//b5 cost of picking up a fuel tank 
+	public static double w_consecutiveFuelTanksCost = 1;//b6 cost of picking up consecutive fuel tanks
+    //TODO 3 what's wrong with setting this to 1? even without macro time.	
+	public static int macroActionsCount = 5;//T macro action length
+	public static int searchDepth = 10;//d playout depth
+	public static double ucb1Exploration = sqrt2;//C ucb1 exploration constant	
+	
+    private Graph aGraph; // Graph for this controller.
+    private ArrayList<Path> aPlannedPath = new ArrayList<>();// Paths to the waypoints based on the planner
     static ArrayList<Vector2d> possiblePosition = new ArrayList<>();    
-    static HashMap<Vector2d, Double> possiblePositionScore = new HashMap<Vector2d, Double>();
-//    static ArrayList<Vector2d> possiblePositionEnd = new ArrayList<Vector2d>();
     static ArrayList<Vector2d> panicPosition = new ArrayList<>();
     
-    private SearchTreeNode searchTree;
+    //TODO 0 consider using a list of nodes instead of gameobject (waypoint / fuel tank)
         
-    boolean inPanicMode = false;
-    long panicModeStart;
-    long panicModeLength = 1000;//in miliseconds
-    int panicModeCheckInterval = 5;//how many ticks to wait between checks
-    int panicModeNextCheck = panicModeCheckInterval;    
-    int panicModeAction = 1;//action to take while in panic mode
-    Vector2d previousShipPosition;
-    //TODO 3 what's wrong with setting this to 1? even without macro time.
-    static int macroActionsCount = 5;
+    private int ticks = 0;
+    
+    private SearchTreeNode searchTree;
     int macroActionsRemaining = 0;
     int macroAction;
     int ongoingsearchresult = -1;
 
-    public static int searchDepth = 10;
-
-	
-    /*
-     * searchDepth * macroActionsCount should be around 100
-     * 
-     * deeper than that and the paths are too chaotic
-     * count = 1, searchDepth = 100  : no macro actions 
-     * count = 5, searchDepth = 20
-     * 
-     * paper: 5 x 10
-     * 
-     */
-    public Random m_rnd = new Random();
+    public Random rnd = new Random();
 
     /**
      * Constructor, that receives a copy of the game state
-     * @param a_gameCopy a copy of the game state
+     * @param aGameCopy a copy of the game state
      * @param a_timeDue The time the initialization is due. Finishing this method after a_timeDue will disqualify this controller.
      */
-    public DriveMCTS(Game a_gameCopy, long a_timeDue)
+    public DriveMCTS(Game aGameCopy, long a_timeDue)
     {
-//    	if (true) throw new NotImplementedException();
     	System.out.println("**** mcts controller ****");
-        m_graph = new Graph(a_gameCopy);//Init the graph.
-
-        Planner planner = new Planner3Opt(a_gameCopy);//remove three edges and reconnect the graph
+        aGraph = new Graph(aGameCopy);//Init the graph.
+       
+        Planner planner = new Planner3Opt(aGameCopy);//remove three edges and reconnect the graph
 //        Planner planner = new PlannerGreedy(a_gameCopy);//use greedy for testing
 //        Planner planner = new PlannerMC(a_gameCopy, a_timeDue);//use greedy for testing
-        m_orderedWaypoints = planner.getOrderedWaypoints();//get the planned route
-        m_nextWaypoint = m_orderedWaypoints.get(0);//set immediate goal        
-        planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
-        m_plannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
         
-//        System.out.println("planned path " + m_plannedPath.get(0).m_cost);
+        Planner.weightLava = w_lava;
+        Planner.weightDistance = w_distance;
+        Planner.weightDirectness = w_directness;
+        Planner.weightAngle = w_angle;
+    	Planner.weightFuelTankCost = w_fuelTankCost;
+    	Planner.weightConsecutiveFuelTanksCost = w_consecutiveFuelTanksCost;
+    	
+    	planner.runPlanner();
+        
+        planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
+        aPlannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
+        
+//        System.out.println("planned path " + aPlannedPath.get(0).m_cost);
                 
-        //TODO - this stops the execution
+        //TODO - this stops the execution 0
 //        System.exit(1);////////////////////////////////////////////////////////////////////////////       
     }
     
@@ -131,52 +134,11 @@ public class DriveMCTS extends Controller
 			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]\n");
 			return macroAction;			
 		}
+		//done with a macro action, clean up
         searchTree = null;      
         possiblePosition.clear();//display just one level of search
     	int bestAction = -1;
-//        if(inPanicMode)
-//    	{        
-//        	if (System.currentTimeMillis() > panicModeStart + panicModeLength)
-//        	{
-//        		if (verbose) System.out.println("\t<<<out of panic mode");
-//        		/*
-//        		 * the panic mode action can take longer than the normal next interval
-//        		 * so push next check further so a normal action can be applied
-//        		 */
-//        		panicModeNextCheck += 100 *panicModeCheckInterval;
-//        		inPanicMode = false;
-//        	}
-//        	else
-//        	{
-//        		if (verbose) System.out.println("panic mode!!!");
-//        		return panicModeAction;
-//        	}        		
-//    	}
-    	if(isWaypointReached(a_gameCopy)) advanceWaypointTarget();
-        
-        //get path the next waypoint    	    
-        pathToFollow = m_plannedPath.get(nextWaypoint-1);
-        Path pathToFollowFarther = m_plannedPath.get(nextWaypoint-1);
-        
-        //Get the next node to go to, from the path to the closest waypoint/ fueltank
-    	aimedNode = Navigator.getLastNodeVisible(pathToFollow, a_gameCopy, m_graph);
-    	//create a copy of the game
-    	Game a_gameCopyForAimedNode = a_gameCopy.getCopy();
-    	//set put the ship in the aimed node position
-    	a_gameCopyForAimedNode.getShip().s.x = aimedNode.x();
-    	a_gameCopyForAimedNode.getShip().s.y = aimedNode.y();
-    	aimedNodeNext = Navigator.getLastNodeVisible(pathToFollowFarther, a_gameCopyForAimedNode, m_graph);
-    	
-    	if(//both nodes are on the same position (next waypoint)
-    			aimedNodeNext.x() == aimedNode.x() &&
-    			aimedNodeNext.y() == aimedNode.y() &&
-    			nextWaypoint < m_plannedPath.size()
-    		)
-    	{
-    		pathToFollowFarther = m_plannedPath.get(nextWaypoint);
-    		aimedNodeNext = Navigator.getLastNodeVisible(pathToFollowFarther, a_gameCopyForAimedNode, m_graph);    		
-    	}
-		if(macroActionsRemaining <= 0)
+    	if(macroActionsRemaining <= 0)
 		{ 
 			//mctsSearch call
 			System.out.println("\n---new search");
@@ -186,27 +148,9 @@ public class DriveMCTS extends Controller
         macroActionsRemaining = macroActionsCount;
         bestAction = macroAction;
     	
-//    	//check if ship is stuck in the same position
-//    	if(ticks >= panicModeNextCheck)
-//    	{
-//        	Vector2d currentShipPosition = a_gameCopy.getShip().s;
-//        	if(currentShipPosition.equals(previousShipPosition))
-//        	{
-//        		if (verbose) System.out.println(">>>entering panic mode");
-//        		inPanicMode = true;
-//        		panicModeStart = System.currentTimeMillis();
-//           	 	if(!panicPosition.contains(currentShipPosition))
-//                {
-//           	 		panicPosition.add(currentShipPosition);	
-//                }        		
-//        		return panicModeAction;         		
-//        	}
-//        	previousShipPosition = a_gameCopy.getShip().s;
-//        	panicModeNextCheck = ticks + panicModeCheckInterval;
-//    	}    	
         if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
 
-        //TODO - this stops the execution
+        //TODO - this stops the execution 0
 //        System.exit(1);////////////////////////////////////////////////////////////////////////////
         
         return bestAction;    	
@@ -249,7 +193,7 @@ public class DriveMCTS extends Controller
         	
         	// simulate
         	if (verbose) System.out.println(" simulating from " + SearchTreeNode.getFullIdentifier(urgentNode));//TODO 1 basic debug mcts
-        	double matchValue = urgentNode.simulateTarget(aimedNode);
+        	double matchValue = urgentNode.simulate();
         	
         	// back propagate
         	urgentNode.backPropagate(urgentNode, matchValue);
@@ -274,63 +218,80 @@ public class DriveMCTS extends Controller
 //        System.out.println("\n=====leaf");
 //        searchTree.present();               
     	return bestAction;
-    }      
+    }
+	
+    /**
+     * computes a score / cost for getting from the current position to the aimedNode
+     * @param a_gameCopy
+     * @param aimedNode
+     * @return
+     * TODO 0 implement 18 param evaluator
+     */
+    public Value evaluateShipPosition(Game a_gameCopy) 
+    {
+    	//v(s) = a1 * m(s) + a2 * e(s) + a3 (1-d(s)) + a4 * fn(s) + a5 * ft(s) + a6 * du(s) + a7 * dc(s)
+    	// m(s) - number of wp on the route collected
+    	    	
+		Value value = new Value();
+		return value;
+	}
 
+    /**
+     * returns the next node in the tree to simulate
+     * @param incomingNode
+     * @return
+     */
 	private SearchTreeNode treePolicy(SearchTreeNode incomingNode) {
     	SearchTreeNode currentNode = incomingNode;
     	//TODO 1 basic debug mcts
         while (currentNode.depth < searchDepth)
         {
-	        if (!currentNode.isFullyExpanded()) {
+	        if (!currentNode.isFullyExpanded()) 
+	        {
 	        	if (verbose) System.out.println("\n" + currentNode.getIdentifier() + " expanding");
-	            return currentNode.expand();
-	        } else {        	
+	            return currentNode.expand(false);
+	        } else 
+	        {        	
 	        	SearchTreeNode nextNode = currentNode.uct();
-	        	if (verbose) System.out.println("\n" + currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );
-	//                SearchTreeNode nextNode = currentNode.egreedy();
-	//                SearchTreeNode nextNode = currentNode.random();//MC search
+//	        	SearchTreeNode nextNode = currentNode.egreedy();
+//                SearchTreeNode nextNode = currentNode.random();//MC search	        	
+	        	if (verbose) System.out.println("\n" + currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );	               
 	            currentNode = nextNode;
 	        }
         }
         return currentNode;
     }
-	    
+	
     /**
-     * checks if the ship reached the next waypoint
-     * @param a_gameCopy
+     * is collected for both waypoint and fuel tank
+     * @param aGameObject
      * @return
      */
-    public boolean isWaypointReached(Game a_gameCopy)
+    public boolean isCollected(GameObject aGameObject)
     {
-    	//target reached?
-        if(m_nextWaypoint.checkCollected(a_gameCopy.getShip().ps, m_nextWaypoint.radius/4*3))
-    	{    		
-    		return true;
+    	if(aGameObject instanceof Waypoint)
+    	{
+    		if(((Waypoint) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
     	}
-        else return false;
+    	if(aGameObject instanceof FuelTank)
+    	{
+    		if( ((FuelTank) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
     }
-    
-    public void advanceWaypointTarget()
-    {
-    	if (verbose) System.out.println("!!!!!marked as completed " + m_nextWaypoint);
-		m_nextWaypoint.setCollected(true);
-		m_orderedWaypoints.get(m_orderedWaypoints.indexOf(m_nextWaypoint)).setCollected(true);    		
-		
-		//set next waypoint
-		nextWaypoint = m_orderedWaypoints.indexOf(m_nextWaypoint)+1;
-		m_nextWaypoint = m_orderedWaypoints.get(m_orderedWaypoints.indexOf(m_nextWaypoint)+1);
-    }
-
-	/**
+	        
+  	/**
      * paint additional info
      */
     public void paint(Graphics2D a_gr)
     {  
     	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
-//    	Painter.paintPossibleShipPositions(a_gr, (HashMap<Vector2d, Double>) possiblePositionScore.clone());
-    	Painter.paintPanicPositions(a_gr, panicPosition);
-    	Painter.paintPaths(a_gr, m_graph, m_plannedPath, Color.gray);
-    	Painter.paintAimedNode(a_gr, aimedNode);
-    	Painter.paintAimedNode(a_gr, aimedNodeNext, Color.GREEN);
-    }  
+    	Painter.paintPaths(a_gr, aGraph, aPlannedPath, Color.gray);
+    }
 }

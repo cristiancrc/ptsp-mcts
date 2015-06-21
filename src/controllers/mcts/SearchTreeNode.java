@@ -33,9 +33,7 @@ public class SearchTreeNode {
     public Random rnd = new Random();
     public static double epsilon = 1e-6;
     public static double egreedyEpsilon = 0.05;
-    public static double sqrt2 = Math.sqrt(2);
-    
-    
+        
     public SearchTreeNode(Game a_gameCopy, SearchTreeNode parent) 
     {
     	this.name = hashCode();
@@ -125,34 +123,36 @@ public class SearchTreeNode {
      * return a random child from the unexpanded ones
      * @return
      */
-    public SearchTreeNode expand() 
+    public SearchTreeNode expand(boolean expandRandom) 
     {
-        /*
-        //expand children nodes sequentially
-        int childCount = 0;
-        for (SearchTreeNode aNode : this.children) 
-        {        
-            if (aNode != null) 
-            {
-                childCount++;
-            }
-        }
-        int bestAction = childCount;
-        */
-        
-        //expand new children nodes randomly
         int bestAction = 0;
-        while(this.getChild(bestAction) != null)
+        if(expandRandom)
         {
-            bestAction = rnd.nextInt(Controller.NUM_ACTIONS);
-        }       
-        
+            //expand new children nodes randomly        
+            while(this.getChild(bestAction) != null)
+            {
+                bestAction = rnd.nextInt(Controller.NUM_ACTIONS);
+            }                       	
+        }
+        else
+        {
+            //expand children nodes sequentially
+            int childCount = 0;
+            for (SearchTreeNode aNode : this.children) 
+            {        
+                if (aNode != null) 
+                {
+                    childCount++;
+                }
+            }
+            bestAction = childCount;                    	
+        }
         
         if (verbose) System.out.println(" expand action : " + bestAction);
         Game nextState = worldSate.getCopy();
         for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
         {
-//          System.out.println("\nship at: " + nextState.getShip().ps + " , h : " + nextState.getShip().d);
+//          System.out.println("\n ship at: " + nextState.getShip().ps + " , h : " + nextState.getShip().d);
             nextState.getShip().update(bestAction);
 //            System.out.println("performed " + bestAction);    
         }        
@@ -172,7 +172,7 @@ public class SearchTreeNode {
     	//uctVal = number of wins / number of simulations of this child + exploration parameter * sqrt( log (total simulations) / number of simulations of this child
         SearchTreeNode selectedNode = null;
         double bestValue = Double.MAX_VALUE;
-        double explorationParameter = sqrt2;
+        double explorationParameter = DriveMCTS.ucb1Exploration;
        
         for (SearchTreeNode child : this.children)
         {
@@ -203,14 +203,15 @@ public class SearchTreeNode {
     
     public SearchTreeNode egreedy() {
         SearchTreeNode selected = null;
-
         if(rnd.nextDouble() < egreedyEpsilon)
         {
             //Choose randomly
             int selectedIdx = rnd.nextInt(children.length);
             selected = this.children[selectedIdx];
 
-        }else{
+        }
+        else
+        {
             //pick the best Q.
             double bestValue = -Double.MAX_VALUE;
             for (SearchTreeNode child : this.children)
@@ -218,35 +219,35 @@ public class SearchTreeNode {
                 double hvVal = child.value;
                 hvVal = noise(hvVal, epsilon, this.rnd.nextDouble());     //break ties randomly
                 // small sampleRandom numbers: break ties in unexpanded nodes
-                if (hvVal > bestValue) {
+                if (hvVal > bestValue)
+                {
                     selected = child;
                     bestValue = hvVal;
                 }
             }
 
         }
-
-
         if (selected == null)
         {
             throw new RuntimeException("Warning! returning null: " + this.children.length);
         }
-
         return selected;
     }   
     
-    public SearchTreeNode random() {
+    /**
+     * 
+     * @return
+     */
+    private SearchTreeNode random() {
         SearchTreeNode selected = null;
 
         //Choose randomly
         int selectedIdx = rnd.nextInt(children.length);
         selected = this.children[selectedIdx];
-
         if (selected == null)
         {
             throw new RuntimeException("Warning! returning null: " + this.children.length);
-        }
-
+        }      
         return selected;
     }       
     
@@ -309,54 +310,6 @@ public class SearchTreeNode {
         double localNewValue = newStateValue.value;
 
         nextPosition = nextState.getShip().s;
-        DriveMCTS.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
-        
-        if(localNewValue < bounds[0])
-        {
-            bounds[0] = localNewValue;
-        }
-
-        if(localNewValue > bounds[1])
-        {
-            bounds[1] = localNewValue;
-        }
-
-        return localNewValue;       
-    }
-    
-    /**
-     * select a random action and apply it to the current state until one of the finishRollout conditions is met or the target is reached
-     * TODO 8 the node would be better in the evaluation function than in the finish rollout
-     * @param aimedNode
-     * @return
-     */
-    public double simulateTarget(Node aimedNode) 
-    {       
-        Game nextState = worldSate.getCopy();       
-        int thisDepth = this.depth;
-        Vector2d nextPosition = new Vector2d();
-                
-    	while (!finishRolloutTarget(nextState, thisDepth, aimedNode))
-        {
-            int action = rnd.nextInt(Controller.NUM_ACTIONS);
-            for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
-            {
-//              System.out.print(action);
-                nextState.tick(action);
-            }            
-            thisDepth++;
-            nextPosition = nextState.getShip().s;
-            if(!DriveMCTS.possiblePosition.contains(nextPosition))
-            {
-                DriveMCTS.possiblePosition.add(nextPosition);
-            }
-        }
-        
-        Value newStateValue = Navigator.evaluateShipPositionVisibleNode(nextState, DriveMCTS.aimedNode);        
-        double localNewValue = newStateValue.value;
-
-// TODO 9 this is modified while it is being drawn, resulting in problems
-//        nextPosition = nextState.getShip().s;
 //        DriveMCTS.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
         
         if(localNewValue < bounds[0])
@@ -371,7 +324,7 @@ public class SearchTreeNode {
 
         return localNewValue;       
     }
-    
+        
     /**
      * check if this state is an end state to finish the simulation
      * @param aState
@@ -396,38 +349,7 @@ public class SearchTreeNode {
         return false;
     }
     
-    
-    /**
-     * check if this state is an end state to finish the simulation
-     * @param aState
-     * @param depth
-     * @param aimedNode
-     * @return
-     */
-    private boolean finishRolloutTarget(Game aState, int depth, Node aimedNode)
-    {
-        //rollout end conditions        
-    	if (verbose) System.out.print(".");//TODO 1 basic debug mcts
-        if(depth >= DriveMCTS.searchDepth)
-        {
-        	if (verbose) System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
-            return true;            
-        }  
-        //TODO 9 combine with updated evaluate position and remove the aimed node target
-        if(4 > aimedNode.euclideanDistanceTo(aState.getShip().ps.x, aState.getShip().ps.y))
-        {           
-        	if (verbose) System.out.print("target checkpoint reached");
-            return true;
-        }
         
-        if(aState.isEnded())
-        {
-        	if (verbose) System.out.print("game is ended()");
-            return true;
-        }           
-        return false;
-    }
-    
     public void backPropagate(SearchTreeNode fromThisNodeUpwards, double positionValue)
     {   
         SearchTreeNode nodeBubble = fromThisNodeUpwards;
