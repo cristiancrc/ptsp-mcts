@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import framework.core.FuelTank;
 import framework.core.Game;
+import framework.core.GameObject;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
@@ -35,22 +36,6 @@ public class Navigator {
     	return furthestNodeVisible;
     }
     
-    /**
-     * computes a score / cost for getting from the current position to the aimedNode
-     * @param a_gameCopy
-     * @param aimedNode
-     * @return
-     * TODO 0 implement 18 param evaluator
-     */
-    public static Value evaluateShipPosition(Game a_gameCopy) 
-    {
-    	Vector2d nextPosition = a_gameCopy.getShip().s;
-		Vector2d potentialDirection = a_gameCopy.getShip().d;
-
-		Value value = new Value();
-		return value;
-	}
-
 	
 	/**
      * computes a score / cost for getting from the current position to the aimedNode
@@ -102,6 +87,30 @@ public class Navigator {
         	if(!tank.isCollected())
         		m_pathListFuelTanks.add(m_graph.getPath(m_shipNode.id(),m_graph.getClosestNodeTo(tank.s.x, tank.s.y,true).id()));
         }
+    }
+	
+    /**
+     * is collected for both waypoint and fueltank
+     * @param aGameObject
+     * @return
+     */
+    public boolean isCollected(GameObject aGameObject)
+    {
+    	if(aGameObject instanceof Waypoint)
+    	{
+    		if(((Waypoint) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
+    	}
+    	if(aGameObject instanceof FuelTank)
+    	{
+    		if( ((FuelTank) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
     }
 }
 

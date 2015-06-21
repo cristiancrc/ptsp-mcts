@@ -165,16 +165,16 @@ public class DriveMCTS extends Controller
 //        System.out.print("\n due:" + timeDue);
 //    	System.out.print("\n remaining:" + remainingTime );
         
-//        SearchTreeNode rootNode;
+//        SearchTreeNodeLive rootNode;
         if(searchTree == null)
         {
         	System.out.println("+++++++++new search");        
         	//create root node for initial state
-//        	rootNode = new SearchTreeNode(a_gameCopy, null);
+//        	rootNode = new SearchTreeNodeLive(a_gameCopy, null);
         } else 
         {
         	System.out.println("+++++++++continuing search...");
-//        	rootNode = SearchTreeNode.copyTree(searchTree);        	
+//        	rootNode = SearchTreeNodeLive.copyTree(searchTree);        	
         }
         
     	//create root node for initial state
@@ -212,7 +212,7 @@ public class DriveMCTS extends Controller
 //        rootNode.present();
         //TODO 9 supposedly erratic when copying the child, due to different depth end
         //store the selected tree
-//        searchTree = SearchTreeNode.copyTree(rootNode.getChild(bestAction));
+//        searchTree = SearchTreeNodeLive.copyTree(rootNode.getChild(bestAction));
         searchTree = SearchTreeNode.copyTree(rootNode);
 //        System.out.println("\nselected : " + bestAction);
 //        System.out.println("\n=====leaf");
@@ -220,22 +220,6 @@ public class DriveMCTS extends Controller
     	return bestAction;
     }
 	
-    /**
-     * computes a score / cost for getting from the current position to the aimedNode
-     * @param a_gameCopy
-     * @param aimedNode
-     * @return
-     * TODO 0 implement 18 param evaluator
-     */
-    public Value evaluateShipPosition(Game a_gameCopy) 
-    {
-    	//v(s) = a1 * m(s) + a2 * e(s) + a3 (1-d(s)) + a4 * fn(s) + a5 * ft(s) + a6 * du(s) + a7 * dc(s)
-    	// m(s) - number of wp on the route collected
-    	    	
-		Value value = new Value();
-		return value;
-	}
-
     /**
      * returns the next node in the tree to simulate
      * @param incomingNode
@@ -253,8 +237,8 @@ public class DriveMCTS extends Controller
 	        } else 
 	        {        	
 	        	SearchTreeNode nextNode = currentNode.uct();
-//	        	SearchTreeNode nextNode = currentNode.egreedy();
-//                SearchTreeNode nextNode = currentNode.random();//MC search	        	
+//	        	SearchTreeNodeLive nextNode = currentNode.egreedy();
+//                SearchTreeNodeLive nextNode = currentNode.random();//MC search	        	
 	        	if (verbose) System.out.println("\n" + currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );	               
 	            currentNode = nextNode;
 	        }

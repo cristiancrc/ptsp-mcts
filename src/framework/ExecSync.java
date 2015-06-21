@@ -305,9 +305,9 @@ public class ExecSync extends Exec
                       
         //TODO~ this selects the controller
         //completed controller
-//        m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver        
+        m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver        
 //        m_controllerName = "controllers.greedy.DriveDfs"; //dfs controller        
-        m_controllerName = "controllers.greedy.DriveGreedy"; //greedy controller with planner selection
+//        m_controllerName = "controllers.greedy.DriveGreedy"; //greedy controller with planner selection
 
         //defaults
 //        m_controllerName = "controllers.greedy.GreedyController"; // default greedy with live paths
