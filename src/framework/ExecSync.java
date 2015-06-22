@@ -59,7 +59,7 @@ public class ExecSync extends Exec
         {
         	
         	//TODO~ time limit between waypoints
-//        	m_game.setStepsLeft(1000);
+        	m_game.setStepsLeft(1000);
 
             //When the result is expected:
             long then = System.currentTimeMillis();

@@ -38,8 +38,7 @@ public abstract class Planner {
 	ArrayList<Path> plannedPath = new ArrayList<>();//path between waypoints ready to be displayed on-screen
 	Graph aGraph;
 	Game aGameCopy;
-	//TODO 7 check variable visibility and static properties
-	//TODO 7 check variable names
+	public static boolean includeFuel = false;
 	public static double weightLava = 1;
 	public static double weightDistance = 1;
 	public static double weightDirectness = 1;
@@ -424,7 +423,7 @@ public abstract class Planner {
     	System.out.println("");
     	for (GameObject way : waypointList)
     	{
-    		System.out.print(way.getName() + " ");
+    		System.out.print(GameObject.getName(way) + " ");
     	}
     }
     

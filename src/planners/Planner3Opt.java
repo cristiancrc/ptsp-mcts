@@ -148,7 +148,7 @@ public class Planner3Opt extends Planner {
 							aPath.addFirst(wpShip);
 							if (verbose) presentList(aPath);
 							//alternate cost function when fuel tanks are in use
-							if(DriveMCTS.p_includeFuel)
+							if(includeFuel)
 							{
 								pathCost = getPathAlternateCost(aPath);	
 							}

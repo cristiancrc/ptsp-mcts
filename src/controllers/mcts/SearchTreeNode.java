@@ -5,9 +5,15 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
+import planners.Planner3Opt;
+
 import framework.core.Controller;
+import framework.core.FuelTank;
 import framework.core.Game;
+import framework.core.GameObject;
+import framework.core.PTSPConstants;
 import framework.core.Waypoint;
+import framework.graph.Graph;
 import framework.graph.Node;
 import framework.utils.Navigator;
 import framework.utils.Value;
@@ -33,6 +39,14 @@ public class SearchTreeNode {
     public Random rnd = new Random();
     public static double epsilon = 1e-6;
     public static double egreedyEpsilon = 0.05;
+    
+    //state evaluation data
+//			+ 	DriveMCTS.w_wpDistance * distanceToNextWaypoint +
+//			+   DriveMCTS.w_wpFuelOutOfRoute * collectedFuelOutOfRoute +
+	private int collectedWpRoute;
+	private int fuelConsumed;
+    private double damageFromLava;
+    private double damageFromCollisions;
         
     public SearchTreeNode(Game a_gameCopy, SearchTreeNode parent) 
     {
@@ -40,11 +54,18 @@ public class SearchTreeNode {
         this.worldSate = a_gameCopy;
         this.parent = parent;
         
+        
         children = new SearchTreeNode[Controller.NUM_ACTIONS];
         if(parent != null)
+        {
             depth = parent.depth+1;
+            this.damageFromLava = parent.damageFromLava;
+            this.damageFromCollisions = parent.damageFromCollisions;
+        }
         else
+        {
             depth = 0;
+        }
     }
     
     
@@ -172,22 +193,21 @@ public class SearchTreeNode {
     	//uctVal = number of wins / number of simulations of this child + exploration parameter * sqrt( log (total simulations) / number of simulations of this child
         SearchTreeNode selectedNode = null;
         double bestValue = Double.MAX_VALUE;
-        double explorationParameter = DriveMCTS.ucb1Exploration;
        
         for (SearchTreeNode child : this.children)
         {
             double hvVal = child.value;
             double childValue =  hvVal / (child.visited + epsilon);
 
-            //TODO 9 why normalize? bounds change
             childValue = normalise(childValue, bounds[0], bounds[1]);
 
-            double uctValue = childValue - explorationParameter * Math.sqrt(Math.log(this.visited + 1) / (child.visited + epsilon));
+            double uctValue = childValue - DriveMCTS.ucb1Exploration * Math.sqrt(Math.log(this.visited + 1) / (child.visited + epsilon));
 
             // small sampleRandom numbers: break ties in unexpanded nodes
             uctValue = noise(uctValue, epsilon, this.rnd.nextDouble());     //break ties randomly
 
-            if (uctValue < bestValue) {//minimizing a cost function
+            if (uctValue < bestValue) 
+            {//minimizing a cost function
                 selectedNode = child;
                 bestValue = uctValue;
             }
@@ -206,9 +226,8 @@ public class SearchTreeNode {
         if(rnd.nextDouble() < egreedyEpsilon)
         {
             //Choose randomly
-            int selectedIdx = rnd.nextInt(children.length);
-            selected = this.children[selectedIdx];
-
+            int aRandChild = rnd.nextInt(children.length);
+            selected = this.children[aRandChild];
         }
         else
         {
@@ -232,33 +251,18 @@ public class SearchTreeNode {
             throw new RuntimeException("Warning! returning null: " + this.children.length);
         }
         return selected;
-    }   
-    
-    /**
-     * 
-     * @return
-     */
-    private SearchTreeNode random() {
-        SearchTreeNode selected = null;
+    }      
 
-        //Choose randomly
-        int selectedIdx = rnd.nextInt(children.length);
-        selected = this.children[selectedIdx];
-        if (selected == null)
-        {
-            throw new RuntimeException("Warning! returning null: " + this.children.length);
-        }      
-        return selected;
-    }       
-    
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-    //Normalizes a value between its MIN and MAX.
     public static double normalise(double a_value, double a_min, double a_max)
     {
         if(a_min < a_max)
+        {    //Normalizes a value between its MIN and MAX.
             return (a_value - a_min)/(a_max - a_min);
-        else    // if bounds are invalid, then return same value
+        }
+        else 
+        {    // if bounds are invalid, then return same value
             return a_value;
+        }
     }
     
     /**
@@ -280,11 +284,11 @@ public class SearchTreeNode {
 
     /**
      * select a random action and apply it to the current state until one of the finishRollout conditions is met
-     * @param aimedNode
+     * @param ordered waypoints
      * @return
      * TODO 9 consider using dynamic depth
      */
-    public double simulate() 
+    public double simulate(LinkedList<GameObject> orderedWaypoints, Graph aGraph) 
     {       
         Game nextState = worldSate.getCopy();       
         int thisDepth = this.depth;
@@ -306,7 +310,7 @@ public class SearchTreeNode {
             }
         }
         
-        double localNewValue = evaluateShipPosition(nextState);        
+        double localNewValue = evaluateShipPosition(nextState, orderedWaypoints, aGraph);        
 
         nextPosition = nextState.getShip().s;
 //        DriveMCTSLive.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
@@ -371,14 +375,98 @@ public class SearchTreeNode {
 
     /**
      * computes a score / cost for getting from the current position to the aimedNode
-     * @param aGameCopy
-     * @return
-     * TODO 0 implement 18 param evaluator
+     * @param aGameState
+     * @return score
      */
-    public double evaluateShipPosition(Game aGameCopy) 
+    public double evaluateShipPosition(Game aGameState, LinkedList<GameObject> orderedWaypoints, Graph aGraph) 
     {
-    	double positionValue = 0;
+    	//get number of waypoints and fueltanks collected on route
+    	int collectedWpRoute = -1;
+    	int collectedWp = 0;
+    	int collectedFuelRoute = -1;
+    	int collectedFuel = 0;
+    	int nextTargetIndex = -1;
+    	int wayCounter = 0;
+    	for (GameObject way : orderedWaypoints) 
+    	{    		
+    		if(way instanceof Waypoint)
+    		{
+    			if (((Waypoint) way).isCollected())
+    			{
+    				collectedWp++;
+				}
+    			else
+    			{
+    				if( -1 == nextTargetIndex)
+    				{
+    					nextTargetIndex = wayCounter;
+    				}
+    				if( -1 == collectedWpRoute)
+    				{
+        				collectedWpRoute = collectedWp;
+        			}    			
+    			}
+    			
+    		}
+    		else if(way instanceof FuelTank)
+    		{
+    			if (((FuelTank) way).isCollected())
+    			{
+    				collectedFuel++;
+				}
+    			else
+    			{
+    				if( -1 == nextTargetIndex)
+    				{
+    					nextTargetIndex = wayCounter;
+    				}
+    				if( -1 == collectedFuelRoute)
+        			{
+        				collectedFuelRoute = collectedFuel;
+        			}   			
+    			}    			
+    		}
+    		wayCounter++;
+    	}
+    	System.out.println("\npath parsed:");
+    	//get fuel collected out of route
+    	int collectedFuelOutOfRoute = aGameState.getFuelTanksCollected() - collectedFuelRoute;
     	
+    	//get number of wp collected out of route
+    	int collectedWpOutOfRoute = aGameState.getWaypointsVisited()- collectedWpRoute;
+    	
+    	//get distance to next waypoint
+    	Node shipNode = aGraph.getClosestNodeTo(aGameState.getShip().s.x, aGameState.getShip().s.y);
+    	Node targetWpNode = aGraph.getClosestNodeTo(orderedWaypoints.get(nextTargetIndex).ps.x, orderedWaypoints.get(nextTargetIndex).ps.x);
+    	double distanceToNextWaypoint = aGraph.getPath(targetWpNode.id(), shipNode.id()).m_cost;
+    	
+    	//get damage from collisions
+    	int damageFromCollisions = 0;
+       	if ( aGameState.getShip().getDamage() > this.worldSate.getShip().getDamage() 
+       		&& aGameState.getShip().getCollLastStep())
+       	{
+       		damageFromCollisions += aGameState.getShip().getDamage() - this.worldSate.getShip().getDamage();
+       	}
+
+		System.out.println("wp on route " + collectedWpRoute);
+		System.out.println("wp off route " + collectedWpOutOfRoute);
+		System.out.println("fuel on route " + collectedFuelRoute);
+		System.out.println("fuel off route " + collectedFuelOutOfRoute);
+		System.out.println("wp distance " + distanceToNextWaypoint);
+		System.out.println("fuel consumed " + (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()));
+		System.out.println("damage taken " + (PTSPConstants.MAX_DAMAGE - aGameState.getShip().getDamage()));
+		System.out.println("damage collisions " + damageFromCollisions);
+		
+		
+
+    	//final score
+    	double positionValue = 		DriveMCTS.w_wpCollectedRoute * collectedWpRoute +
+    							+ 	DriveMCTS.w_wpCollectedOutOfRoute * collectedWpOutOfRoute +
+    							+ 	DriveMCTS.w_wpDistance * distanceToNextWaypoint +
+    							+ 	DriveMCTS.w_fuelConsumed * (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()) +
+    							+	DriveMCTS.w_damageIncurred * (PTSPConstants.MAX_DAMAGE - aGameState.getShip().getDamage()) +
+    							+   DriveMCTS.w_wpFuelOutOfRoute * collectedFuelOutOfRoute +
+    							+ 	DriveMCTS.w_damageCollisions * damageFromCollisions;     	
 		return positionValue;
 	}
     

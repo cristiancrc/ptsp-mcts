@@ -31,6 +31,8 @@ import framework.utils.Vector2d;
  * Monte-Carlo tree search driver
  * @version 150621
  * @author Cristian
+ * TODO 0 debug planner path, weights one by one
+ * TODO 0 debug mcts search, weights one by one
  * TODO 0 link the parameters to CMA-ES library
  * TODO 7 implement transposition tables for states (see 2013 detail paper)
  */
@@ -41,29 +43,33 @@ public class DriveMCTS extends Controller
 	static double sqrt2 = Math.sqrt(2);
 	
 	//controller weights
-	static int scorePanicMode = 0;//a0 score threshold for panic mode
-	public static int w_wpCollectedRoute = 1;//a1 waypoints collected on the planned route
-	public static int w_wpCollectedOutOfRoute = 1;//a2 waypoints collected out of the planned route
-	public static int w_wpDistance = 1;//a3 distance to next waypoint
-	public static int w_fuelConsumed = 1;//a4 total fuel consumed
-	public static int w_damageIncurred = 1;//a5 damage taken
-	public static int w_wpFuelOutOfRoute = 1;//a6 fuel tanks picked up opportunistically
-	public static int w_damageCollisions = 1;//a7 damage taken only from collisions
+	//TODO 1 implement panic mode
+	static double scorePanicMode = 0.1;//a0 score threshold for panic mode
+	static double w_wpCollectedRoute = 1;//a1 waypoints collected on the planned route
+	static double w_wpCollectedOutOfRoute = -1;//a2 waypoints collected out of the planned route
+	static double w_wpDistance = 0.75;//a3 distance to next waypoint
+	static double w_fuelConsumed = 0.001;//a4 total fuel consumed
+	static double w_wpFuelOutOfRoute = 1;//a5 fuel tanks picked up opportunistically	
+	static double w_damageIncurred = 0.002;//a6 damage taken
+	static double w_damageCollisions = 0.3;//a7 damage taken only from collisions
 	
 	//planner weights	
-	public static double w_lava = 1;//l increase distance when passing over lava
-	public static double w_distance = 1;//b1 travel distance
-	public static double w_directness = 1;//b2 ratio between travel distance and euclidean distance
-	public static double w_angle = 1;//b3 angle change between entering and exiting a waypoint
-	public static boolean p_includeFuel = true;//b4 include fuel tanks in planning	
-	public static double w_fuelTankCost = 1;//b5 cost of picking up a fuel tank 
-	public static double w_consecutiveFuelTanksCost = 1;//b6 cost of picking up consecutive fuel tanks
+	static double w_lava = 1.5;//l increase distance when passing over lava
+	static double w_distance = 1.5;//b1 travel distance
+	static double w_directness = 150;//b2 ratio between travel distance and euclidean distance
+	static double w_angle = 80;//b3 angle change between entering and exiting a waypoint
+	static boolean p_includeFuel = true;//b4 include fuel tanks in planning	
+	static double w_fuelTankCost = 200;//b5 cost of picking up a fuel tank 
+	static double w_consecutiveFuelTanksCost = 1000;//b6 cost of picking up consecutive fuel tanks
     //TODO 3 what's wrong with setting this to 1? even without macro time.	
-	public static int macroActionsCount = 5;//T macro action length
-	public static int searchDepth = 10;//d playout depth
-	public static double ucb1Exploration = sqrt2;//C ucb1 exploration constant	
-	
-    private Graph aGraph; // Graph for this controller.
+	static int macroActionsCount = 5;//T macro action length
+	static int searchDepth = 10;//d playout depth
+	static double ucb1Exploration = 1;//C ucb1 exploration constant	
+		
+	private LinkedList<GameObject> orderedWaypoints;	
+
+	private Graph aGraph; // Graph for this controller.
+	private Node aimedNode;
     private ArrayList<Path> aPlannedPath = new ArrayList<>();// Paths to the waypoints based on the planner
     static ArrayList<Vector2d> possiblePosition = new ArrayList<>();    
     static ArrayList<Vector2d> panicPosition = new ArrayList<>();
@@ -77,7 +83,7 @@ public class DriveMCTS extends Controller
     int macroAction;
     int ongoingsearchresult = -1;
 
-    public Random rnd = new Random();
+    public Random rnd = new Random();	
 
     /**
      * Constructor, that receives a copy of the game state
@@ -99,8 +105,10 @@ public class DriveMCTS extends Controller
         Planner.weightAngle = w_angle;
     	Planner.weightFuelTankCost = w_fuelTankCost;
     	Planner.weightConsecutiveFuelTanksCost = w_consecutiveFuelTanksCost;
+    	Planner.includeFuel = p_includeFuel;
     	
     	planner.runPlanner();
+    	orderedWaypoints = planner.getOrderedWaypoints();
         
         planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
         aPlannedPath = planner.getPlannedPath();//get the path from one waypoint to the next
@@ -147,9 +155,25 @@ public class DriveMCTS extends Controller
         macroAction = ongoingsearchresult;
         macroActionsRemaining = macroActionsCount;
         bestAction = macroAction;
+        
+        //get target waypoint
+        GameObject target = null;
+        for (GameObject way : orderedWaypoints)
+        {
+        	if(way instanceof Waypoint && !((Waypoint)way).isCollected())
+        	{
+        		target = way;
+        		break;
+        	}
+        	if(way instanceof FuelTank && !((FuelTank)way).isCollected())
+        	{
+        		target = way;
+        		break;
+        	}
+        }
+        aimedNode = aGraph.getClosestNodeTo(target.s.x, target.s.y);
     	
-        if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());
-
+        if(verbose) System.out.println("\n>>>out\t\t" + System.currentTimeMillis());      
         //TODO - this stops the execution 0
 //        System.exit(1);////////////////////////////////////////////////////////////////////////////
         
@@ -193,7 +217,7 @@ public class DriveMCTS extends Controller
         	
         	// simulate
         	if (verbose) System.out.println(" simulating from " + SearchTreeNode.getFullIdentifier(urgentNode));//TODO 1 basic debug mcts
-        	double matchValue = urgentNode.simulate();
+        	double matchValue = urgentNode.simulate(orderedWaypoints, aGraph);
         	
         	// back propagate
         	urgentNode.backPropagate(urgentNode, matchValue);
@@ -237,8 +261,7 @@ public class DriveMCTS extends Controller
 	        } else 
 	        {        	
 	        	SearchTreeNode nextNode = currentNode.uct();
-//	        	SearchTreeNodeLive nextNode = currentNode.egreedy();
-//                SearchTreeNodeLive nextNode = currentNode.random();//MC search	        	
+//	        	SearchTreeNodeLive nextNode = currentNode.egreedy();	        	
 	        	if (verbose) System.out.println("\n" + currentNode.getIdentifier() + " uct decided: " + nextNode.getIdentifier() );	               
 	            currentNode = nextNode;
 	        }
@@ -269,12 +292,13 @@ public class DriveMCTS extends Controller
     	}
     	return false;
     }
-	        
+    	        
   	/**
      * paint additional info
      */
     public void paint(Graphics2D a_gr)
     {  
+    	Painter.paintAimedNode(a_gr, aimedNode);
     	Painter.paintPossibleShipPositions(a_gr, possiblePosition);
     	Painter.paintPaths(a_gr, aGraph, aPlannedPath, Color.gray);
     }

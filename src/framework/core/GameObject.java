@@ -93,7 +93,16 @@ public abstract class GameObject {
      */    
     public String getName()
     {
-		return this.toString().substring(this.toString().indexOf("@")+1);    	
+    	String ret = this.toString().substring(this.toString().indexOf("@")+1);
+    	if (this instanceof Waypoint)
+    	{
+    		ret += "[w]"; 
+    	}
+    	else
+    	{
+    		ret += "[f]";
+    	}
+		return ret;
     }
     
     /**
@@ -103,9 +112,18 @@ public abstract class GameObject {
      * 
      * @author Cristian
      */ 
-    public static String getName(Waypoint aWaypoint)
+    public static String getName(GameObject aWaypoint)
     {
-		return aWaypoint.toString().substring(aWaypoint.toString().indexOf("@")+1);    	
+    	String ret = aWaypoint.toString().substring(aWaypoint.toString().indexOf("@")+1);  
+    	if (aWaypoint instanceof Waypoint)
+    	{
+    		ret += "[w]"; 
+    	}
+    	else
+    	{
+    		ret += "[f]";
+    	}
+		return ret;
     }
 
 }
