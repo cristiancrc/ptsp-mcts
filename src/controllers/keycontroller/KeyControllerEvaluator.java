@@ -1,16 +1,30 @@
 package controllers.keycontroller;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+
+import controllers.mcts.DriveMCTS;
+
+import planners.Planner;
+import planners.Planner2Opt;
+import planners.Planner3Opt;
+import planners.PlannerBruteForce;
+import planners.PlannerGreedy;
+import planners.PlannerGreedyCost_w;
+import planners.PlannerMC;
 
 import framework.core.Controller;
 import framework.core.FuelTank;
 import framework.core.Game;
 import framework.core.GameObject;
+import framework.core.PTSPConstants;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 import framework.graph.Node;
 import framework.graph.Path;
+import framework.utils.Painter;
 import framework.utils.Vector2d;
 
 /**
@@ -18,9 +32,31 @@ import framework.utils.Vector2d;
  * PTSP-Competition
  * Created by Diego Perez, University of Essex.
  * Date: 20/12/11
+ * Cristian : added planner call
  */
-public class KeyControllerShowPaths extends KeyController
+public class KeyControllerEvaluator extends KeyController
 {
+	//planner weights
+	static double w_lava = 2;//l increase distance when passing over lava 1
+	static double w_distance = 1;//b1 travel distance 1
+	static double w_directness = 150;//b2 ratio between travel distance and euclidean distance 150
+	static double w_angle = 80;//b3 angle change between entering and exiting a waypoint 80
+	
+	static boolean p_includeFuel = false;//b4 include fuel tanks in planning false
+	static double w_fuelTankCost = 200;//b5 cost of picking up a fuel tank 200
+	static double w_consecutiveFuelTanksCost = 1000;//b6 cost of picking up consecutive fuel tanks 1000
+	
+	//controller weights
+	static double scorePanicMode = 0.1;//a0 score threshold for panic mode 0.1
+	static double w_wpCollectedRoute = 1;//a1 waypoints collected on the planned route 1
+	static double w_wpCollectedOutOfRoute = -1;//a2 waypoints collected out of the planned route -1
+	static double w_wpDistance = 0.75;//a3 distance to next waypoint 0.75
+	static double w_fuelConsumed = -0.001;//a4 total fuel consumed 0.001
+	static double w_wpFuelOutOfRoute = 1;//a5 fuel tanks picked up opportunistically 1	
+	static double w_damageIncurred = -0.002;//a6 damage taken 0.002
+	static double w_damageCollisions = -0.3;//a7 damage taken only from collisions 0.3
+	
+	
     /**
      * To manage the keyboard input.
      */
@@ -68,13 +104,59 @@ public class KeyControllerShowPaths extends KeyController
      */
     
     Path pathToClosest;
+    private ArrayList<Path> aPlannedPath = new ArrayList<>();// Paths to the waypoints based on the planner
+
+    static LinkedList<GameObject> orderedWaypoints = new LinkedList<GameObject>();
     
-    public KeyControllerShowPaths(Game a_gameCopy, long a_timeDue)
+    
+    public KeyControllerEvaluator(Game a_gameCopy, long a_timeDue)
     {
+        System.out.println("**** keyboard controller with planner ****");
         m_input = new KeyInput();
         
-      //Init the graph.
         m_graph = new Graph(a_gameCopy);
+//        Planner planner = new PlannerBruteForce(a_gameCopy);
+//        Planner planner = new PlannerGreedy(a_gameCopy);
+//        Planner planner = new PlannerMC(a_gameCopy, a_timeDue);
+//        Planner planner = new Planner2Opt(a_gameCopy);
+        Planner planner = new Planner3Opt(a_gameCopy);
+        
+
+        Planner.weightLava = w_lava;
+        Planner.weightDistance = w_distance;
+        Planner.weightDirectness = w_directness;
+        Planner.weightAngle = w_angle;
+    	Planner.weightFuelTankCost = w_fuelTankCost;
+    	Planner.weightConsecutiveFuelTanksCost = w_consecutiveFuelTanksCost;
+    	Planner.includeFuel = p_includeFuel;
+        
+    	planner.runPlanner();
+    	orderedWaypoints = planner.getOrderedWaypoints();
+    	
+    	//compare flood fill result with node distance result
+//    	HashMap<GameObject, Double[][]> distanceMapList = new HashMap<GameObject, Double[][]>();
+//    	long totalFillTime = 0;
+//    	for (GameObject way : orderedWaypoints)
+//    	{
+//    		long timeStart = System.currentTimeMillis();
+//            Double[][] aMap = planner.computeDistanceMap(a_gameCopy.getMap(), (int)way.s.x, (int)way.s.y);
+//            distanceMapList.put(way, aMap);           
+//            long timeEnd = System.currentTimeMillis();
+//            System.out.println("---- Total time spent for one fill: " + (timeEnd - timeStart) + " ms.");
+//            totalFillTime += (timeEnd - timeStart);
+//    	}
+//    	System.out.println("...total fill time :  " + totalFillTime);
+//    	
+//    	for (GameObject way : orderedWaypoints)
+//    	{
+//    		System.out.println("\nfrom ship...");
+//    		Double[][] localMap = distanceMapList.get(way);
+//    		System.out.println("fill: " + localMap[(int) a_gameCopy.getShip().s.x][(int) a_gameCopy.getShip().s.y]);
+//        	Waypoint wpShip = new Waypoint(a_gameCopy, a_gameCopy.getShip().s);        	
+//    		System.out.println("distance : " + Planner.distanceMatrix.get(wpShip).get(way));
+//    	}
+        planner.calculateOrderedWaypointsPaths();//calculate the paths from one waypoint to another
+        aPlannedPath = planner.getPlannedPath();//get the path from one waypoint to the next        
         
         m_pathToFuelTanks = new Path[a_gameCopy.getFuelTanks().size()];
         m_pathToWaypoints = new Path[a_gameCopy.getWaypoints().size()];
@@ -102,7 +184,7 @@ public class KeyControllerShowPaths extends KeyController
      * @return the integer identifier of the action to execute (see interface framework.core.Controller for definitions)
      */
     public int getAction(Game a_gameCopy, long a_timeDue)
-    {
+    {    	
         //Get the path to the closest node, if my ship moved.
         Node oldShipId = m_shipNode;
         m_shipNode = m_graph.getClosestNodeTo(a_gameCopy.getShip().s.x, a_gameCopy.getShip().s.y,true);
@@ -135,7 +217,9 @@ public class KeyControllerShowPaths extends KeyController
               		m_pathToFuelTanks[i] = m_graph.getPath(m_shipNode.id(), m_collectNodes.get(tank).id());
               }
           }
-    	
+    	  
+	    Graph aGraph = new Graph(a_gameCopy);
+	    evaluateShipPosition(a_gameCopy, orderedWaypoints, aGraph);
     	Vector2d straightup = new Vector2d();
     	straightup.x = 0;
     	straightup.y = 1;
@@ -203,6 +287,7 @@ public class KeyControllerShowPaths extends KeyController
     
     public void paintPaths(Graphics2D a_gr)
     {
+    	Painter.paintPaths(a_gr, m_graph, aPlannedPath, Color.gray);
     	 //paint all active waypoints
 //        a_gr.setColor(Color.blue);
 //        Path[] pathToWaypoints = getPathToWaypoints();
@@ -286,5 +371,170 @@ public class KeyControllerShowPaths extends KeyController
      */
     public KeyInput getInput() {return m_input;}
     
+    /**
+     * draws a list of paths on the screen with the same color
+     * @param a_gr
+     * @param m_graph
+     * @param m_pathList
+     * @param color
+     */
+    public static void paintPaths(Graphics2D a_gr, Graph m_graph, ArrayList<Path> m_pathList, Color color)
+    {
+    	//paint planned paths
+        if ( m_pathList.size() > 0) 
+        {
+	        for(int i = 0; i< m_pathList.size(); i++)
+	        {	        	
+	        	Path a_path = m_pathList.get(i);
+	        	paintPath(a_gr, m_graph, a_path, color);
+	        }
+        }
+    }
+    
+    /**
+     * draws a single path on the screen
+     * @param a_gr
+     * @param m_graph
+     * @param m_path
+     * @param color
+     */
+    public static void paintPath(Graphics2D a_gr, Graph m_graph, Path m_path, Color color)
+    {
+    	a_gr.setColor(color);
+    	if (null != m_path)
+    	{
+        	for(int j = 0; j < m_path.m_points.size()-1; ++j)
+            {
+                Node thisNode = m_graph.getNode(m_path.m_points.get(j));
+                Node nextNode = m_graph.getNode(m_path.m_points.get(j+1));
+                a_gr.drawLine(thisNode.x(), thisNode.y(), nextNode.x(),nextNode.y());
+            }
+    	}
+    }
+    
    private double shipHeading_x, shipHeading_y; 
+   
+   
+   
+   
+   
+   
+   
+   /**
+    * computes a score / cost for getting for a game state and a planned list
+    * @param aGameState
+    * @return score
+    */
+   public double evaluateShipPosition(Game aGameState, LinkedList<GameObject> orderedWaypoints, Graph aGraph) 
+   {
+	   
+   	//get number of waypoints and fueltanks collected on route
+   	int collectedWpRoute = -1;
+   	int collectedWp = 0;
+   	int collectedFuelRoute = -1;
+   	int collectedFuel = 0;
+   	int nextTargetIndex = -1;
+   	int wayCounter = 0;
+
+   	for (GameObject way : orderedWaypoints) 
+   	{    		
+   		if(way instanceof Waypoint)
+   		{
+   			if (((Waypoint) way).isCollected())
+   			{
+   				collectedWp++;
+				}
+   			else
+   			{
+   				if( -1 == nextTargetIndex)
+   				{
+   					nextTargetIndex = wayCounter;
+   				}
+   				if( -1 == collectedWpRoute)
+   				{
+       				collectedWpRoute = collectedWp;
+       			}    			
+   			}
+   			
+   		}
+   		else if(way instanceof FuelTank)
+   		{
+   			if (((FuelTank) way).isCollected())
+   			{
+   				collectedFuel++;
+				}
+   			else
+   			{
+   				if( -1 == nextTargetIndex)
+   				{
+   					nextTargetIndex = wayCounter;
+   				}
+   				if( -1 == collectedFuelRoute)
+       			{
+       				collectedFuelRoute = collectedFuel;
+       			}   			
+   			}    			
+   		}
+   		wayCounter++;
+   	}   	
+   	//get fuel collected out of route
+   	int collectedFuelOutOfRoute = aGameState.getFuelTanksCollected() - collectedFuelRoute;
+   	
+   	//get number of wp collected out of route
+   	int collectedWpOutOfRoute = aGameState.getWaypointsVisited()- collectedWpRoute;
+   	
+   	//get distance to next waypoint
+//   	System.out.println("Ship at " + aGameState.getShip().s + " , target at " + orderedWaypoints.get(nextTargetIndex).s);
+   	Node shipNode = aGraph.getClosestNodeTo(aGameState.getShip().s.x, aGameState.getShip().s.y);
+   	Node targetWpNode = aGraph.getClosestNodeTo(orderedWaypoints.get(nextTargetIndex).s.x, orderedWaypoints.get(nextTargetIndex).s.y);
+   	double distanceToNextWaypoint = aGraph.getPath(targetWpNode.id(), shipNode.id()).m_cost;
+   	
+   	//get damage from collisions
+   	int damageFromCollisions = 0;
+  	if ( aGameState.getShip().getCollLastStep())
+  	{
+  		damageFromCollisions += aGameState.getShip().getDamage();
+  	}
+   	//final score
+   	double positionValue = 		w_wpCollectedRoute * collectedWpRoute +
+   							+ 	w_wpCollectedOutOfRoute * collectedWpOutOfRoute +
+   							+ 	w_wpDistance * distanceToNextWaypoint +
+   							+ 	w_fuelConsumed * (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()) +
+   							+	w_damageIncurred * (PTSPConstants.MAX_DAMAGE - aGameState.getShip().getDamage()) +
+   							+   w_wpFuelOutOfRoute * collectedFuelOutOfRoute +
+   							+ 	w_damageCollisions * damageFromCollisions; 
+   	
+  	if(0 == aGameState.getTotalTime() % 50)
+  	{
+  		System.out.println("\n" + aGameState.getTotalTime());
+		System.out.println("wp on route " + collectedWpRoute);
+		System.out.println("wp off route " + collectedWpOutOfRoute);
+		System.out.println("fuel on route " + collectedFuelRoute);
+		System.out.println("fuel off route " + collectedFuelOutOfRoute);
+		System.out.println("wp distance " + distanceToNextWaypoint);
+		System.out.println("fuel consumed " + (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()));
+		System.out.println("damage taken " + (PTSPConstants.MAX_DAMAGE - aGameState.getShip().getDamage()));
+		System.out.println("damage collisions " + damageFromCollisions);
+		System.out.println("=== " + positionValue);
+  	}
+		
+		
+
+    	
+		return positionValue;
+	}
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 }

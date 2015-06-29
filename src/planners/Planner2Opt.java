@@ -26,25 +26,47 @@ public class Planner2Opt extends Planner {
     
     public void runPlanner()
     {
-        long timeStart = System.currentTimeMillis();
+    	
+        long timeStart = System.currentTimeMillis();      
     	aGraph = new Graph(aGameCopy);    	
-    	createMatrices();
+    	LinkedList<GameObject> waypointList;
+    	Waypoint wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);
+    	long timeInit = System.currentTimeMillis();
+    	System.out.println(" Time to init: " + (timeInit - timeStart) + " ms.");
+    	createMatrices();  	    	
         long timeAfterMatrices = System.currentTimeMillis();
-		System.out.println(" Total time spent for matrices init: " + (timeAfterMatrices - timeStart) + " ms.");
-    	//get a greedy plan
-		Planner planner = new PlannerGreedy(aGameCopy);
-    	LinkedList<GameObject> waypointList = (LinkedList<GameObject>) aGameCopy.getWaypoints().clone();//the list of waypoints
+		System.out.println(" Total time spent for matrices init: " + (timeAfterMatrices - timeInit) + " ms.");
+		
+		int allotedTime = 0;
+		if(includeFuel)
+		{
+			allotedTime = 300;//with fuel
+		}
+		else
+		{
+			allotedTime = 600;//without fuel
+		}
+		//TODO 8 use multiple fragment for the base
+    	//get a base plan		
+//		Planner planner = new PlannerGreedy(a_gameCopy);
+    	Planner planner = new PlannerMC(aGameCopy, allotedTime);
+    	planner.runPlanner();
 		waypointList = planner.getOrderedWaypoints();//get the planned route
-		long timeAfterGreedy = System.currentTimeMillis();
-		System.out.println(" Time spent for greedy planner: " + (timeAfterGreedy - timeAfterMatrices) + " ms.");		
-    	Waypoint wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);//add ship position as waypoint        
+//		System.out.print("out from DriveMC_w:");
+//		presentList(waypointList);
+//		System.out.println("\n");
+		
+		orderedWaypoints = (LinkedList<GameObject>) waypointList.clone();//an initial list is needed
+		long timeAfterBasicPlanner = System.currentTimeMillis();
+		
+		System.out.println(" Time spent for base planner: " + (timeAfterBasicPlanner - timeAfterMatrices) + " ms.");	
 
 		//build paths, based on the greedy result
-    	double pathMinCost = getPathCost(waypointList);//result from greedy	
+    	double pathMinCost = getPathCost(waypointList);//base result	
 		double pathCost = 0;//local search result
 		LinkedList<GameObject> aPath = new LinkedList<>();//stores built paths
 		LinkedList<GameObject> aPathRev = new LinkedList<>();//stores built paths
-
+		long timeBeforeSearching = System.currentTimeMillis();
 		//full search through all edges
 		for (int i = 1; i < waypointList.size()-2; i++)//no need to check the last, 1 because counting starts at 0, another 1 because this is a graph not a circuit
 		{
@@ -118,7 +140,7 @@ public class Planner2Opt extends Planner {
 			if (verbose) System.out.println("");   		
     	}    	
     	long timeAfter = System.currentTimeMillis();
-    	System.out.println(" Time spent searching: " + (timeAfter - timeAfterGreedy) + " ms.");    	
+    	System.out.println(" Time spent searching: " + (timeAfter - timeBeforeSearching) + " ms.");    	
 		System.out.println("Path distance:" + getPathCost(orderedWaypoints));			
 		System.out.println("2Opt Planner time: " + (timeAfter - timeStart) + " ms.");	
     }

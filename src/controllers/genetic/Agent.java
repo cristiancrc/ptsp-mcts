@@ -1,5 +1,5 @@
 package controllers.genetic;
-//TODO 5 implement a genetic planner
+//TODO 5 implement a genetic controller
 //
 //
 //import controllers.Heuristics.StateHeuristic;

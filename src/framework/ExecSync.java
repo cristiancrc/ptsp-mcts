@@ -59,7 +59,7 @@ public class ExecSync extends Exec
         {
         	
         	//TODO~ time limit between waypoints
-        	m_game.setStepsLeft(1000);
+//        	m_game.setStepsLeft(1000);
 
             //When the result is expected:
             long then = System.currentTimeMillis();
@@ -287,7 +287,7 @@ public class ExecSync extends Exec
      */
     public static void main(String[] args)
     {
-        m_mapNames = new String[]{"maps/ptsp_map45.map"}; //Set here the name of the map to play in.
+        m_mapNames = new String[]{"maps/ptsp_map61.map"}; //Set here the name of the map to play in.
         //m_mapNames = new String[]{"maps/ptsp_map01.map","maps/ptsp_map02.map","maps/ptsp_map08.map",
         //        "maps/ptsp_map19.map","maps/ptsp_map24.map","maps/ptsp_map35.map","maps/ptsp_map40.map",
         //        "maps/ptsp_map45.map","maps/ptsp_map56.map","maps/ptsp_map61.map"}; //In an array, to play in multiple maps with runGames().
@@ -305,17 +305,21 @@ public class ExecSync extends Exec
                       
         //TODO~ this selects the controller
         //completed controller
-        m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver        
+        m_controllerName = "controllers.mcts.DriveMCTS"; //mcts driver
+//        m_controllerName = "controllers.mctsLive.DriveMCTSLive"; //mcts live driver
 //        m_controllerName = "controllers.greedy.DriveDfs"; //dfs controller        
 //        m_controllerName = "controllers.greedy.DriveGreedy"; //greedy controller with planner selection
+//        m_controllerName = "controllers.keycontroller.KeyControllerEvaluator"; //key controller with planner and evaluator of state
+//        m_controllerName = "controllers.keycontroller.KeyControllerPlanner"; //key controller with planner
 
         //defaults
 //        m_controllerName = "controllers.greedy.GreedyController"; // default greedy with live paths
 //        m_controllerName = "controllers.MacroRandomSearch.MacroRSController"; //default macro actions
 //        m_controllerName = "controllers.lineofsight.LineOfSight";//default line of sight greedy
 //        m_controllerName = "controllers.random.RandomController";//default random walker
-//        m_controllerName = "controllers.WoxController.WoxController"; //default
-//        m_controllerName = "controllers.keycontroller.KeyControllerShowPaths"; //key controller
+//        m_controllerName = "controllers.WoxController.WoxController"; //default random 2
+//        m_controllerName = "controllers.keycontroller.KeyController"; //key controller
+        
         
         //parameters
         m_visibility = true; //Set here if the graphics must be displayed or not (for those modes where graphics are allowed).

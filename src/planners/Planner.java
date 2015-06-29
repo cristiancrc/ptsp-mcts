@@ -1,10 +1,14 @@
 package planners;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+
+import oracle.jrockit.jfr.parser.ChunkParser;
 
 import com.sun.xml.internal.ws.util.StringUtils;
 
@@ -29,7 +33,7 @@ import framework.utils.Vector2d;
  */	
 public abstract class Planner {
 	
-	boolean verbose = false;
+	public boolean verbose = false;
 	static HashMap<GameObject, HashMap<GameObject, Double>> distanceMatrix = new HashMap<>();//distance matrix from each waypoint to each other
 	static HashMap<GameObject, HashMap<GameObject, Double>> matrixCostLava = new HashMap<>();//cost (distance and lava) matrix from each waypoint to each other
 	static HashMap<GameObject, HashMap<GameObject, Double>> matrixCostDirectness = new HashMap<>();//directness matrix from each waypoint to each other
@@ -37,19 +41,21 @@ public abstract class Planner {
 	LinkedList<GameObject> orderedWaypoints = new LinkedList<>();//the route resulted from the planner
 	ArrayList<Path> plannedPath = new ArrayList<>();//path between waypoints ready to be displayed on-screen
 	Graph aGraph;
-	Game aGameCopy;
-	public static boolean includeFuel = false;
-	public static double weightLava = 1;
+	Game aGameCopy;	
+	public static double weightLava = 1.5;
 	public static double weightDistance = 1;
-	public static double weightDirectness = 1;
-	public static double weightAngle = 1;
-	public static double weightFuelTankCost = 1;
-	public static double weightConsecutiveFuelTanksCost = 2;
-	//TODO 8 if a waypoint is taken out of order, what do we do? should we replan? remove it from the path? with 1 0 0 1 this happens
-	//fuel true
-	//bonus fuel 200
-	//penalty for consecutive tanks 1000
+	public static double weightDirectness = 0;
+	public static double weightAngle = 0;
+	public static boolean includeFuel = false;
+	public static double weightFuelTankCost = 0;
+	public static double weightConsecutiveFuelTanksCost = 0;
 	
+	ArrayList<Integer[]> theQueue = new ArrayList<Integer[]>();
+	double[][] checkedList = new double[600][600];
+	Map aMap;
+	char[][] aMapChars;
+	static Double[][] distanceMap;
+		
 	/**
 	 * perform the planning
 	 * @param aGameCopy
@@ -271,18 +277,17 @@ public abstract class Planner {
        	HashMap<GameObject, Double> distanceList = new HashMap<>();//distance from -one- waypoint to each of the others
        	HashMap<GameObject, Double> distanceListLava = new HashMap<>();//distance from -one- waypoint to each of the others
        	Map a_map = aGameCopy.getMap();       
-       	
     	for (int i = 0; i < waypointList.size(); i++)    		
     	{
     		GameObject wpFrom = waypointList.get(i);
     		distanceList.clear();
     		distanceListLava.clear();
     		
-    		for (int j = 1; j < waypointList.size(); j++) 
+    		for (int j = 0; j < waypointList.size(); j++) 
 			//j = i for symmetric weights , j = 0 for asymmetric (uphill downhill)
     		//we need full matrix for easy lookup, so j = 0, but we will avoid computing cost by retrieving previous result
     		{    	       	
-    			GameObject wpTo = waypointList.get(j);    			
+    			GameObject wpTo = waypointList.get(j);    	
     			if (i == j) continue; //distance to self is 0
     			double pathCost = 0;
     			double lavaCost = 0;
@@ -291,7 +296,6 @@ public abstract class Planner {
     			{
 					pathCost = distanceMatrix.get(wpTo).get(wpFrom);
 					lavaCost = distanceMatrixLava.get(wpTo).get(wpFrom);
-//    				System.out.println(" cost retrieved:" + pathCost);
     			} 
     			else
     			{    				
@@ -305,8 +309,8 @@ public abstract class Planner {
 		                Node thisNode = aGraph.getNode(aPath.m_points.get(k));		                
 		                Node nextNode = aGraph.getNode(aPath.m_points.get(k+1));
 		                double dist = thisNode.euclideanDistanceTo(nextNode);
-		                if(  i == 0 ||
-		                	 (wpFrom instanceof FuelTank && wpTo instanceof FuelTank) )
+		                if( 	0 == i && wpTo instanceof FuelTank //pick-up a fuel tank first 
+		                	|| 	wpFrom instanceof FuelTank && wpTo instanceof FuelTank) //pick-up consecutive fuel tanks
 		                {
 		                	dist *= weightConsecutiveFuelTanksCost;
 		                }
@@ -321,7 +325,7 @@ public abstract class Planner {
 	        	distanceList.put(wpTo, pathCost);
 	        	distanceListLava.put(wpTo, lavaCost);
     		}
-    		distanceMatrix.put(wpFrom, (HashMap<GameObject, Double>) distanceList.clone());
+    		distanceMatrix.put(wpFrom, (HashMap<GameObject, Double>) distanceList.clone());    		
     		distanceMatrixLava.put(wpFrom, (HashMap<GameObject, Double>) distanceListLava.clone());
     	}
     	result[0] = distanceMatrix;
@@ -337,7 +341,11 @@ public abstract class Planner {
 	protected void createMatrices()
 	{
 		LinkedList<GameObject> waypointList = (LinkedList<GameObject>) aGameCopy.getWaypoints().clone();//start with all the waypoints
-		waypointList.addAll((Collection<? extends GameObject>) aGameCopy.getFuelTanks().clone());
+		if(includeFuel)		
+		{
+			System.out.println(" ...planning with fuel");
+			waypointList.addAll((Collection<? extends GameObject>) aGameCopy.getFuelTanks().clone());
+		}
 		Waypoint wpShip = new Waypoint(aGameCopy, aGameCopy.getShip().s);
     	waypointList.addFirst(wpShip);//add the ship to start from
     	HashMap<GameObject, HashMap<GameObject, Double>>[] distanceMatrices = createDistanceMatrices(waypointList);
@@ -346,26 +354,203 @@ public abstract class Planner {
     	matrixCostDirectness = createDirectnessMatrix(waypointList);
     	matrixCostAngle = createAngleMatrix(waypointList);
 	}
-	
+		
 	/**
-	 * flood fill the map and create the distance matrices
-	 * TODO 1 flood fill map
-	 * @param aMap
+	 * flood fill map starting from a position
+	 * TODO 8 optimize flood fill 
+	 * @param _aMap
+	 * @param x0
+	 * @param y0
+	 * @return distance map
 	 */
-	public static void floodFill(Map aMap)
-	{
-		char[][] charMap = aMap.getMapChar();
-		System.out.println("size x " + charMap.length);
-		System.out.println("size y " + charMap[0].length);
-		for(int i = 0; i < charMap.length; i++)
+	public Double[][] computeDistanceMap(Map _aMap, int x0, int y0)
+	{				
+		long timeStart = System.currentTimeMillis();
+		aMap = _aMap;
+		aMapChars = aMap.getMapChar();
+		System.out.println("map size " + aMap.getMapWidth() + "," +  aMap.getMapHeight() + " = " + (aMap.getMapWidth() * aMap.getMapHeight() )); 
+		distanceMap = new Double[aMap.getMapWidth()][aMap.getMapHeight()];
+		theQueue.clear();
+		for(int i = 0; i < aMap.getMapWidth(); i++)
 		{
-			System.out.println("");
-			for(int j =0; j < charMap[i].length; j++)
+			for(int j =0; j < aMap.getMapHeight(); j++)
 			{
-				System.out.print(charMap[i][j]);				
+				checkedList[i][j] = 0;
+				if(i == x0 && j == y0)
+				{
+					distanceMap[i][j] = 0.;
+					
+				}
+				else if (isFillable(i, j))
+				{
+					distanceMap[i][j] = Double.NEGATIVE_INFINITY;
+				}
+				else 
+				{
+					distanceMap[i][j] = Double.POSITIVE_INFINITY;
+				}
+			}
+		}
+		Integer[] aPosition = new Integer[2];
+		aPosition[0] = x0;
+		aPosition[1] = y0;
+		theQueue.add(aPosition);			
+		int checkedCells = 0;
+		while(theQueue.size() > 0)
+		{	
+			Integer[] checkPosition = theQueue.get(theQueue.size()-1);			
+			theQueue.remove(theQueue.size()-1);
+			if(1==checkedList[checkPosition[0]][checkPosition[1]])
+			{
+				continue;
+			}
+			else
+			{
+				checkedList[checkPosition[0]][checkPosition[1]] = 1;	
+			}							
+			if(isFillable(checkPosition[0], checkPosition[1]))
+			{
+				distanceMap[checkPosition[0]][checkPosition[1]] = minDist(checkPosition[0], checkPosition[1]);
+				if(isFillable(checkPosition[0], checkPosition[1]-1))				
+				{				
+					Integer[] aNewPosition = new Integer[2];
+					aNewPosition[0] = checkPosition[0];
+					aNewPosition[1] = checkPosition[1]-1;
+					theQueue.add(aNewPosition);
+				}
+				if(isFillable(checkPosition[0], checkPosition[1]+1))				
+				{
+					Integer[] aNewPosition = new Integer[2];
+					aNewPosition[0] = checkPosition[0];
+					aNewPosition[1] = checkPosition[1]+1;
+					theQueue.add(aNewPosition);
+				}
+//				long timeBeforeScan = System.currentTimeMillis();
+				scan(checkPosition[0], checkPosition[1], -1);
+				scan(checkPosition[0], checkPosition[1], +1);
+//				long timeAfterScan = System.currentTimeMillis();
+//				System.out.println("  total time spent for a scan (" + checkPosition[0] + "," + checkPosition[1] + "):" + (timeAfterScan - timeBeforeScan) + " ms.");				
+			}
+			
+			checkedCells++;			
+			if(0 == checkedCells % 500) System.out.print('.');
+//			System.out.println("  queue: " + theQueue.size());
+		}
+		System.out.println("  total cells checked : " + checkedCells);
+		long timeEnd = System.currentTimeMillis();
+        System.out.println("  total time spent for one fill: " + (timeEnd - timeStart) + " ms.");
+		return distanceMap;
+	}
+		
+	/**
+	 * scan from x,y on the same row using step
+	 * @param x
+	 * @param y
+	 * @param step
+	 */
+	private void scan(int x, int y, int step)
+	{			
+		for (int i = 1; i < aMap.getMapWidth(); i++)		
+		{					
+			int newX = x + i*step;
+			if(newX >= 0 && newX < aMap.getMapWidth())
+			{				
+				if(isFillable(newX, y))
+				{
+					distanceMap[newX][y] = minDist(newX, y);
+					if(isFillable(newX, y-1) && !isFillable(newX -step, y-1))
+					{
+						Integer[] aNewPosition = new Integer[2];
+						aNewPosition[0] = newX;
+						aNewPosition[1] = y-1;
+						theQueue.add(aNewPosition);
+					}
+					if(isFillable(newX, y+1) && !isFillable(newX -step, y+1))
+					{
+						Integer[] aNewPosition = new Integer[2];
+						aNewPosition[0] = newX;
+						aNewPosition[1] = y+1;
+						theQueue.add(aNewPosition);
+					}
+				}
 			}
 		}
 	}
+	
+	/**
+	 * get distance
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	private double minDist(int x, int y)
+	{			
+		double minDist = Double.POSITIVE_INFINITY; 
+		for (int i = x -1; i <= x +1; i++)
+		{
+			if(i< 0 || i >= aMap.getMapWidth()) continue;
+			for (int j = y -1; j <= y +1; j++)
+			{							
+				if(j< 0 || j >= aMap.getMapHeight()) continue;
+				if (distanceMap[i][j] > Double.NEGATIVE_INFINITY)
+				{
+					//TODO 9 include lava weight
+					double val = distanceMap[i][j] + Math.sqrt( Math.pow(i -x, 2) + Math.pow(j -y, 2) );
+					if (val < minDist)
+					{
+						minDist = val;
+					}
+				}
+			}
+		}
+		return minDist;
+	}
+	
+	/**
+	 * surround walls with + shape
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	private boolean isFillable(int x, int y)
+	{
+		int rad = Ship.SHIP_RADIUS;
+		for (int i =-rad; i <= rad; i++)
+		{
+			int newX = x+i;
+			if(newX >= 0 && newX < aMap.getMapWidth())
+			{
+				for (int j =-rad; j <= rad; j++)
+				{				
+					int newY = y+j;
+					if(newY >= 0 && newY < aMap.getMapHeight())
+					{
+						if(isObstacle(newX, newY))
+						{
+							return false;
+						}
+					}
+				}	
+			}			
+		}	
+		return true;		
+	}
+	
+	/**
+	 * local isObstacle check for improved speed
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+    public boolean isObstacle(int x, int y)
+    {
+        char mapChar = aMapChars[x][y];
+        if (Map.NIL == mapChar || Map.LAVA == mapChar || Map.START == mapChar || Map.WAYPOINT == mapChar || Map.FUEL_TANK == mapChar)
+        {
+        	return false;
+        }        	
+        return true;
+    }
 
 	/**
 	 * displays a matrix in a humanly readable form
@@ -495,6 +680,7 @@ public abstract class Planner {
 	}
 
 	/**
+	 * alternate cost is used when fuel tanks are enabled
 	 * cost for a route is composed of:
 	 *  distance cost, including lava
 	 *  indirectness, how much the shortest path deviates from a straight line
@@ -504,6 +690,7 @@ public abstract class Planner {
 	 */
 	public double getPathAlternateCost(LinkedList<GameObject> waypointList, double weightDistance, double weightDirectness, double weightAngle, double weightFuelTankCost)
 	{			
+		System.out.println("alternate cost");
 		//get the latest waypoint
 		//get the fuel tank count before the latest waypoint
 		int latestWaypoint = 0;
@@ -535,9 +722,6 @@ public abstract class Planner {
 		
 		//present list
 		if (verbose) presentList((LinkedList<GameObject>) shortList);
-
-////		//TODO - this stops the execution 0
-//		System.exit(1);
 		
 		double costDistanceLava = 0;
 		costDistanceLava = getPathDistanceLava(shortList);
@@ -552,16 +736,11 @@ public abstract class Planner {
 //		System.out.println("angle change: " + costAngleChange);
 
 
-		//TODO 0 how come this doesn't always return a path without any fuel tanks? such a shortlist should almost always have a better score
 		double totalCost = Math.pow(costDistanceLava, weightDistance) + weightDirectness *costDirectness + weightAngle*costAngleChange - weightFuelTankCost*countFuelTanks;
 		if (verbose) System.out.println(totalCost);
 //		System.out.printf("\ncost: distance [%f] directness [%f]  angle [%f] = total[%f]", Math.pow(costDistanceLava, weightDistance), weightDirectness *costDirectness, weightAngle*costAngleChange, totalCost);
 		return totalCost;
-	}
-	public double getPathAlternateCost(LinkedList<GameObject> waypointList)
-	{	
-		return getPathAlternateCost(waypointList, weightDistance, weightDirectness, weightAngle, weightFuelTankCost);		
-	}   
+	}  
 	
 	/**
 	 * cost for a route is composed of:
@@ -597,7 +776,10 @@ public abstract class Planner {
 	 */
 	public double getPathCost(LinkedList<GameObject> waypointList)
 	{
-		return getPathCost(waypointList, weightDistance, weightDirectness, weightAngle);		
+		if(includeFuel)
+			return getPathAlternateCost(waypointList, weightDistance, weightDirectness, weightAngle, weightFuelTankCost);
+		else
+			return getPathCost(waypointList, weightDistance, weightDirectness, weightAngle);
 	}        
 	
 	/**

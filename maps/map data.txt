@@ -1,9 +1,9 @@
 Maps are in ASCII format.
 This is the meaning of the characters:
 
-@ - obstacle
-E - obstacle
-T - obstacle
+@ - obstacle*
+T - obstacle*
+E - obstacle (map edge)
 D - damage obstacle
 L - elastic obstacle
 : - lava
@@ -11,3 +11,5 @@ L - elastic obstacle
 F - fuel canister
 C - checkpoint
 S - ship position
+
+* - not in MAP constants, but in Map.isObstacle(char)

@@ -26,10 +26,9 @@ import framework.utils.Vector2d;
  * monte carlo simulation driver
  * @version 141128
  * @author Cristian
- * TODO 9 this should be like the macro rs controller but worse, without macro; consider adding ucb
  */
 
-public class DriveMC extends Controller
+public class DriveMC_w extends Controller
 {
     private Graph m_graph; //     * Graph for this controller.
     private ArrayList<Path> plannedPath = new ArrayList<>();//      * Paths to the waypoints based on the planner
@@ -48,7 +47,7 @@ public class DriveMC extends Controller
      * @param a_gameCopy a copy of the game state
      * @param a_timeDue The time the initialization is due. Finishing this method after a_timeDue will disqualify this controller.
      */
-    public DriveMC(Game a_gameCopy, long a_timeDue)
+    public DriveMC_w(Game a_gameCopy, long a_timeDue)
     {
     	System.out.println("**** monte carlo search controller ****");
         m_graph = new Graph(a_gameCopy);//Init the graph.

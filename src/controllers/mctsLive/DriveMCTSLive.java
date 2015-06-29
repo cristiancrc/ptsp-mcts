@@ -114,9 +114,9 @@ public class DriveMCTSLive extends Controller
     	System.out.println("**** mcts controller ****");
         aGraph = new Graph(aGameCopy);//Init the graph.
        
-        Planner planner = new Planner3Opt(aGameCopy);//remove three edges and reconnect the graph
-//        Planner planner = new PlannerGreedy(a_gameCopy);//use greedy for testing
-//        Planner planner = new PlannerMC(a_gameCopy, a_timeDue);//use greedy for testing
+//        Planner planner = new Planner3Opt(aGameCopy);//remove three edges and reconnect the graph
+        Planner planner = new PlannerGreedy(aGameCopy);//use greedy for testing
+//        Planner planner = new PlannerMC(aGameCopy, a_timeDue);//use greedy for testing
         
         Planner.weightLava = w_lava;
         Planner.weightDistance = w_distance;
@@ -124,6 +124,7 @@ public class DriveMCTSLive extends Controller
         Planner.weightAngle = w_angle;
     	Planner.weightFuelTankCost = w_fuelTankCost;
     	Planner.weightConsecutiveFuelTanksCost = w_consecutiveFuelTanksCost;
+    	Planner.includeFuel = p_includeFuel;
     	
     	planner.runPlanner();
         
@@ -158,7 +159,7 @@ public class DriveMCTSLive extends Controller
 			//mctsSearch call
 			System.out.println("---continuing");
 			ongoingsearchresult = mctsSearch(a_gameCopy, a_timeDue);
-			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]\n");
+//			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]\n");
 			return macroAction;			
 		}
         searchTree = null;      

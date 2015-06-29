@@ -36,17 +36,23 @@ public class Planner3Opt extends Planner {
         long timeAfterMatrices = System.currentTimeMillis();
 		System.out.println(" Total time spent for matrices init: " + (timeAfterMatrices - timeInit) + " ms.");
 		
-		//TODO 7 flood fill
-//		Planner.floodFill(aGameCopy.getMap());
-		//TODO 8 use multiple fragment for the base
+		int allotedTime = 0;
+		if(includeFuel)
+		{
+			allotedTime = 300;//with fuel
+		}
+		else
+		{
+			allotedTime = 500;//without fuel
+		}
     	//get a base plan		
 //		Planner planner = new PlannerGreedy(a_gameCopy);
-    	Planner planner = new PlannerMC(aGameCopy, 0);//300 without fuel tanks
+    	Planner planner = new PlannerMC(aGameCopy, allotedTime);
     	planner.runPlanner();
 		waypointList = planner.getOrderedWaypoints();//get the planned route
-		System.out.print("out from DriveMC:");
-		presentList(waypointList);
-		System.out.println("\n");
+//		System.out.print("out from DriveMC_w:");
+//		presentList(waypointList);
+//		System.out.println("\n");
 		
 		orderedWaypoints = (LinkedList<GameObject>) waypointList.clone();//an initial list is needed
 		long timeAfterBasicPlanner = System.currentTimeMillis();
@@ -148,14 +154,7 @@ public class Planner3Opt extends Planner {
 							aPath.addFirst(wpShip);
 							if (verbose) presentList(aPath);
 							//alternate cost function when fuel tanks are in use
-							if(includeFuel)
-							{
-								pathCost = getPathAlternateCost(aPath);	
-							}
-							else 
-							{
-								pathCost = getPathCost(aPath);	
-							}							
+							pathCost = getPathCost(aPath);	
 			            	if (verbose) System.out.println(" generated " + pathCost + "(" + pathMinCost + ")");
 			            	if(pathCost < pathMinCost)
 			            	{
@@ -171,7 +170,6 @@ public class Planner3Opt extends Planner {
 		long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent 3opt searching: " + (timeAfter - timeBeforeSearching) + " ms.");    	
 		System.out.println("Final path cost:" + getPathCost(orderedWaypoints));
-		System.out.println("Final path cost:" + getPathAlternateCost(orderedWaypoints));	
 		System.out.println("3Opt Planner time: " + (timeAfter - timeStart) + " ms.");
     }
 	

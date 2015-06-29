@@ -20,10 +20,10 @@ import framework.utils.Vector2d;
  *  @author Cristian
  *  @version 141128
  */	
-public class PlannerGreedyEvolved extends Planner {
+public class PlannerGreedyEvolved_w extends Planner {
 	
 	
-	public PlannerGreedyEvolved(Game aGameCopy)
+	public PlannerGreedyEvolved_w(Game aGameCopy)
 	{
     	System.out.println("***greedy evolved planner***");
     	this.aGameCopy = aGameCopy;

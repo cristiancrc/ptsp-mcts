@@ -19,12 +19,12 @@ import framework.graph.Graph;
  *  @version 141208
  */
 
-public class PlannerKOpt extends Planner {
+public class PlannerKOpt_w extends Planner {
 	
 	private int Kopt;
 
 	@SuppressWarnings("unchecked")
-	public PlannerKOpt(Game aGameCopy, int Kopt)
+	public PlannerKOpt_w(Game aGameCopy, int Kopt)
     {
     	System.out.println("***KOpt planner***");
     	System.out.println("running with K = " + Kopt);
@@ -215,7 +215,7 @@ public class PlannerKOpt extends Planner {
 	 * default constructor, uses Kopt = 3
 	 * @param a_gameCopy
 	 */
-	public PlannerKOpt(Game a_gameCopy)
+	public PlannerKOpt_w(Game a_gameCopy)
     {
 		this(a_gameCopy, 3); 
     }	

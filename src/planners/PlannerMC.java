@@ -7,6 +7,7 @@ import java.util.Random;
 
 import framework.core.Game;
 import framework.core.GameObject;
+import framework.core.PTSPConstants;
 import framework.core.Waypoint;
 import framework.graph.Graph;
 
@@ -18,8 +19,8 @@ import framework.graph.Graph;
  */
 
 public class PlannerMC extends Planner {
-	
-	int bufferTime = 5;
+		
+	int bufferTime = 10;
 	long timeDue;
 	
 	public PlannerMC(Game aGameCopy)
@@ -27,11 +28,17 @@ public class PlannerMC extends Planner {
     	this(aGameCopy, 0);
     }
 	
-    public PlannerMC(Game aGameCopy, int timeAllowed)
+	public PlannerMC(Game aGameCopy, int timeAlloted)
+    {
+    	this(aGameCopy, System.currentTimeMillis() + timeAlloted);
+    }
+	
+    public PlannerMC(Game aGameCopy, long timeDue)
     {
     	System.out.println("***monte carlo planner***");
     	this.aGameCopy = aGameCopy;
-    	this.timeDue = System.currentTimeMillis() + timeAllowed;
+    	this.timeDue = timeDue;
+    	this.verbose = false;
     }
     	
 	public void runPlanner()
@@ -47,6 +54,8 @@ public class PlannerMC extends Planner {
         {
         	createMatrices();
         }
+        
+        
 		long timeAfterMatrices = System.currentTimeMillis();
 		System.out.println(" Total time spent for matrices init: " + (timeAfterMatrices - timeStart) + " ms.");		
     	
@@ -54,7 +63,7 @@ public class PlannerMC extends Planner {
     	Random rand = new Random();
     	LinkedList<GameObject> aPath = new LinkedList<>();//the random path    	
     	double pathMinCost = Double.MAX_VALUE;    	
-    	int tries = 0;    	    	
+    	int tries = 0;
     	boolean theresstilltime = true;    	
     	while(theresstilltime)
     	{
@@ -64,24 +73,27 @@ public class PlannerMC extends Planner {
     		aPath.clear();
     		aPath.add(wpShip);//add ship position as waypoint, to be included in the distance matrix
     		waypointList = (LinkedList<GameObject>) aGameCopy.getWaypoints().clone();//start with all the waypoints
-    		waypointList.addAll((Collection<? extends GameObject>) aGameCopy.getFuelTanks().clone());//add all the fuel tanks
+    		if(includeFuel)    			
+    		{
+    			waypointList.addAll((Collection<? extends GameObject>) aGameCopy.getFuelTanks().clone());//add all the fuel tanks
+    		}
     		    		
     		//extract a random waypoint and add it to the path
         	while(waypointList.size() > 0)
         	{   
-        		//TODO ~ control actual randomness here
+        		//TODO~ control actual randomness here
 //        		int randomIndex = 0;//sequential list
-        		rand.setSeed(100);//fixed random list
+//        		rand.setSeed(100);//fixed random list
         		int randomIndex = rand.nextInt(waypointList.size());
         		GameObject thePoppedWay = waypointList.get(randomIndex);
         		waypointList.remove(randomIndex);
         		aPath.add(thePoppedWay);
-        	}    	
-        	
+        	}   
         	pathCost = getPathCost(aPath);
-        	if (verbose) System.out.println(tries + " : generated " + pathCost + "(" + pathMinCost + ")");
+        	if (verbose) System.out.print("\n"+ tries + " : generated dist " + pathCost + " (" + pathMinCost + ")");
         	if(pathCost < pathMinCost)
         	{
+        		if (verbose) System.out.print("---new minimum");
         		pathMinCost = pathCost;
         		orderedWaypoints = (LinkedList<GameObject>) aPath.clone();
         	}    	
@@ -92,7 +104,7 @@ public class PlannerMC extends Planner {
     	}    	
     	long timeAfter = System.currentTimeMillis();
     	System.out.println(" Time spent randomizing " + tries + " paths: " + (timeAfter - timeAfterMatrices) + " ms.");    	
-		System.out.println("Path distance:" + getPathCost(orderedWaypoints));			
+		System.out.println("Path cost:" + getPathCost(orderedWaypoints));
 		System.out.println("MC Planner time: " + (timeAfter - timeStart) + " ms.");	
 	}
 }

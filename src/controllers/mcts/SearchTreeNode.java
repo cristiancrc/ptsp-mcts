@@ -20,7 +20,7 @@ import framework.utils.Value;
 import framework.utils.Vector2d;
 
 public class SearchTreeNode {
-	static boolean verbose = false;
+	static boolean verbose = DriveMCTS.verbose;
     public SearchTreeNode parent = null;//parent node   
     public int action = -1;//action performed in parent node that got us here
     public Game worldSate;//current world state 
@@ -297,7 +297,8 @@ public class SearchTreeNode {
         while (!finishRollout(nextState, thisDepth)) 
         {
             int action = rnd.nextInt(Controller.NUM_ACTIONS);
-            for (int _ = 0; _ < DriveMCTS.macroActionsCount; _++)
+            nextState.getShip().update(action); 
+            for (int _ = 1; _ < DriveMCTS.macroActionsCount; _++)
             {
 //              System.out.print(action);
                 nextState.getShip().update(action); 
@@ -308,11 +309,12 @@ public class SearchTreeNode {
             {
                 DriveMCTS.possiblePosition.add(nextPosition);
             }
+            
         }
         
         double localNewValue = evaluateShipPosition(nextState, orderedWaypoints, aGraph);        
 
-        nextPosition = nextState.getShip().s;
+//        nextPosition = nextState.getShip().s;
 //        DriveMCTSLive.possiblePositionScore.putIfAbsent(nextPosition, localNewValue);
         
         if(localNewValue < bounds[0])
@@ -337,7 +339,7 @@ public class SearchTreeNode {
     public boolean finishRollout(Game aState, int depth)
     {
         //rollout end conditions        
-        System.out.print(".");
+        if (verbose) System.out.print(".");
         if(depth >= DriveMCTS.searchDepth)
         {
         	if (verbose) System.out.print("max depth reached " + depth + ", limit at " + DriveMCTS.searchDepth);
@@ -372,9 +374,40 @@ public class SearchTreeNode {
             nodeBubble = nodeBubble.parent;
         }
     }
-
+    
     /**
      * computes a score / cost for getting from the current position to the aimedNode
+     * @param aGameState
+     * @return score
+     */
+    public double evaluateShipPositionBasic(Game aGameState, LinkedList<GameObject> orderedWaypoints, Graph aGraph) 
+    {
+    	Vector2d nextPosition = aGameState.getShip().s;
+        Vector2d potentialDirection = aGameState.getShip().d;
+
+    	GameObject target = null;
+    	for(GameObject way : orderedWaypoints)
+    	{
+    		if(!isCollected(way))
+    		{
+    			target = way;
+    			break;
+    		}
+    	}
+    	Vector2d targetPosition = target.s;    		
+    	Node nextNode = aGraph.getClosestNodeTo(targetPosition.x, targetPosition.y);
+    	Vector2d nextNodeV = new Vector2d(nextNode.x(),nextNode.y());
+        nextNodeV.subtract(nextPosition);
+        nextNodeV.normalise();   //This is a unit vector from my position pointing towards the next node to go to.
+        double dot = potentialDirection.dot(nextNodeV);  //Dot product between this vector and where the ship is facing to.
+		double dist = nextNode.euclideanDistanceTo(nextPosition.x, nextPosition.y);
+		if(verbose) System.out.println("\n dist: " + dist);
+		if(verbose) System.out.println("dot : " + dot);
+		double score = dist - 30* dot;
+		return score;
+    }
+    /**
+     * computes a score / cost for getting for a game state and a planned list
      * @param aGameState
      * @return score
      */
@@ -428,7 +461,6 @@ public class SearchTreeNode {
     		}
     		wayCounter++;
     	}
-    	System.out.println("\npath parsed:");
     	//get fuel collected out of route
     	int collectedFuelOutOfRoute = aGameState.getFuelTanksCollected() - collectedFuelRoute;
     	
@@ -437,7 +469,7 @@ public class SearchTreeNode {
     	
     	//get distance to next waypoint
     	Node shipNode = aGraph.getClosestNodeTo(aGameState.getShip().s.x, aGameState.getShip().s.y);
-    	Node targetWpNode = aGraph.getClosestNodeTo(orderedWaypoints.get(nextTargetIndex).ps.x, orderedWaypoints.get(nextTargetIndex).ps.x);
+    	Node targetWpNode = aGraph.getClosestNodeTo(orderedWaypoints.get(nextTargetIndex).s.x, orderedWaypoints.get(nextTargetIndex).s.y);
     	double distanceToNextWaypoint = aGraph.getPath(targetWpNode.id(), shipNode.id()).m_cost;
     	
     	//get damage from collisions
@@ -448,15 +480,15 @@ public class SearchTreeNode {
        		damageFromCollisions += aGameState.getShip().getDamage() - this.worldSate.getShip().getDamage();
        	}
 
-		System.out.println("wp on route " + collectedWpRoute);
-		System.out.println("wp off route " + collectedWpOutOfRoute);
-		System.out.println("fuel on route " + collectedFuelRoute);
-		System.out.println("fuel off route " + collectedFuelOutOfRoute);
-		System.out.println("wp distance " + distanceToNextWaypoint);
-		System.out.println("fuel consumed " + (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()));
-		System.out.println("damage taken " + (PTSPConstants.MAX_DAMAGE - aGameState.getShip().getDamage()));
-		System.out.println("damage collisions " + damageFromCollisions);
-		
+//		System.out.println("wp on route " + collectedWpRoute);
+//		System.out.println("wp off route " + collectedWpOutOfRoute);
+//		System.out.println("fuel on route " + collectedFuelRoute);
+//		System.out.println("fuel off route " + collectedFuelOutOfRoute);
+//		System.out.println("wp distance " + distanceToNextWaypoint);
+//		System.out.println("fuel consumed " + (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()));
+//		System.out.println("damage taken " + (aGameState.getShip().getDamage()));
+//		System.out.println("damage collisions " + damageFromCollisions);
+//		
 		
 
     	//final score
@@ -464,7 +496,7 @@ public class SearchTreeNode {
     							+ 	DriveMCTS.w_wpCollectedOutOfRoute * collectedWpOutOfRoute +
     							+ 	DriveMCTS.w_wpDistance * distanceToNextWaypoint +
     							+ 	DriveMCTS.w_fuelConsumed * (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()) +
-    							+	DriveMCTS.w_damageIncurred * (PTSPConstants.MAX_DAMAGE - aGameState.getShip().getDamage()) +
+    							+	DriveMCTS.w_damageIncurred * (aGameState.getShip().getDamage()) +
     							+   DriveMCTS.w_wpFuelOutOfRoute * collectedFuelOutOfRoute +
     							+ 	DriveMCTS.w_damageCollisions * damageFromCollisions;     	
 		return positionValue;
@@ -483,16 +515,16 @@ public class SearchTreeNode {
         if (verbose) System.out.println("bounds : " + SearchTreeNode.bounds[0] + " <> " + SearchTreeNode.bounds[1]);
         for (int i = 0; i < children.length; i++) 
         {
-        	if (verbose) 
-        	{
-        		System.out.println("\nat child " + i + " with data");
-        		System.out.println("visited : " + children[i].visited);
-        		System.out.println("score : " + children[i].score);
-        		System.out.println("best child : " + children[i].bestPossible);         
-        		System.out.println("value : " + children[i].value);
-        	}
-            if(children[i] != null)
+            if(null != children[i])
             {
+            	if (verbose) 
+            	{
+            		System.out.println("\nat child " + i + " with data");
+            		System.out.println("visited : " + children[i].visited);
+            		System.out.println("score : " + children[i].score);
+            		System.out.println("best child : " + children[i].bestPossible);         
+            		System.out.println("value : " + children[i].value);
+            	}
                 //check if all children have the same visited count
                 if(-1 == initVisit)
                 {
@@ -686,7 +718,6 @@ public class SearchTreeNode {
 	 * used to search while macroing another action 
 	 * @param nodeStartFrom
 	 * @return new node
-	 * TODO 2 use this for macroing, current copy looks fine
 	 * TODO 9 reuse the tree - this was reported bad due to different depth, so consider copying the tree and 
 	 * first updating it before continuing with "normal" search
 	 */
@@ -699,6 +730,7 @@ public class SearchTreeNode {
         newRoot.score = nodeStartFrom.score;
         newRoot.visited = nodeStartFrom.visited;
         newRoot.value = nodeStartFrom.value;
+        System.out.println("start from depth " + nodeStartFrom.depth);
         newRoot.depth = nodeStartFrom.depth-1;//otherwise it is increased
         newRoot.name = nodeStartFrom.name;//copy hash code
         
@@ -706,15 +738,40 @@ public class SearchTreeNode {
         {
         	newRoot.parent = null;
         	newRoot.action = -1;
-    	}
-
+    	}        
         for(SearchTreeNode aNode : nodeStartFrom.children)
         {        	
         	if(null != aNode)
         	{
+        		System.out.println("anode action "  +aNode.action);
         		newRoot.children[aNode.action] = SearchTreeNode.copyTree(aNode);        	
         	}
         }
         return newRoot;
+    }
+    
+	
+    /**
+     * is collected for both waypoint and fuel tank
+     * @param aGameObject
+     * @return
+     */
+    public boolean isCollected(GameObject aGameObject)
+    {
+    	if(aGameObject instanceof Waypoint)
+    	{
+    		if(((Waypoint) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
+    	}
+    	if(aGameObject instanceof FuelTank)
+    	{
+    		if( ((FuelTank) aGameObject).isCollected())
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
     }
 }
