@@ -58,13 +58,13 @@ public class SearchTreeNode {
         children = new SearchTreeNode[Controller.NUM_ACTIONS];
         if(parent != null)
         {
-            depth = parent.depth+1;
+            this.depth = parent.depth+1;
             this.damageFromLava = parent.damageFromLava;
             this.damageFromCollisions = parent.damageFromCollisions;
         }
         else
         {
-            depth = 0;
+            this.depth = 0;
         }
     }
     
@@ -730,20 +730,13 @@ public class SearchTreeNode {
         newRoot.score = nodeStartFrom.score;
         newRoot.visited = nodeStartFrom.visited;
         newRoot.value = nodeStartFrom.value;
-        System.out.println("start from depth " + nodeStartFrom.depth);
-        newRoot.depth = nodeStartFrom.depth-1;//otherwise it is increased
+        newRoot.depth = nodeStartFrom.depth;//TODO 9 for copying a leaf this should be decreased
         newRoot.name = nodeStartFrom.name;//copy hash code
-        
-        if(nodeStartFrom.depth == 1) 
-        {
-        	newRoot.parent = null;
-        	newRoot.action = -1;
-    	}        
+              
         for(SearchTreeNode aNode : nodeStartFrom.children)
         {        	
         	if(null != aNode)
         	{
-        		System.out.println("anode action "  +aNode.action);
         		newRoot.children[aNode.action] = SearchTreeNode.copyTree(aNode);        	
         	}
         }

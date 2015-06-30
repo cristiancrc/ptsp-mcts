@@ -154,17 +154,18 @@ public class DriveMCTS extends Controller
         if(verbose) System.out.println("   due on\t" + a_timeDue);
         
 		if(macroActionsRemaining-- > 0)
-		{
+		{			
 			System.out.print('.');
+			possiblePosition.clear();//display just one level of search
 			//mctsSearch call
 			if(verbose) System.out.println("---continuing");
 			ongoingsearchresult = mctsSearch(aGameCopy, a_timeDue);
-//			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]\n");
+//			System.out.print("macro actions remaining " + macroActionsRemaining + "[" + macroAction + "]\n");			
 			return macroAction;			
 		}
 		//done with a macro action, clean up
         searchTree = null;      
-        possiblePosition.clear();//display just one level of search
+//        possiblePosition.clear();//display just one level of search
     	int bestAction = -1;
     	if(macroActionsRemaining <= 0)
 		{    		
@@ -209,14 +210,16 @@ public class DriveMCTS extends Controller
         SearchTreeNode rootNode;
         if(searchTree == null)
         {
-        	System.out.println("+++++++++new search");        
+//        	System.out.println("new search");        
 //        	create root node for initial state
         	rootNode = new SearchTreeNode(a_gameCopy, null);
         } else 
         {
-        	System.out.println("+++++++++continuing search...");
+//        	System.out.println("continuing search");
         	rootNode = SearchTreeNode.copyTree(searchTree);        	
         }
+        //make sure tree increases
+//        System.out.println(SearchTreeNode.getTotalChildren(rootNode));
         
     	//create root node for initial state
 //    	SearchTreeNode rootNode = new SearchTreeNode(a_gameCopy, null);
