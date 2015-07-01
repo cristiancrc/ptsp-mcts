@@ -842,3 +842,8 @@ Iteration,#Fevals: rb Function Value Delta( best ,worst) |idx: Max SD idx: Min S
 (6,12)-CMA-ES(mu_eff=4.0), Ver="0.99.40", dimension=18, 0 diagonal iter., randomSeed=1435687414382 (Tue Jun 30 20:03:34 CEST 2015)
 (6,12)-CMA-ES(mu_eff=4.0), Ver="0.99.40", dimension=18, 0 diagonal iter., randomSeed=1435690897347 (Tue Jun 30 21:01:37 CEST 2015)
 (6,12)-CMA-ES(mu_eff=4.0), Ver="0.99.40", dimension=18, 0 diagonal iter., randomSeed=1435691504051 (Tue Jun 30 21:11:44 CEST 2015)
+(6,12)-CMA-ES(mu_eff=4.0), Ver="0.99.40", dimension=18, 0 diagonal iter., randomSeed=1435784368701 (Wed Jul 01 22:59:28 CEST 2015)
+(6,12)-CMA-ES(mu_eff=4.0), Ver="0.99.40", dimension=18, 0 diagonal iter., randomSeed=1435785052340 (Wed Jul 01 23:10:52 CEST 2015)
+(6,12)-CMA-ES(mu_eff=4.0), Ver="0.99.40", dimension=18, 0 diagonal iter., randomSeed=1435785064329 (Wed Jul 01 23:11:04 CEST 2015)
+Iteration,#Fevals: rb Function Value Delta( best ,worst) |idx: Max SD idx: Min SD  | minsigD  sigma Axisratio | time, in eig
+    1(12),     12: 4.0500000000000000e+01 (+0e+00,3e+03) | 13: 1.9e-01  4: 1.9e-01 | 1.9e-01 1.9e-01   1.00   | 1347.4  0.0 

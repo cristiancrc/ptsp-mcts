@@ -13,10 +13,11 @@ import framework.core.Exec;
 
 class OptimizeMe implements IObjectiveFunction { // meaning implements methods valueOf and isFeasible
 	
-	int trials = 5;//how many times to run on each map
-	String[] mapList = new String[]{"maps/ptsp_map01.map","maps/ptsp_map02.map","maps/ptsp_map08.map",
-            "maps/ptsp_map19.map","maps/ptsp_map24.map","maps/ptsp_map35.map","maps/ptsp_map40.map",
-            "maps/ptsp_map45.map","maps/ptsp_map56.map","maps/ptsp_map61.map"}; 
+	int trials = 2;//how many times to run on each map
+//	String[] mapList = new String[]{"maps/ptsp_map01.map","maps/ptsp_map02.map","maps/ptsp_map08.map",
+//            "maps/ptsp_map19.map","maps/ptsp_map24.map","maps/ptsp_map35.map","maps/ptsp_map40.map",
+//            "maps/ptsp_map45.map","maps/ptsp_map56.map","maps/ptsp_map61.map"}; 
+	String[] mapList = new String[]{"maps/ptsp_map99.map","maps/ptsp_map01.map"}; 	
 	public double valueOf (double[] parameters)
 	{		
 		double avg_score = 0;
@@ -24,12 +25,13 @@ class OptimizeMe implements IObjectiveFunction { // meaning implements methods v
 		double avg_time = 0;
 		double avg_fuelSpent = 0;
 		double avg_damageTaken = 0;
+		System.out.println("=================================== starting valueOf");
 		for(String runThisMap : mapList)
 		{			
+			System.out.println("*********************************** map:" + runThisMap);
 			for( int i = 0; i < trials; i++)
 			{
-				System.out.println("------------------------------------");
-				System.out.println("map :" + runThisMap + ", trial : " + i);
+				System.out.println("----------------------------------- map :" + runThisMap + ", trial : " + i);
 			
 				//start moptsp game
 				ExecSync aGame = new ExecSync();
@@ -62,7 +64,8 @@ class OptimizeMe implements IObjectiveFunction { // meaning implements methods v
 				DriveMCTS.search_damageCollisions = parameters[17];
 								
 				//run one game
-				ExecSync.runGame(false, 0);
+				ExecSync.runGame(false, 0);				
+				//while a game is running with the mcts controller a dot is printed to the console each 100 ticks
 				
 				//results
 				HashMap<String, Double> results = ExecSync.m_game.getResults();		
@@ -75,14 +78,6 @@ class OptimizeMe implements IObjectiveFunction { // meaning implements methods v
 			}
 		}	
 		System.out.println("\n valueOf finished");
-
-		//TODO 0 dominance ranking
-//		System.out.println("score " + avg_score);
-//		System.out.println("waypoints visited " + avg_waypointsVisited);
-//		System.out.println("time " + avg_time);
-//		System.out.println("fuel " + avg_fuelSpent);
-//		System.out.println("damage " + avg_damageTaken);
-
 		return avg_score/(trials * mapList.length);
 	}
 	public boolean isFeasible(double[] x) 

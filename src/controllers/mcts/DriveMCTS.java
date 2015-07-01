@@ -32,7 +32,6 @@ import framework.utils.Vector2d;
  * Monte-Carlo tree search driver
  * @version 150621
  * @author Cristian
- * TODO 0 link the parameters to CMA-ES library
  * TODO 7 implement transposition tables for states (see 2013 detail paper)
  */
 
