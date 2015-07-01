@@ -690,7 +690,6 @@ public abstract class Planner {
 	 */
 	public double getPathAlternateCost(LinkedList<GameObject> waypointList, double weightDistance, double weightDirectness, double weightAngle, double weightFuelTankCost)
 	{			
-		System.out.println("alternate cost");
 		//get the latest waypoint
 		//get the fuel tank count before the latest waypoint
 		int latestWaypoint = 0;

@@ -466,6 +466,39 @@ public class Game
     }
     
     /**
+     * returns the results (for CMA-ES easy update)
+     * @author Cristian
+     */
+    public HashMap<String, Double> getResults()
+    {
+    	HashMap<String, Double> results = new HashMap<String, Double>();
+        if(getWaypointsLeft() == 0)
+        {        	        
+            System.out.println("Final score: " + getWaypointsVisited() +
+                    " waypoints in " + getTotalTime() + " steps, damage taken: " + getShip().getDamage() +
+                    ", fuel spent: " + (PTSPConstants.INITIAL_FUEL-m_ship.getRemainingFuel()) + ".");
+        }else if(getStepsLeft() <= 0)
+        {
+            System.out.println("Time out. Final score: " + getWaypointsVisited() +
+                    " waypoints in " + getTotalTime() + " steps, damage taken: " + getShip().getDamage() +
+                    ", fuel spent: " + (PTSPConstants.INITIAL_FUEL-m_ship.getRemainingFuel()) + ".");
+        }else if (getShip().getDamage() > PTSPConstants.MAX_DAMAGE)
+        {
+            System.out.println("Ship destroyed. Final score: " + getWaypointsVisited() +
+                    " waypoints in " + getTotalTime() + " steps, damage taken: " + getShip().getDamage() +
+                    ", fuel spent: " + (PTSPConstants.INITIAL_FUEL-m_ship.getRemainingFuel()) + ".");
+        }
+        double finalScore = -getWaypointsVisited() + getTotalTime()/100 + getShip().getDamage()+(PTSPConstants.INITIAL_FUEL-m_ship.getRemainingFuel());
+        results.put("waypointsVisited",  (double) getWaypointsVisited());
+        results.put("time",  (double) getTotalTime());
+    	results.put("damageTaken",  (double) getShip().getDamage());
+    	results.put("fuelSpent",  (double) (PTSPConstants.INITIAL_FUEL-m_ship.getRemainingFuel()));
+    	results.put("finalScore",  finalScore);
+        return results;
+
+    }
+    
+    /**
      * Returns the number of waypoints visited in this play.
      * @return the number of waypoints visited in this play
      */

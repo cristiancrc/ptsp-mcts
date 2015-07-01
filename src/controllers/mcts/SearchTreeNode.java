@@ -35,7 +35,6 @@ public class SearchTreeNode {
     protected static double[] bounds = new double[]{Double.MAX_VALUE, -Double.MAX_VALUE};
     
     public SearchTreeNode[] children = new SearchTreeNode[Controller.NUM_ACTIONS];
-//    public LinkedList<SearchTreeNodeLive> children = new LinkedList<SearchTreeNodeLive>();
     public Random rnd = new Random();
     public static double epsilon = 1e-6;
     public static double egreedyEpsilon = 0.05;
@@ -45,8 +44,8 @@ public class SearchTreeNode {
 //			+   DriveMCTS.w_wpFuelOutOfRoute * collectedFuelOutOfRoute +
 	private int collectedWpRoute;
 	private int fuelConsumed;
-    private double damageFromLava;
-    private double damageFromCollisions;
+    private double damageFromLava; //store damage from lava in tree
+    private double damageFromCollisions; //store damage from collisions in tree
         
     public SearchTreeNode(Game a_gameCopy, SearchTreeNode parent) 
     {
@@ -487,13 +486,11 @@ public class SearchTreeNode {
 //		System.out.println("wp distance " + distanceToNextWaypoint);
 //		System.out.println("fuel consumed " + (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()));
 //		System.out.println("damage taken " + (aGameState.getShip().getDamage()));
-//		System.out.println("damage collisions " + damageFromCollisions);
-//		
-		
+//		System.out.println("damage collisions " + damageFromCollisions);//		
 
     	//final score
     	double positionValue = 		DriveMCTS.w_wpCollectedRoute * collectedWpRoute +
-    							+ 	DriveMCTS.w_wpCollectedOutOfRoute * collectedWpOutOfRoute +
+    							+ 	DriveMCTS.search_wpCollectedOutOfRoute * collectedWpOutOfRoute +
     							+ 	DriveMCTS.w_wpDistance * distanceToNextWaypoint +
     							+ 	DriveMCTS.w_fuelConsumed * (PTSPConstants.INITIAL_FUEL - aGameState.getShip().getRemainingFuel()) +
     							+	DriveMCTS.w_damageIncurred * (aGameState.getShip().getDamage()) +

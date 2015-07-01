@@ -83,8 +83,8 @@ public class KeyControllerPlanner extends KeyController
     private ArrayList<Path> aPlannedPath = new ArrayList<>();// Paths to the waypoints based on the planner
 	static double w_lava = 2;//l increase distance when passing over lava 1
 	static double w_distance = 1;//b1 travel distance 1
-	static double w_directness = 150;//b2 ratio between travel distance and euclidean distance 150
-	static double w_angle = 80;//b3 angle change between entering and exiting a waypoint 80
+	static double w_directness = 0;//b2 ratio between travel distance and euclidean distance 150
+	static double w_angle = 0;//b3 angle change between entering and exiting a waypoint 80
 	
 	static boolean p_includeFuel = true;//b4 include fuel tanks in planning false
 	static double w_fuelTankCost = 200;//b5 cost of picking up a fuel tank 200
@@ -257,11 +257,12 @@ public class KeyControllerPlanner extends KeyController
      */
     public void paint(Graphics2D a_gr)
     {
-    	pathToClosest = getPathToClosest();
+//    	pathToClosest = getPathToClosest();
+    	pathToClosest = null;
     	a_gr.setColor(Color.GRAY);
-    	a_gr.drawString("x:" + Double.toString(shipHeading_x), 30,30);
-    	a_gr.drawString("y:" + Double.toString(shipHeading_y), 30,60);
-    	a_gr.drawString("cost:" + Double.toString(pathToClosest.m_cost), 30,90);
+//    	a_gr.drawString("x:" + Double.toString(shipHeading_x), 30,30);
+//    	a_gr.drawString("y:" + Double.toString(shipHeading_y), 30,60);
+//    	a_gr.drawString("cost:" + Double.toString(pathToClosest.m_cost), 30,90);
     	paintPaths(a_gr);
     }  
     
